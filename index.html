@@ -532,7 +532,7 @@
     </div>
 
     <script>
-        // ЛОГИКА НАВИГАЦИИ
+        // ЛОГИКА НАВИГАЦИИ СТРАНИЦ БЛОГА
         function showPage(pageId) {
             document.querySelectorAll('.page').forEach(page => page.classList.remove('active-page'));
             document.querySelectorAll('nav button').forEach(btn => btn.classList.remove('active'));
@@ -564,7 +564,7 @@
             });
         }
 
-        // ЖИВОЙ ГРАФИК С ДАННЫМИ ИЗ ЯНДЕКС.МЕТРИКИ
+        // ЖИВОЙ И ЧЕСТНЫЙ ГРАФИК С ДАННЫМИ ИЗ ЯНДЕКС.МЕТРИКИ
         const METRIKA_COUNTER_ID = '110005197'; 
         const METRIKA_TOKEN = 'y0__wgBELWlkfUIGOv9QyD19qH_FzD1-YvmB_YSwGw7GvGzPRLtkhCBZ9Z9GyXs';
 
@@ -607,21 +607,31 @@
                     }
                 });
                 
-                if (!response.ok) throw new Error('Ошибка сети или неверный токен');
+                if (!response.ok) throw new Error('Ошибка при запросе к API Яндекса');
                 
                 const result = await response.json();
                 const realValues = [];
                 const realLabels = [];
                 const weekdayNames = ['Вс', 'Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб'];
 
-                result.data.forEach(item => {
-                    realValues.push(item.metrics[0]);
-                    const parsedDate = new Date(item.dimensions[0].name);
-                    realLabels.push(weekdayNames[parsedDate.getDay()]);
-                });
+                // 1. Создаем пустую сетку на последние 7 дней (заполняем честными нулями)
+                for (let i = 6; i >= 0; i--) {
+                    const d = new Date(Date.now() - i * 24 * 60 * 60 * 1000);
+                    realLabels.push(weekdayNames[d.getDay()]);
+                    realValues.push(0); 
+                }
 
-                while(realValues.length < 7) realValues.unshift(0);
-                while(realLabels.length < 7) realLabels.unshift('...');
+                // 2. Если Яндекс вернул реальные данные, заменяем нули на нужные дни
+                if (result.data && result.data.length > 0) {
+                    result.data.forEach(item => {
+                        const parsedDate = new Date(item.dimensions[0].name);
+                        const dayName = weekdayNames[parsedDate.getDay()];
+                        const index = realLabels.indexOf(dayName);
+                        if (index !== -1) {
+                            realValues[index] = item.metrics[0]; // Перезаписываем нуль реальной цифрой визитов
+                        }
+                    });
+                }
 
                 trafficChart.data.labels = realLabels;
                 trafficChart.data.datasets[0].data = realValues;
@@ -629,9 +639,16 @@
 
             } catch (error) {
                 console.error('Не удалось загрузить данные из Метрики:', error);
-                // Запасной шаблон на случай, если Метрика пуста в первые часы работы
-                trafficChart.data.labels = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'];
-                trafficChart.data.datasets[0].data = [1, 2, 0, 4, 3, 7, 5];
+                
+                // Дефолтный откат на чистые нули в случае сбоя сети
+                const realLabels = [];
+                const weekdayNames = ['Вс', 'Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб'];
+                for (let i = 6; i >= 0; i--) {
+                    const d = new Date(Date.now() - i * 24 * 60 * 60 * 1000);
+                    realLabels.push(weekdayNames[d.getDay()]);
+                }
+                trafficChart.data.labels = realLabels;
+                trafficChart.data.datasets[0].data = [0, 0, 0, 0, 0, 0, 0];
                 trafficChart.update();
             }
         }
