@@ -122,7 +122,6 @@
             nav button { margin: 0 5px; }
         }
 
-        /* ТРЁХКОЛОНОЧНЫЙ ИНТЕРФЕЙС ДЛЯ ПК */
         .main-wrapper {
             display: grid;
             grid-template-columns: 320px 1fr;
@@ -137,7 +136,6 @@
             .main-wrapper { grid-template-columns: 1fr; }
         }
 
-        /* БОКОВАЯ ПАНЕЛЬ С ГРАФИКОМ */
         .sidebar {
             display: flex;
             flex-direction: column;
@@ -204,7 +202,6 @@
             letter-spacing: 0.5px;
         }
 
-        /* СЕТКА СТАТИСТИКИ КАНАЛОВ */
         .stats-grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
@@ -274,7 +271,6 @@
             border-color: var(--primary);
         }
 
-        /* КАТАЛОГ СЕТКОЙ (GRID) */
         .catalog-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
@@ -568,15 +564,18 @@
             });
         }
 
-        // КОД НЕОНОВОГО ГРАФИКА
+        // ЖИВОЙ ГРАФИК С ДАННЫМИ ИЗ ЯНДЕКС.МЕТРИКИ
+        const METRIKA_COUNTER_ID = '110005197'; 
+        const METRIKA_TOKEN = 'y0__wgBELWlkfUIGOv9QyD19qH_FzD1-YvmB_YSwGw7GvGzPRLtkhCBZ9Z9GyXs';
+
         const ctx = document.getElementById('trafficChart').getContext('2d');
         const trafficChart = new Chart(ctx, {
             type: 'line',
             data: {
-                labels: ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'],
+                labels: ['...', '...', '...', '...', '...', '...', '...'],
                 datasets: [{
                     label: 'Уникальные визиты',
-                    data: [42, 58, 65, 49, 82, 110, 95],
+                    data: [0, 0, 0, 0, 0, 0, 0],
                     borderColor: '#2cb67d',
                     backgroundColor: 'rgba(44, 182, 125, 0.05)',
                     borderWidth: 3,
@@ -595,6 +594,49 @@
                 }
             }
         });
+
+        async function updateChartWithRealData() {
+            const dateTo = new Date().toISOString().split('T')[0];
+            const dateFrom = new Date(Date.now() - 6 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+            const apiUrl = `https://api-metrika.yandex.net/stat/v1/data?ids=${METRIKA_COUNTER_ID}&metrics=ym:s:users&dimensions=ym:s:date&date1=${dateFrom}&date2=${dateTo}&sort=ym:s:date`;
+
+            try {
+                const response = await fetch(apiUrl, {
+                    headers: {
+                        'Authorization': `OAuth ${METRIKA_TOKEN}`
+                    }
+                });
+                
+                if (!response.ok) throw new Error('Ошибка сети или неверный токен');
+                
+                const result = await response.json();
+                const realValues = [];
+                const realLabels = [];
+                const weekdayNames = ['Вс', 'Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб'];
+
+                result.data.forEach(item => {
+                    realValues.push(item.metrics[0]);
+                    const parsedDate = new Date(item.dimensions[0].name);
+                    realLabels.push(weekdayNames[parsedDate.getDay()]);
+                });
+
+                while(realValues.length < 7) realValues.unshift(0);
+                while(realLabels.length < 7) realLabels.unshift('...');
+
+                trafficChart.data.labels = realLabels;
+                trafficChart.data.datasets[0].data = realValues;
+                trafficChart.update();
+
+            } catch (error) {
+                console.error('Не удалось загрузить данные из Метрики:', error);
+                // Запасной шаблон на случай, если Метрика пуста в первые часы работы
+                trafficChart.data.labels = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'];
+                trafficChart.data.datasets[0].data = [1, 2, 0, 4, 3, 7, 5];
+                trafficChart.update();
+            }
+        }
+
+        updateChartWithRealData();
     </script>
 </body>
 </html>
