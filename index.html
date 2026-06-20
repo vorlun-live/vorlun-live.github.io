@@ -9,6 +9,8 @@
     <meta name="yandex-verification" content="ddcfc6be5a50b1df" />
     <meta name="google-site-verification" content="em-FzPvx-EDfwSKd8oKJtHq9x_0OzSksyTe-Tg9n3fs" />
 
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
     <script type="text/javascript">
         (function(m,e,t,r,i,k,a){
             m[i]=m[i]||function(){(m[i].a=m[i].a||[]).push(arguments)};
@@ -385,7 +387,7 @@
             <button onclick="showPage('main')" class="logo">VORLUN<span>_</span></button>
             <nav>
                 <button id="nav-main" class="active" onclick="showPage('main')">Главная</button>
-                <button id="nav-catalog" onclick="showPage('catalog')">Каталог гайдов</button>
+                <button id="nav-catalog" onclick="showPage('page-catalog')" style="display:none;">Каталог гайдов</button> <button id="nav-catalog" onclick="showPage('catalog')">Каталог гайдов</button>
             </nav>
         </div>
     </header>
@@ -395,8 +397,8 @@
         <aside class="sidebar">
             <div class="sidebar-panel">
                 <h4><span class="live-indicator"></span> Посещаемость сайта</h4>
-                <div style="width: 100%; height: 100px; display: flex; align-items: center; justify-content: center; color: var(--text-muted); font-size: 0.85rem; text-align: center;">
-                    Статистика визитов доступна в панели Яндекс.Метрики
+                <div style="width: 100%; height: 130px;">
+                    <canvas id="trafficChart"></canvas>
                 </div>
             </div>
 
@@ -640,6 +642,72 @@
                 }
             });
         }
+
+        // --- СКРИПТЫ ГРАФИКА ПОСЕЩАЕМОСТИ ---
+        const ctx = document.getElementById('trafficChart').getContext('2d');
+
+        // Начальные данные (например, за последние 7 часов или дней)
+        const trafficData = {
+            labels: ['12:00', '13:00', '14:00', '15:00', '16:00', '17:00', '18:00'],
+            datasets: [{
+                label: 'Посетители сайта',
+                data: [5, 12, 8, 15, 22, 18, 30], // Ваши базовые числа
+                borderColor: '#7f5af0', // Фиолетовый (основной цвет сайта)
+                backgroundColor: 'rgba(127, 90, 240, 0.15)', // Полупрозрачное свечение
+                borderWidth: 2,
+                fill: true,
+                tension: 0.3 // Сглаживание линии графика
+            }]
+        };
+
+        const trafficChart = new Chart(ctx, {
+            type: 'line',
+            data: trafficData,
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false // Скрываем подпись, чтобы не занимать место в панели
+                    }
+                },
+                scales: {
+                    x: {
+                        ticks: { color: '#94a1b2' }, // Цвет текста меток (серый)
+                        grid: { color: 'rgba(255, 255, 255, 0.05)' } // Еле заметная сетка
+                    },
+                    y: {
+                        beginAtZero: true,
+                        ticks: { color: '#94a1b2' },
+                        grid: { color: 'rgba(255, 255, 255, 0.05)' }
+                    }
+                }
+            }
+        });
+
+        // Симуляция обновления данных в реальном времени (каждые 10 секунд)
+        setInterval(() => {
+            // Генерируем случайное число визитов от 1 до 40 
+            // В будущем замените эту логику на запрос к вашему бэкенду/аналитике через fetch(...)
+            const randomVisitCount = Math.floor(Math.random() * 40) + 1;
+            
+            // Получаем текущее время (часы:минуты) для новой метки
+            const now = new Date();
+            const timeLabel = String(now.getHours()).padStart(2, '0') + ':' + String(now.getMinutes()).padStart(2, '0');
+
+            // Добавляем новые данные в конец массивов
+            trafficChart.data.labels.push(timeLabel);
+            trafficChart.data.datasets[0].data.push(randomVisitCount);
+
+            // Ограничиваем отображение графика последними 7 точками, чтобы он не сжимался бесконечно
+            if (trafficChart.data.labels.length > 7) {
+                trafficChart.data.labels.shift();
+                trafficChart.data.datasets[0].data.shift();
+            }
+
+            // Применяем изменения
+            trafficChart.update();
+        }, 10000); // 10000 миллисекунд = 10 секунд (для теста обновляется быстро, можете увеличить интервал)
     </script>
 </body>
 </html>
