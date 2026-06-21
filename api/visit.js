@@ -31,7 +31,7 @@ module.exports = async (req, res) => {
 
       const nowTime = new Date().toISOString();
       
-      // Производим вставку времени и определенного IP-адреса
+      // Производим вставку времени и IP-адреса посетителя
       const { error: insertError } = await supabase
         .from('site_visits')
         .insert([{ 
@@ -45,38 +45,42 @@ module.exports = async (req, res) => {
     } 
     
     if (req.method === 'GET') {
-      // Запрашиваем ВСЕ записи из таблицы визитов, обходя проблемы с представлениями
+      // Запрашиваем визиты из таблицы напрямую, избегая ошибок представлений
       const { data, error: selectError } = await supabase
         .from('site_visits')
         .select('visited_at, visitor_ip')
         .order('visited_at', { ascending: false })
-        .limit(200); // Берем последние 200 визитов с запасом
+        .limit(500);
 
       if (selectError) throw selectError;
 
-      // Преобразуем формат для фронтенда, чтобы фронтенд мог сгруппировать их по дням
-      // (фронтенд ожидает поля visit_date и unique_visitors)
-      const visitsByDay = {};
-      
+      // Группируем и считаем уникальные посещения по дням на сервере
+      const visitsMap = {}; // Формат: { "ДД.ММ": Set([IP1, IP2]) }
+
       (data || []).forEach(row => {
         if (!row.visited_at) return;
-        // Извлекаем дату в формате DD.MM
+        
         const dateObj = new Date(row.visited_at);
         const day = String(dateObj.getDate()).padStart(2, '0');
         const month = String(dateObj.getMonth() + 1).padStart(2, '0');
         const dateKey = `${day}.${month}`;
-        
-        if (!visitsByDay[dateKey]) {
-          visitsByDay[dateKey] = new Set(); // Используем Set для подсчета уникальных IP
+
+        if (!visitsMap[dateKey]) {
+          visitsMap[dateKey] = new Set();
         }
-        visitsByDay[dateKey].add(row.visitor_ip);
+        visitsMap[dateKey].add(row.visitor_ip);
       });
 
-      // Собираем обратно в массив объектов, который ожидает ваш JS на фронтенде
-      const formattedData = Object.keys(visitsByDay).map(date => ({
-        visit_date: `2026-${date.split('.').reverse().join('-')}T00:00:00Z`, // имитация полной даты для парсинга
-        unique_visitors: visitsByDay[date].size
-      }));
+      // Превращаем результат в массив, который ожидает ваш фронтенд
+      // Фронтенд ожидает: visit_date (ISO-строка) и unique_visitors
+      const formattedData = Object.keys(visitsMap).map(dateStr => {
+        // Разбираем обратно "ДД.ММ" для формирования полной даты (текущий год 2026)
+        const [day, month] = dateStr.split('.');
+        return {
+          visit_date: `2026-${month}-${day}T00:00:00.000Z`,
+          unique_visitors: visitsMap[dateStr].size // Размер множества = количество уникальных IP
+        };
+      });
 
       return res.status(200).json(formattedData);
     }
