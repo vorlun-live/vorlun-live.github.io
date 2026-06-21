@@ -750,18 +750,24 @@
                 // 1. Фиксируем визит 
                 await fetch(API_URL, { method: 'POST' });
 
-                // 2. Получаем список последних визитов
+                // 2. Получаем список визитов из базы
                 const response = await fetch(API_URL);
                 const data = await response.json(); 
 
                 if (!Array.isArray(data) || data.length === 0) return;
 
-                // Разворачиваем, чтобы старые шли в начале, а новые в конце (слева направо)
+                // Сортируем массив по хронологии (от старых к новым)
                 const sortedData = [...data].reverse();
 
-                // Рисуем подписи и значения в виде роста графика
+                // Формируем динамические точки для роста графика
                 const labels = sortedData.map((_, index) => `В. ${index + 1}`);
                 const visitCounts = sortedData.map((_, index) => index + 1);
+
+                // Если записей в базе пока мало (меньше 2), добавляем искусственную нулевую точку, чтобы линия визуально отображалась
+                if (labels.length < 2) {
+                    labels.unshift('Старт');
+                    visitCounts.unshift(0);
+                }
 
                 // Обновляем график
                 trafficChart.data.labels = labels;
