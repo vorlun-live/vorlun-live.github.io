@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>VORLUN | Гайды по стримингу, настройке ОБС и продвижению</title>
-    <meta name="description" content="Полезные SEO-гайды для начинающих контент-мейкеров. Как настроить OBS без лагов, убрать шумы микрофона и продвигать Twitch через TikTok.">
+    <meta name="description" content="Полезные гайды для начинающих контент-мейкеров. Как настроить OBS без лагов, убрать шумы микрофона и продвигать Twitch через TikTok.">
     
     <meta name="yandex-verification" content="ddcfc6be5a50b1df" />
     <meta name="google-site-verification" content="em-FzPvx-EDfwSKd8oKJtHq9x_0OzSksyTe-Tg9n3fs" />
@@ -19,7 +19,13 @@
             k=e.createElement(t),a=e.getElementsByTagName(t)[0],k.async=1,k.src=r,a.parentNode.insertBefore(k,a)
         })(window, document,'script','https://mc.yandex.ru/metrika/tag.js?id=110005197', 'ym');
 
-        ym(110005197, 'init', {ssr:true, webvisor:true, clickmap:true, ecommerce:"dataLayer", referrer: document.referrer, url: location.href, accurateTrackBounce:true, trackLinks:true});
+        ym(110005197, 'init', {
+            clickmap:true,
+            trackLinks:true,
+            accurateTrackBounce:true,
+            webvisor:true,
+            ecommerce:"dataLayer"
+        });
     </script>
     <noscript><div><img src="https://mc.yandex.ru/watch/110005197" style="position:absolute; left:-9999px;" alt="" /></div></noscript>
     <style>
@@ -56,6 +62,7 @@
             flex-direction: column;
             align-items: center;
             min-height: 100vh;
+            overflow-x: hidden;
         }
 
         header {
@@ -63,7 +70,7 @@
             backdrop-filter: blur(12px);
             -webkit-backdrop-filter: blur(12px);
             width: 100%;
-            padding: 20px 0;
+            padding: 15px 0;
             box-sizing: border-box;
             border-bottom: 1px solid rgba(127, 90, 240, 0.3);
             box-shadow: 0 4px 30px rgba(0, 0, 0, 0.4);
@@ -73,8 +80,8 @@
         }
 
         .header-container {
-            max-width: 1400px;
-            width: 95%;
+            max-width: 1100px; /* Вернули оптимальную (не чрезмерную) ширину */
+            width: 90%;
             margin: 0 auto;
             display: flex;
             justify-content: space-between;
@@ -82,9 +89,9 @@
         }
 
         .logo {
-            font-size: 1.8rem;
+            font-size: 1.6rem;
             font-weight: 900;
-            letter-spacing: 2px;
+            letter-spacing: 1px;
             text-transform: uppercase;
             color: var(--text-main);
             text-decoration: none;
@@ -98,18 +105,23 @@
 
         .logo span { color: var(--primary); }
 
+        nav {
+            display: flex;
+            gap: 10px;
+        }
+
         nav button {
             background: none;
             border: none;
             color: var(--text-muted);
             cursor: pointer;
             font-family: inherit;
-            margin-left: 24px;
             font-weight: 600;
-            font-size: 1.05rem;
+            font-size: 0.95rem;
             transition: all 0.2s;
-            padding: 8px 16px;
+            padding: 8px 14px;
             border-radius: 8px;
+            white-space: nowrap;
         }
 
         nav button:hover, nav button.active { 
@@ -117,56 +129,49 @@
             background: rgba(127, 90, 240, 0.15);
         }
 
-        @media (max-width: 1000px) {
-            .header-container { flex-direction: column; gap: 15px; }
-            nav button { margin: 0 5px; }
-        }
-
         .main-wrapper {
             display: grid;
-            grid-template-columns: 350px 1fr;
-            width: 95%;
-            max-width: 1450px;
-            gap: 40px;
-            margin: 40px 0;
+            grid-template-columns: 300px 1fr; /* Компактная двухколоночная сетка */
+            width: 90%;
+            max-width: 1100px;
+            gap: 30px;
+            margin: 30px 0;
             flex: 1;
-        }
-
-        @media (max-width: 1000px) {
-            .main-wrapper { grid-template-columns: 1fr; }
+            box-sizing: border-box;
         }
 
         .sidebar {
             display: flex;
             flex-direction: column;
-            gap: 30px;
+            gap: 20px;
         }
 
         .sidebar-panel {
             background-color: var(--panel-bg);
-            padding: 28px;
-            border-radius: 18px;
+            padding: 20px;
+            border-radius: 14px;
             border: 1px solid rgba(127, 90, 240, 0.15);
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+            box-sizing: border-box;
         }
 
         .sidebar-panel h4 {
-            margin: 0 0 20px 0;
-            font-size: 1rem;
+            margin: 0 0 15px 0;
+            font-size: 0.95rem;
             text-transform: uppercase;
             letter-spacing: 1px;
             color: var(--text-muted);
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 8px;
         }
 
         .live-indicator {
-            width: 10px;
-            height: 10px;
+            width: 8px;
+            height: 8px;
             background-color: var(--secondary);
             border-radius: 50%;
-            box-shadow: 0 0 8px var(--secondary);
+            box-shadow: 0 0 6px var(--secondary);
             animation: blink 1.5s infinite;
         }
 
@@ -179,6 +184,7 @@
         .container {
             width: 100%;
             z-index: 2;
+            min-width: 0; /* Фикс для предотвращения вылезания grid-элементов */
         }
 
         .page { display: none; }
@@ -186,61 +192,62 @@
 
         .section {
             background-color: var(--panel-bg);
-            padding: 40px;
-            border-radius: 18px;
-            margin-bottom: 35px;
+            padding: 30px;
+            border-radius: 14px;
+            margin-bottom: 25px;
             border: 1px solid rgba(127, 90, 240, 0.1);
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.4);
+            box-sizing: border-box;
         }
 
         h2 {
             color: var(--text-main);
             margin-top: 0;
-            font-size: 1.8rem;
+            font-size: 1.5rem;
             border-left: 4px solid var(--primary);
-            padding-left: 18px;
+            padding-left: 14px;
             letter-spacing: 0.5px;
         }
 
         .stats-grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
-            gap: 20px;
-            margin-top: 25px;
+            gap: 15px;
+            margin-top: 20px;
         }
-        @media (max-width: 500px) { .stats-grid { grid-template-columns: 1fr; } }
 
         .stat-box {
             background: var(--card-bg);
-            padding: 20px;
-            border-radius: 12px;
+            padding: 15px;
+            border-radius: 10px;
             border: 1px solid rgba(255,255,255,0.02);
             text-align: center;
         }
-        .stat-box .num { font-size: 2rem; font-weight: 800; color: var(--secondary); }
-        .stat-box .label { font-size: 0.9rem; color: var(--text-muted); margin-top: 8px; text-transform: uppercase; }
+        .stat-box .num { font-size: 1.6rem; font-weight: 800; color: var(--secondary); }
+        .stat-box .label { font-size: 0.75rem; color: var(--text-muted); margin-top: 6px; text-transform: uppercase; }
 
         .links-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 20px;
-            margin-top: 30px;
+            gap: 15px;
+            margin-top: 20px;
         }
-        @media (max-width: 600px) { .links-grid { grid-template-columns: 1fr; } }
 
         .btn {
             display: flex;
             align-items: center;
             justify-content: center;
-            padding: 20px;
-            border-radius: 12px;
+            padding: 15px;
+            border-radius: 10px;
             text-decoration: none;
-            font-weight: 700;
-            font-size: 1.1rem;
+            font-weight: 600;
+            font-size: 1rem;
             transition: all 0.25s ease;
+            text-align: center;
+            box-sizing: border-box;
         }
 
-        .btn-twitch { background-color: var(--twitch-color); color: #ffffff; box-shadow: 0 4px 15px rgba(100, 65, 165, 0.2); }
+        .btn-twitch { background-color: var(--twitch-color); color: #ffffff; box-shadow: 0 4px 12px rgba(100, 65, 165, 0.2); }
         .btn-twitch:hover { background-color: var(--twitch-hover); transform: translateY(-2px); }
 
         .btn-tiktok { background-color: var(--tiktok-color); color: #ffffff; border: 1px solid rgba(255, 255, 255, 0.1); }
@@ -248,8 +255,8 @@
 
         .catalog-tags {
             display: flex;
-            gap: 12px;
-            margin-bottom: 30px;
+            gap: 8px;
+            margin-bottom: 20px;
             flex-wrap: wrap;
         }
 
@@ -257,11 +264,11 @@
             background-color: var(--card-bg);
             border: 1px solid rgba(255, 255, 255, 0.05);
             color: var(--text-muted);
-            padding: 10px 22px;
-            border-radius: 30px;
+            padding: 8px 16px;
+            border-radius: 20px;
             cursor: pointer;
-            font-weight: 600;
-            font-size: 0.95rem;
+            font-weight: 500;
+            font-size: 0.85rem;
             transition: all 0.2s ease;
         }
 
@@ -273,15 +280,15 @@
 
         .catalog-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-            gap: 25px;
-            margin-top: 25px;
+            grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); /* Уменьшен размер карточек, чтобы они плотно заполняли пространство */
+            gap: 18px;
+            margin-top: 20px;
         }
 
         .post-card {
             background-color: var(--card-bg);
-            padding: 26px;
-            border-radius: 16px;
+            padding: 20px;
+            border-radius: 12px;
             border: 1px solid rgba(255, 255, 255, 0.03);
             transition: all 0.25s ease;
             cursor: pointer;
@@ -293,108 +300,133 @@
         }
 
         .post-card:hover {
-            transform: translateY(-4px);
+            transform: translateY(-3px);
             border-color: rgba(127, 90, 240, 0.4);
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4), 0 0 15px var(--primary-glow);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3), 0 0 10px var(--primary-glow);
         }
 
-        .post-card h3 { margin: 10px 0 14px 0; color: var(--text-main); font-size: 1.4rem; line-height: 1.4; }
-        .post-card p { color: var(--text-muted); font-size: 1rem; line-height: 1.6; margin: 0 0 20px 0; flex-grow: 1; }
+        .post-card h3 { margin: 8px 0 10px 0; color: var(--text-main); font-size: 1.15rem; line-height: 1.3; }
+        .post-card p { color: var(--text-muted); font-size: 0.85rem; line-height: 1.5; margin: 0 0 15px 0; flex-grow: 1; }
         
         .article-meta {
             display: flex;
-            gap: 15px;
-            font-size: 0.85rem;
+            gap: 10px;
+            font-size: 0.75rem;
             color: var(--secondary);
             font-weight: bold;
             text-transform: uppercase;
         }
 
-        .post-link { color: var(--primary); font-weight: bold; font-size: 1rem; }
+        .post-link { color: var(--primary); font-weight: bold; font-size: 0.9rem; }
 
-        .article-content { line-height: 1.9; font-size: 1.15rem; color: #e1e6eb; }
-        .article-content h3 { color: var(--text-main); margin-top: 35px; font-size: 1.5rem; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 8px; }
-        .article-content hr { border: 0; height: 1px; background: rgba(127, 90, 240, 0.2); margin: 30px 0; }
-        .article-content ul, .article-content ol { padding-left: 25px; margin: 20px 0; }
+        .article-content { line-height: 1.7; font-size: 1rem; color: #e1e6eb; }
+        .article-content h3 { color: var(--text-main); margin-top: 25px; font-size: 1.3rem; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 6px; }
+        .article-content hr { border: 0; height: 1px; background: rgba(127, 90, 240, 0.2); margin: 20px 0; }
+        .article-content ul, .article-content ol { padding-left: 20px; margin: 15px 0; }
         
         .tip-box {
             background-color: rgba(127, 90, 240, 0.03);
             border-left: 4px solid var(--primary);
-            padding: 18px 24px;
-            border-radius: 0 12px 12px 0;
-            margin: 25px 0;
+            padding: 12px 16px;
+            border-radius: 0 10px 10px 0;
+            margin: 18px 0;
             color: var(--text-main);
+            font-size: 0.95rem;
         }
 
         .back-btn {
             background: none;
             border: 1px solid var(--text-muted);
             color: var(--text-muted);
-            padding: 12px 22px;
+            padding: 10px 18px;
             border-radius: 8px;
             cursor: pointer;
             font-weight: 600;
-            margin-bottom: 25px;
+            margin-bottom: 20px;
             transition: all 0.2s;
-            font-size: 1rem;
+            font-size: 0.9rem;
         }
         .back-btn:hover { border-color: var(--primary); color: var(--text-main); }
 
         .stream-status-widget {
             background: var(--card-bg);
-            border-radius: 16px;
-            padding: 30px;
+            border-radius: 12px;
+            padding: 20px;
             border: 1px solid rgba(255,255,255,0.05);
-            margin-top: 25px;
+            margin-top: 18px;
             text-align: center;
         }
         .stream-offline-msg {
             color: var(--text-muted);
-            font-size: 1.1rem;
+            font-size: 0.95rem;
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 20px;
+            gap: 15px;
         }
         .stream-offline-dot {
-            width: 12px;
-            height: 12px;
+            width: 10px;
+            height: 10px;
             background-color: var(--text-muted);
             border-radius: 50%;
             display: inline-block;
         }
         .check-channel-btn {
             display: inline-block;
-            margin-top: 10px;
-            padding: 14px 28px;
+            margin-top: 5px;
+            padding: 10px 20px;
             background-color: var(--twitch-color);
             color: #fff;
             text-decoration: none;
-            border-radius: 10px;
+            border-radius: 8px;
             font-weight: bold;
-            font-size: 1.05rem;
+            font-size: 0.9rem;
             transition: background 0.2s;
         }
         .check-channel-btn:hover {
             background-color: var(--twitch-hover);
         }
 
-        /* SEO Блок в подвале */
+        /* Наполнение пустоты справа и под ними */
+        .fill-widget {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 16px;
+            border: 1px solid rgba(255,255,255,0.03);
+            margin-top: 20px;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+        .fill-widget h5 { color: var(--secondary); margin: 0 0 6px 0; font-size: 0.95rem; }
+
+        /* SEO Текст (блок в подвале для заполнения и продвижения) */
         .seo-section {
             background-color: var(--panel-bg);
-            padding: 40px;
-            border-radius: 18px;
-            margin-top: 50px;
+            padding: 30px;
+            border-radius: 14px;
+            margin-top: 35px;
             border: 1px solid rgba(127, 90, 240, 0.1);
             color: var(--text-muted);
-            font-size: 1.05rem;
-            line-height: 1.7;
+            font-size: 0.95rem;
+            line-height: 1.6;
+            box-sizing: border-box;
         }
         .seo-section h3 {
             color: var(--text-main);
-            font-size: 1.5rem;
+            font-size: 1.3rem;
             margin-top: 0;
-            margin-bottom: 15px;
+            margin-bottom: 12px;
+        }
+
+        /* Мобильная адаптивность */
+        @media (max-width: 850px) {
+            .header-container { flex-direction: column; gap: 10px; }
+            nav { width: 100%; justify-content: center; overflow-x: auto; padding-bottom: 5px; }
+            .main-wrapper { grid-template-columns: 1fr; width: 95%; margin: 20px auto; gap: 20px; }
+            .stats-grid { grid-template-columns: 1fr; }
+            .links-grid { grid-template-columns: 1fr; }
+            .catalog-grid { grid-template-columns: 1fr; }
+            .article-content { font-size: 0.95rem; }
         }
     </style>
 </head>
@@ -406,7 +438,7 @@
             <nav>
                 <button id="nav-main" class="active" onclick="showPage('main')">Главная</button>
                 <button id="nav-catalog" onclick="showPage('catalog')">Каталог гайдов</button>
-                <button id="nav-equipment" onclick="showPage('equipment')">Оборудование</button>
+                <button id="nav-equipment" onclick="showPage('equipment')">Каталог оборудования</button>
             </nav>
         </div>
     </header>
@@ -416,15 +448,26 @@
         <aside class="sidebar">
             <div class="sidebar-panel">
                 <h4><span class="live-indicator"></span> Посещаемость сайта</h4>
-                <div style="width: 100%; height: 160px;">
+                <div style="width: 100%; height: 130px;">
                     <canvas id="trafficChart"></canvas>
                 </div>
             </div>
 
-            <div class="sidebar-panel" style="font-size: 1rem; line-height: 1.6;">
+            <div class="sidebar-panel" style="line-height: 1.5;">
                 <h4 style="color: var(--primary);">👤 О проекте</h4>
-                <p style="margin: 0 0 15px 0; color: #e1e6eb;">Привет! Я создаю контент и делюсь рабочими фишками по оптимизации стримов, софта и звука для начинающих авторов.</p>
-                <div style="color: var(--text-muted); font-size: 0.85rem;">Цель: Стабильный и чистый поток без лагов.</div>
+                <p style="margin: 0 0 12px 0; color: #e1e6eb;">Привет! Я создаю контент и делюсь рабочими фишками по оптимизации стримов, софта и звука для начинающих авторов.</p>
+                <div style="color: var(--text-muted); font-size: 0.75rem;">Цель: Стабильный и чистый поток без лагов.</div>
+            </div>
+
+            <div class="sidebar-panel">
+                <h4 style="color: var(--secondary);">📌 Популярные теги</h4>
+                <div style="display:flex; flex-wrap: wrap; gap: 6px;">
+                    <span style="background:#161424; padding: 4px 10px; border-radius:6px; font-size: 0.75rem;">#OBS</span>
+                    <span style="background:#161424; padding: 4px 10px; border-radius:6px; font-size: 0.75rem;">#Звук</span>
+                    <span style="background:#161424; padding: 4px 10px; border-radius:6px; font-size: 0.75rem;">#Микрофон</span>
+                    <span style="background:#161424; padding: 4px 10px; border-radius:6px; font-size: 0.75rem;">#Twitch</span>
+                    <span style="background:#161424; padding: 4px 10px; border-radius:6px; font-size: 0.75rem;">#TikTok</span>
+                </div>
             </div>
         </aside>
 
@@ -433,13 +476,18 @@
             <div id="page-main" class="page active-page">
                 <div class="section">
                     <h2>👾 Статус Стрима (Live)</h2>
-                    <p style="color: var(--text-muted); font-size: 1rem; margin-top: 8px;">Проверка идет ли трансляция на Twitch в реальном времени.</p>
+                    <p style="color: var(--text-muted); font-size: 0.9rem; margin-top: 5px;">Проверка идет ли трансляция на Twitch в реальном времени.</p>
                     
                     <div id="streamStatusWidget" class="stream-status-widget">
                         <div class="stream-offline-msg">
                             <div><span class="stream-offline-dot"></span> Трансляция сейчас оффлайн.</div>
                             <a href="https://www.twitch.tv/vorlun_" target="_blank" class="check-channel-btn">Перейти на канал (ждать уведомлений)</a>
                         </div>
+                    </div>
+
+                    <div class="fill-widget">
+                        <h5>💡 Быстрый совет</h5>
+                        Обычно перед запуском трансляции полезно проверить статус буфера обмена, запустить OBS от имени Администратора и сделать тестовый прогон звука.
                     </div>
                 </div>
 
@@ -453,7 +501,7 @@
 
                 <div class="section">
                     <h2>📊 Статистика прогресса</h2>
-                    <p style="color: var(--text-muted); font-size: 1rem; margin: 0;">Мониторинг ключевых метрик продвижения каналов:</p>
+                    <p style="color: var(--text-muted); font-size: 0.9rem; margin: 0;">Мониторинг ключевых метрик продвижения каналов:</p>
                     <div class="stats-grid">
                         <div class="stat-box">
                             <div class="num">1080p</div>
@@ -479,7 +527,7 @@
                                 <h3>Как настроить OBS для стрима без лагов в 2026 году</h3>
                                 <p>Пошаговый разбор настроек кодировщика, битрейта и приоритетов. Оптимизируем картинку для слабых и средних ПК.</p>
                             </div>
-                            <span class="post-link">Читать →</span>
+                            <span class="post-link" style="margin-top: 12px;">Читать →</span>
                         </div>
                         
                         <div class="post-card" onclick="openArticle('camera-guide')">
@@ -488,7 +536,7 @@
                                 <h3>Как настроить освещение и камеру для стрима</h3>
                                 <p>Из дешевой веб-камеры делаем студийную картинку. Выставляем свет и убираем шумы с матрицы.</p>
                             </div>
-                            <span class="post-link">Читать →</span>
+                            <span class="post-link" style="margin-top: 12px;">Читать →</span>
                         </div>
                     </div>
                 </div>
@@ -496,14 +544,14 @@
                 <section class="seo-section">
                     <h3>О проекте VORLUN — Гайды и обучение стримингу</h3>
                     <p>Добро пожаловать в базу знаний для начинающих и опытных контент-мейкеров. Если вы хотите начать вести трансляции на Twitch, записывать ролики для YouTube или развивать свой TikTok-канал, здесь собраны актуальные материалы и пошаговые руководства. Мы разбираем ключевые технические аспекты: как настроить OBS Studio до идеального состояния без потери кадров, какие фильтры использовать для получения студийного звука с бюджетного микрофона, а также как правильно выставить свет и экспозицию веб-камеры.</p>
-                    <p>Полноценная оптимизация оборудования и программного обеспечения — залог качественного и стабильного эфира, который удерживает зрителя. Изучайте наши подробные статьи, внедряйте проверенные настройки кодировщиков, избегайте частых ошибок новичков и привлекайте новую аудиторию с помощью органического трафика из социальных сетей!</p>
+                    <p>Оптимизация оборудования и программного обеспечения — залог качественного и стабильного эфира, который удерживает зрителя. Изучайте наши подробные статьи, внедряйте проверенные настройки кодировщиков, избегайте частых ошибок новичков и привлекайте новую аудиторию с помощью органического трафика из социальных сетей!</p>
                 </section>
             </div>
 
             <div id="page-catalog" class="page">
                 <div class="section">
                     <h2>📚 Все публикации</h2>
-                    <p style="color: var(--text-muted); font-size: 1.05rem; margin-bottom: 25px;">Выбирай категорию, чтобы отфильтровать гайды:</p>
+                    <p style="color: var(--text-muted); font-size: 0.95rem; margin-bottom: 20px;">Выбирай категорию, чтобы отфильтровать гайды:</p>
                     
                     <div class="catalog-tags">
                         <button class="tag-filter active-tag" onclick="filterCatalog('all', this)">Все темы</button>
@@ -520,8 +568,8 @@
                         <div class="post-card mix-art obs" onclick="openArticle('obs-guide')">
                             <div>
                                 <div class="article-meta"><span>#OBS</span></div>
-                                <h3>Как настроить OBS для стрима без лагов в 2026 году</h3>
-                                <p>Оптимальный битрейт, выбор кодировщика NVENC и секретные фишки Windows для повышения плавности стрима.</p>
+                                <h3>Как настроить OBS для стрима без лагов</h3>
+                                <p>Оптимальный битрейт, выбор кодировщика NVENC и секретные фишки Windows для повышения плавности.</p>
                             </div>
                             <span class="post-link">Читать гайд →</span>
                         </div>
@@ -530,7 +578,7 @@
                             <div>
                                 <div class="article-meta"><span>#Звук</span></div>
                                 <h3>Настройка микрофона в OBS: как убрать шумы, клики и гул</h3>
-                                <p>Пошаговая настройка фильтров: Шумоподавление, Пропускной порог шума и Лимитер. Делаем студийный звук бесплатно.</p>
+                                <p>Пошаговая настройка фильтров: Шумоподавление, Пропускной порог шума и Лимитер.</p>
                             </div>
                             <span class="post-link">Читать гайд →</span>
                         </div>
@@ -539,7 +587,7 @@
                             <div>
                                 <div class="article-meta"><span>#Донаты</span></div>
                                 <h3>Как подключить донаты на Twitch и настроить оповещения</h3>
-                                <p>Подключаем DonationAlerts, настраиваем панель уведомлений и выводим красивый алерт с отображением подписчиков.</p>
+                                <p>Подключаем DonationAlerts, настраиваем панель уведомлений и выводим красивый алерт.</p>
                             </div>
                             <span class="post-link">Читать гайд →</span>
                         </div>
@@ -547,8 +595,8 @@
                         <div class="post-card mix-art tiktok" onclick="openArticle('tiktok-guide')">
                             <div>
                                 <div class="article-meta"><span>#Тренды / TikTok</span></div>
-                                <h3>Продвижение стримов через TikTok: алгоритмы 2026 года</h3>
-                                <p>How to re-stream highlights, hashtags, and drive external traffic to Twitch.</p>
+                                <h3>Продвижение стримов через TikTok: алгоритмы</h3>
+                                <p>Как нарезать хайлайты, использовать хештеги и перегонять внешний трафик на Твич.</p>
                             </div>
                             <span class="post-link">Читать гайд →</span>
                         </div>
@@ -557,7 +605,7 @@
                             <div>
                                 <div class="article-meta"><span>#Камера</span></div>
                                 <h3>Как настроить освещение и камеру для стрима</h3>
-                                <p>Из дешевой веб-камеры выжимаем максимум. Как правильно выставить свет и настроить экспозицию без пересвета.</p>
+                                <p>Из дешевой веб-камеры выжимаем максимум. Как правильно выставить свет.</p>
                             </div>
                             <span class="post-link">Читать гайд →</span>
                         </div>
@@ -566,7 +614,7 @@
                             <div>
                                 <div class="article-meta"><span>#Твич</span></div>
                                 <h3>Оформление канала Twitch: панели, чат и виджеты</h3>
-                                <p>Создаем приятный визуал для зрителя. Как настроить интерактивные панели под стримом и блоки чата.</p>
+                                <p>Создаем приятный визуал для зрителя. Как настроить интерактивные панели.</p>
                             </div>
                             <span class="post-link">Читать гайд →</span>
                         </div>
@@ -578,34 +626,34 @@
             <div id="page-equipment" class="page">
                 <div class="section">
                     <h2>🎛️ Каталог оборудования</h2>
-                    <p style="color: var(--text-muted); font-size: 1.05rem; margin-bottom: 25px;">Подборки проверенных устройств для качественного ведения трансляций:</p>
+                    <p style="color: var(--text-muted); font-size: 0.95rem; margin-bottom: 20px;">Подборки проверенных устройств для качественного ведения трансляций:</p>
                     
                     <div class="catalog-grid">
                         <div class="post-card">
                             <div>
                                 <div class="article-meta"><span>#Микрофоны</span> <span>2026</span></div>
                                 <h3>Топ-5 бюджетных микрофонов для стрима</h3>
-                                <p>Обзор лучших USB-микрофонов с кардиоидной направленностью, которые не требуют покупки звуковой карты или микшера.</p>
+                                <p>Обзор лучших USB-микрофонов с кардиоидной направленностью, которые не требуют покупки звуковой карты.</p>
                             </div>
-                            <span style="color: var(--text-muted); font-size: 0.9rem;">Скоро здесь появится полный разбор →</span>
+                            <span style="color: var(--text-muted); font-size: 0.75rem; margin-top: 10px;">Скоро здесь появится полный разбор →</span>
                         </div>
 
                         <div class="post-card">
                             <div>
                                 <div class="article-meta"><span>#Свет</span> <span>2026</span></div>
-                                <h3>Выбираем освещение: кольцевой свет или софтбоксы?</h3>
-                                <p>Что лучше подойдет для рабочего места стримера: разбираем типы ламп, их цветовую температуру и влияние на матрицу камеры.</p>
+                                <h3>Кольцевой свет или софтбоксы: что выбрать?</h3>
+                                <p>Что лучше подойдет для рабочего места стримера: разбираем типы ламп и цветовую температуру.</p>
                             </div>
-                            <span style="color: var(--text-muted); font-size: 0.9rem;">Скоро здесь появится полный разбор →</span>
+                            <span style="color: var(--text-muted); font-size: 0.75rem; margin-top: 10px;">Скоро здесь появится полный разбор →</span>
                         </div>
 
                         <div class="post-card">
                             <div>
                                 <div class="article-meta"><span>#ПК</span> <span>Железо</span></div>
                                 <h3>Оптимальная сборка ПК для стриминга</h3>
-                                <p>Какая видеокарта и процессор нужны, чтобы запускать современные игры в 1080p и параллельно кодировать поток без просадки кадров.</p>
+                                <p>Какая видеокарта и процессор нужны, чтобы запускать игры в 1080p и кодировать поток.</p>
                             </div>
-                            <span style="color: var(--text-muted); font-size: 0.9rem;">Скоро здесь появится полный разбор →</span>
+                            <span style="color: var(--text-muted); font-size: 0.75rem; margin-top: 10px;">Скоро здесь появится полный разбор →</span>
                         </div>
                     </div>
                 </div>
@@ -614,7 +662,7 @@
             <div id="page-obs-guide" class="page">
                 <button class="back-btn" onclick="showPage('catalog')">← Назад в каталог</button>
                 <div class="section">
-                    <h1 style="font-size: 2.2rem; margin-top: 0; color: var(--text-main);">Как настроить OBS для стрима без лагов в 2026 году</h1>
+                    <h1 style="font-size: 1.8rem; margin-top: 0; color: var(--text-main);">Как настроить OBS для стрима без лагов в 2026 году</h1>
                     <div class="article-content">
                         <p>Каждый начинающий стример сталкивается с одной и той же проблемой: лаги на трансляции при нормальном FPS в игре. Разберем базовый чеклист настройки ОБС.</p>
                         <hr>
@@ -635,7 +683,7 @@
             <div id="page-audio-guide" class="page">
                 <button class="back-btn" onclick="showPage('catalog')">← Назад в каталог</button>
                 <div class="section">
-                    <h1 style="font-size: 2.2rem; margin-top: 0; color: var(--text-main);">Настройка микрофона в OBS: убираем шумы и клики клавиатуры</h1>
+                    <h1 style="font-size: 1.8rem; margin-top: 0; color: var(--text-main);">Настройка микрофона в OBS: убираем шумы и клики клавиатуры</h1>
                     <div class="article-content">
                         <p>Даже идеальная картинка не спасет стрим, если у тебя фонит микрофон, слышны вздохи или громкий стук механической клавиатуры. Нам не нужно покупать дорогую карту, все настроим встроенными фильтрами ОБС.</p>
                         <hr>
@@ -665,7 +713,7 @@
             <div id="page-donates-guide" class="page">
                 <button class="back-btn" onclick="showPage('catalog')">← Назад в каталог</button>
                 <div class="section">
-                    <h1 style="font-size: 2.2rem; margin-top: 0; color: var(--text-main);">Подключение донатов на Twitch: пошаговое руководство</h1>
+                    <h1 style="font-size: 1.8rem; margin-top: 0; color: var(--text-main);">Подключение донатов на Twitch</h1>
                     <div class="article-content">
                         <p>Монетизация творчества — важный шаг для любого контент-мейкера. Разберем самый популярный и надежный сервис — DonationAlerts.</p>
                         <hr>
@@ -683,14 +731,14 @@
             <div id="page-tiktok-guide" class="page">
                 <button class="back-btn" onclick="showPage('catalog')">← Назад в каталог</button>
                 <div class="section">
-                    <h1 style="font-size: 2.2rem; margin-top: 0; color: var(--text-main);">Продвижение стримов через TikTok: алгоритмы 2026 года</h1>
+                    <h1 style="font-size: 1.8rem; margin-top: 0; color: var(--text-main);">Продвижение стримов через TikTok</h1>
                     <div class="article-content">
                         <p>Просто стримить на Твиче в пустоту — это главная ошибка новичков. Твой главный локомотив продвижения — это короткие ролики в ТикТок, которые подхватывают алгоритмы рекомендаций.</p>
                         <hr>
                         <h3>💎 Стратегия перегона трафика на Twitch:</h3>
                         
                         <h3>1. Правило первых 3-х секунд</h3>
-                        <p>Алгоритмы ТикТока оценивают удержание. В самом начале ролика должен быть жесткий хук (крючок). Не начинай с приветствий, начинай сразу с экшена или интриги.</p>
+                        <p>Алгоритмы ТикТока оценивают удержание. В самом начале ролика должен быть жесткий хук. Не начинай с приветствий, начинай сразу с экшена или интриги.</p>
                         
                         <h3>2. Оформление игрового контента</h3>
                         <p>Используй формат разделенного экрана: сверху лицо с веб-камеры крупно, снизу — геймплей. Текст-субтитры по центру экрана обязательны.</p>
@@ -701,7 +749,7 @@
             <div id="page-camera-guide" class="page">
                 <button class="back-btn" onclick="showPage('catalog')">← Назад в каталог</button>
                 <div class="section">
-                    <h1 style="font-size: 2.2rem; margin-top: 0; color: var(--text-main);">Как настроить освещение и камеру для стрима</h1>
+                    <h1 style="font-size: 1.8rem; margin-top: 0; color: var(--text-main);">Как настроить освещение и камеру</h1>
                     <div class="article-content">
                         <p>Плохой свет может превратить даже дорогую камеру в «мыло». В этом гайде разберем, как добиться приятной и четкой картинки.</p>
                         <hr>
@@ -718,7 +766,7 @@
             <div id="page-twitch-panel-guide" class="page">
                 <button class="back-btn" onclick="showPage('catalog')">← Назад в каталог</button>
                 <div class="section">
-                    <h1 style="font-size: 2.2rem; margin-top: 0; color: var(--text-main);">Оформление канала Twitch: панели, чат и виджеты</h1>
+                    <h1 style="font-size: 1.8rem; margin-top: 0; color: var(--text-main);">Оформление канала Twitch</h1>
                     <div class="article-content">
                         <p>Первое впечатление о стримере складывается по визулу канала. Давайте сделаем его аккуратным и привлекательным.</p>
                         <hr>
@@ -773,7 +821,6 @@
         async function loadVisitsData() {
             const ctx = document.getElementById('trafficChart').getContext('2d');
             
-            // Заглушка-скелет графика на случай отсутствия данных или ошибки сети (по умолчанию 7 дней)
             const getPast7DaysSkeleton = () => {
                 return Array.from({ length: 7 }, (_, i) => {
                     const date = new Date();
@@ -784,7 +831,6 @@
                 });
             };
 
-            // Функция отрисовки графика на холсте (canvas)
             const renderChart = (chartData) => {
                 new Chart(ctx, {
                     type: 'bar',
@@ -796,8 +842,8 @@
                             backgroundColor: '#7f5af0',
                             borderColor: '#7f5af0',
                             borderWidth: 1,
-                            borderRadius: 6,
-                            barPercentage: 0.75
+                            borderRadius: 4,
+                            barPercentage: 0.7
                         }]
                     },
                     options: {
@@ -807,21 +853,21 @@
                             legend: { display: false },
                             tooltip: {
                                 backgroundColor: '#161424',
-                                titleFont: { size: 12 },
-                                bodyFont: { size: 12 },
-                                padding: 10,
-                                cornerRadius: 8,
+                                titleFont: { size: 11 },
+                                bodyFont: { size: 11 },
+                                padding: 8,
+                                cornerRadius: 6,
                                 displayColors: false
                             }
                         },
                         scales: {
                             x: {
                                 grid: { display: false },
-                                ticks: { color: '#94a1b2', font: { size: 10 } }
+                                ticks: { color: '#94a1b2', font: { size: 9 } }
                             },
                             y: {
                                 grid: { color: 'rgba(255, 255, 255, 0.03)' },
-                                ticks: { color: '#94a1b2', font: { size: 9 }, stepSize: 5 }
+                                ticks: { color: '#94a1b2', font: { size: 8 }, stepSize: 5 }
                             }
                         }
                     }
@@ -829,7 +875,6 @@
             };
 
             try {
-                // Подключение к вашему API на Vercel (предполагаемый эндпоинт /api/visit)
                 const response = await fetch('/api/visit');
                 const data = await response.json();
                 
@@ -838,7 +883,6 @@
                     return;
                 }
 
-                // Группировка визитов по дням (ДД.ММ)
                 const visitsByDay = {};
                 data.forEach(item => {
                     if (!item.visited_at) return;
@@ -850,7 +894,6 @@
                     visitsByDay[dateKey] = (visitsByDay[dateKey] || 0) + 1;
                 });
 
-                // Срез ровно за последние 7 дней
                 const sortedDays = Object.keys(visitsByDay).sort();
                 const last7DaysKeys = sortedDays.slice(-7);
 
@@ -859,7 +902,6 @@
                     visits: visitsByDay[date]
                 }));
 
-                // Заполняем недостающие дни нулями, чтобы шкала отображала ровно 7 дней
                 while (chartData.length < 7) {
                     const pastDate = new Date();
                     pastDate.setDate(pastDate.getDate() - (6 - chartData.length));
@@ -876,7 +918,6 @@
             }
         }
 
-        // Вызов инициализации данных при первой загрузке страницы
         loadVisitsData();
     </script>
 </body>
