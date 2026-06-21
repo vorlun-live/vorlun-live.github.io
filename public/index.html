@@ -3,101 +3,370 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VORLUN — Статистика</title>
+    <title>VORLUN_</title>
     <style>
+        /* Базовые стили темной темы */
         body {
-            background-color: #120f18;
+            background-color: #0f0c15;
             color: #ffffff;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
             margin: 0;
-            padding: 20px;
+            padding: 0;
         }
+
+        /* Шапка сайта */
+        header {
+            background-color: #15101d;
+            border-bottom: 1px solid #2a2238;
+            padding: 20px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+            color: #a77cd6;
+            letter-spacing: 1px;
+        }
+
+        nav {
+            display: flex;
+            gap: 20px;
+        }
+
+        nav a {
+            color: #8b70a9;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 500;
+            padding: 6px 12px;
+            border-radius: 6px;
+            transition: all 0.2s;
+        }
+
+        nav a:hover {
+            background-color: #241b30;
+            color: #ffffff;
+        }
+
+        /* Основной контент */
+        main {
+            padding: 40px;
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 380px 1fr;
+            gap: 40px;
+        }
+
+        /* Левая колонка: Виджеты */
+        sidebar {
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
         .widget {
-            background: #1e1b24;
-            border-radius: 12px;
-            padding: 20px;
-            width: 350px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            background-color: #15101d;
+            border: 1px solid #2a2238;
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
         }
-        h3 { margin-top: 0; color: #a27bca; }
-        .chart-container {
+
+        .widget-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #8b70a9;
+            margin: 0 0 20px 0;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* График посещаемости */
+        .chart-wrapper {
             position: relative;
-            height: 150px;
-            margin-top: 15px;
+            height: 160px;
             display: flex;
             align-items: flex-end;
             justify-content: space-between;
-            border-bottom: 2px solid #332d3a;
-            border-left: 2px solid #332d3a;
-            padding: 10px 5px 0 5px;
+            gap: 8px;
+            border-bottom: 2px solid #2a2238;
+            padding-bottom: 4px;
+            margin-bottom: 8px;
         }
-        .chart-column {
+
+        .chart-bar-item {
             position: relative;
-            width: 12%;
-            background: linear-gradient(to top, #7a4bb2, #a27bca);
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            height: 100%;
+            justify-content: flex-end;
+        }
+
+        .chart-bar {
+            width: 100%;
+            min-height: 4px;
+            background: linear-gradient(to top, #442468, #8c52ca);
             border-radius: 4px 4px 0 0;
-            transition: height 0.4s ease;
-            text-align: center;
+            transition: height 0.5s ease-in-out;
         }
-        .chart-column:hover::after {
-            content: attr(data-visits);
+
+        .chart-bar-item:hover .chart-tooltip {
+            opacity: 1;
+            visibility: visible;
+            transform: translateX(-50%) translateY(0);
+        }
+
+        .chart-tooltip {
             position: absolute;
-            top: -25px;
+            top: -36px;
             left: 50%;
-            transform: translateX(-50%);
-            background: #2d2938;
-            padding: 2px 6px;
-            border-radius: 4px;
+            transform: translateX(-50%) translateY(-4px);
+            background-color: #241b30;
+            color: #ffffff;
             font-size: 12px;
-            color: #fff;
+            padding: 4px 8px;
+            border-radius: 6px;
+            border: 1px solid #44325a;
             white-space: nowrap;
+            pointer-events: none;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.2s ease;
             z-index: 10;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
         }
+
         .chart-labels {
             display: flex;
             justify-content: space-between;
-            margin-top: 5px;
-            font-size: 10px;
-            color: #8c8597;
-            padding-left: 5px;
+            gap: 8px;
         }
-        .label-item {
-            width: 12%;
+
+        .chart-label-item {
+            flex: 1;
             text-align: center;
+            font-size: 11px;
+            color: #6c5885;
+            font-weight: 500;
+        }
+
+        /* Блок о проекте */
+        .about-text {
+            font-size: 13px;
+            color: #a39bbb;
+            line-height: 1.6;
+            margin: 0;
+        }
+
+        /* Правая колонка: Основные разделы */
+        content-feed {
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        .stream-status-card {
+            background: linear-gradient(135deg, #241736, #150d20);
+            border: 1px solid #41285e;
+            border-radius: 16px;
+            padding: 32px;
+            text-align: center;
+        }
+
+        .status-badge {
+            display: inline-block;
+            background-color: #1c1426;
+            border: 1px solid #4a3468;
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-size: 12px;
+            color: #caa5f7;
+            margin-bottom: 20px;
+        }
+
+        .stream-title {
+            font-size: 20px;
+            font-weight: 600;
+            margin: 0 0 12px 0;
+            color: #ffffff;
+        }
+
+        .stream-desc {
+            font-size: 13px;
+            color: #86759b;
+            margin: 0 0 24px 0;
+        }
+
+        .btn-twitch {
+            display: inline-block;
+            background-color: #9146FF;
+            color: #ffffff;
+            text-decoration: none;
+            padding: 12px 32px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 14px;
+            transition: background-color 0.2s;
+        }
+
+        .btn-twitch:hover {
+            background-color: #772ce8;
+        }
+
+        /* Свежие материалы / Статьи */
+        .grid-cards {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .card-item {
+            background-color: #15101d;
+            border: 1px solid #2a2238;
+            border-radius: 12px;
+            padding: 20px;
+        }
+
+        .card-tag {
+            display: inline-block;
+            font-size: 10px;
+            font-weight: bold;
+            color: #553b75;
+            background-color: #201330;
+            padding: 2px 6px;
+            border-radius: 4px;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+        }
+
+        .card-item h3 {
+            font-size: 15px;
+            margin: 0 0 8px 0;
+            color: #ffffff;
+        }
+
+        .card-item p {
+            font-size: 12px;
+            color: #7b6894;
+            margin: 0 0 16px 0;
+            line-height: 1.5;
+        }
+
+        .card-link {
+            color: #a77cd6;
+            text-decoration: none;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .card-link:hover {
+            text-decoration: underline;
+        }
+
+        footer-bottom {
+            display: block;
+            text-align: center;
+            padding: 40px;
+            color: #58486e;
+            font-size: 12px;
         }
     </style>
 </head>
 <body>
 
-    <div class="widget">
-        <h3>Посещаемость сайта (Неделя)</h3>
-        <div class="chart-container" id="chart">
+    <header>
+        <div class="logo">VORLUN_</div>
+        <nav>
+            <a href="#">Главная</a>
+            <a href="#">Каталог гайдов</a>
+            <a href="#">Контакты</a>
+        </nav>
+    </header>
+
+    <main>
+        <sidebar>
+            <div class="widget">
+                <h2 class="widget-title">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color: #a77cd6;"><path d="M18 20V10M12 20V4M6 20v-6"/></svg>
+                    Посещаемость сайта
+                </h2>
+
+                <div class="chart-wrapper" id="chartBars">
+                    </div>
+
+                <div class="chart-labels" id="chartLabels">
+                    </div>
             </div>
-        <div class="chart-labels" id="labels">
+
+            <div class="widget">
+                <h2 class="widget-title">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color: #a77cd6;"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1-2.5-2.5Z"/><path d="M6 6h10M6 10h10"/></svg>
+                    О проекте
+                </h2>
+                <p class="about-text">
+                    Привет! Я создаю контент и делюсь рабочими фишками по оптимизации стримов, софта и звука для начинающих авторов. Стабильный и чистый поток, без лагов.
+                </p>
             </div>
-    </div>
+        </sidebar>
+
+        <content-feed>
+            <div class="stream-status-card">
+                <div class="status-badge">• Трансляция сейчас: оффлайн</div>
+                <h1 class="stream-title">Статус Стрима (Live)</h1>
+                <p class="stream-desc">Проверка, идет ли трансляция на Twitch в реальном времени.</p>
+                <a href="#" class="btn-twitch">Перейти на канал</a>
+            </div>
+
+            <div class="grid-cards">
+                <div class="card-item">
+                    <span class="card-tag">OBS 2026</span>
+                    <h3>Как настроить OBS для стрима без лагов в 2026 году</h3>
+                    <p>Пошаговый разбор настроек кодировщика, битрейта и приоритетов. Оптимизируем картинку для слабых и средних ПК.</p>
+                    <a href="#" class="card-link">Читать →</a>
+                </div>
+
+                <div class="card-item">
+                    <span class="card-tag">Камера 2026</span>
+                    <h3>Как настроить освещение и камеру для стрима</h3>
+                    <p>Из дешевой веб-камеры делаем студийную картинку. Выставляем свет и убираем шумы с матрицы.</p>
+                    <a href="#" class="card-link">Читать →</a>
+                </div>
+            </div>
+        </content-feed>
+    </main>
+
+    <footer>
+        <footer-bottom>© VORLUN — Все права защищены, 2026.</footer-bottom>
+    </footer>
 
     <script>
-        async function fetchVisits() {
+        // Логика подтягивания и отрисовки статистики
+        async function loadVisitsData() {
             try {
-                // Обращаемся к вашему серверному скрипту API на Vercel
-                const response = await fetch('/api/visit'); 
+                // Обращаемся к вашему серверному API на Vercel
+                const response = await fetch('/api/visit');
                 const data = await response.json();
                 
                 console.log('Полученные данные визитов:', data);
 
+                // Если данных нет, рендерим пустую сетку за 7 дней
                 if (!Array.isArray(data) || data.length === 0) {
-                    renderEmptyChart();
+                    renderChart(getPast7DaysSkeleton());
                     return;
                 }
 
-                // 1. Группируем визиты по дням (ДД.ММ)
+                // Группируем визиты по дням (ДД.ММ)
                 const visitsByDay = {};
-                
                 data.forEach(item => {
                     if (!item.visited_at) return;
                     const dateObj = new Date(item.visited_at);
-                    // Форматируем дату как ДД.ММ
                     const day = String(dateObj.getDate()).padStart(2, '0');
                     const month = String(dateObj.getMonth() + 1).padStart(2, '0');
                     const dateKey = `${day}.${month}`;
@@ -105,7 +374,7 @@
                     visitsByDay[dateKey] = (visitsByDay[dateKey] || 0) + 1;
                 });
 
-                // 2. Берем срез ровно за последние 7 дней
+                // Берем срез ровно за последние 7 дней
                 const sortedDays = Object.keys(visitsByDay).sort();
                 const last7DaysKeys = sortedDays.slice(-7);
 
@@ -114,56 +383,76 @@
                     visits: visitsByDay[date]
                 }));
 
-                // Если записей меньше 7, дополняем пустыми днями для красивой сетки
+                // Заполняем недостающие дни нулями, чтобы всегда было ровно 7 колонок
                 while (chartData.length < 7) {
-                    chartData.unshift({ date: '--.--', visits: 0 });
+                    const pastDate = new Date();
+                    pastDate.setDate(pastDate.getDate() - (6 - chartData.length));
+                    const day = String(pastDate.getDate()).padStart(2, '0');
+                    const month = String(pastDate.getMonth() + 1).padStart(2, '0');
+                    chartData.unshift({ date: `${day}.${month}`, visits: 0 });
                 }
 
                 renderChart(chartData);
 
             } catch (error) {
-                console.error('Ошибка загрузки статистики:', error);
-                renderEmptyChart();
+                console.error('Не удалось загрузить статистику:', error);
+                renderChart(getPast7DaysSkeleton());
             }
         }
 
+        function getPast7DaysSkeleton() {
+            // Формирует пустой массив из 7 дней для отображения сетки, если база пуста
+            return Array.from({ length: 7 }, (_, i) => {
+                const date = new Date();
+                date.setDate(date.getDate() - (6 - i));
+                const day = String(date.getDate()).padStart(2, '0');
+                const month = String(date.getMonth() + 1).padStart(2, '0');
+                return { date: `${day}.${month}`, visits: 0 };
+            });
+        }
+
         function renderChart(data) {
-            const chartContainer = document.getElementById('chart');
-            const labelsContainer = document.getElementById('labels');
-            
-            chartContainer.innerHTML = '';
+            const barsContainer = document.getElementById('chartBars');
+            const labelsContainer = document.getElementById('chartLabels');
+
+            barsContainer.innerHTML = '';
             labelsContainer.innerHTML = '';
 
-            // Находим максимальное значение для масштабирования высоты (минимум 5 для наглядности)
+            // Находим пиковое значение для масштабирования (минимум 5, чтобы шкала имела адекватный вид)
             const maxVisits = Math.max(5, ...data.map(d => d.visits));
 
             data.forEach(item => {
-                // Считаем высоту в процентах от максимума (максимальный = 90% высоты контейнера)
-                const heightPercentage = maxVisits > 0 ? (item.visits / maxVisits) * 90 : 0;
+                // Вычисляем высоту столбца в процентах
+                const heightPerc = maxVisits > 0 ? (item.visits / maxVisits) * 85 : 0;
 
-                // Создаем столбик графика
-                const column = document.createElement('div');
-                column.className = 'chart-column';
-                column.style.height = `${heightPercentage}%`;
-                column.setAttribute('data-visits', `${item.visits} чел.`);
-                chartContainer.appendChild(column);
+                // 1. Создаем элемент столбца
+                const barItem = document.createElement('div');
+                barItem.className = 'chart-bar-item';
 
-                // Создаем подпись снизу
+                // Внутренний прямоугольник
+                const bar = document.createElement('div');
+                bar.className = 'chart-bar';
+                bar.style.height = `${heightPerc}%`;
+                barItem.appendChild(bar);
+
+                // Всплывающая подсказка
+                const tooltip = document.createElement('div');
+                tooltip.className = 'chart-tooltip';
+                tooltip.textContent = `${item.visits} посещ.`;
+                barItem.appendChild(tooltip);
+
+                barsContainer.appendChild(barItem);
+
+                // 2. Создаем подпись даты снизу
                 const label = document.createElement('div');
-                label.className = 'label-item';
+                label.className = 'chart-label-item';
                 label.textContent = item.date;
                 labelsContainer.appendChild(label);
             });
         }
 
-        function renderEmptyChart() {
-            // Заглушка, если база пуста
-            const emptyData = Array.from({length: 7}, () => ({ date: '--.--', visits: 0 }));
-            renderChart(emptyData);
-        }
-
-        // Запуск при загрузке страницы
-        fetchVisits();
+        // Вызываем загрузку данных при открытии страницы
+        loadVisitsData();
     </script>
 </body>
 </html>
