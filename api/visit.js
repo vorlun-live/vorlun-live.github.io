@@ -8,7 +8,6 @@ const supabase = (supabaseUrl && supabaseKey)
   : null;
 
 module.exports = async (req, res) => {
-  // Настройка CORS
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
@@ -23,31 +22,30 @@ module.exports = async (req, res) => {
 
   try {
     if (req.method === 'POST') {
-      // 1. Получаем IP-адрес визитера (с учетом прокси Vercel)
-      const ipAddress = 
+      // Получаем реальный IP-адрес, учитывая прокси-сервер (Vercel)
+      const clientIp = 
         req.headers['x-forwarded-for'] || 
         req.headers['x-real-ip'] || 
         req.socket.remoteAddress || 
         '0.0.0.0';
-      
+
       const nowTime = new Date().toISOString();
       
-      // 2. Записываем визит и IP-адрес в основную таблицу
+      // Производим вставку времени и определенного IP-адреса
       const { error: insertError } = await supabase
         .from('site_visits')
         .insert([{ 
           visited_at: nowTime,
-          visitor_ip: ipAddress
+          visitor_ip: clientIp
         }]);
 
       if (insertError) throw insertError;
       
-      return res.status(200).json({ status: 'ok', ip: ipAddress });
+      return res.status(200).json({ status: 'ok', ip: clientIp });
     } 
     
     if (req.method === 'GET') {
-      // 3. Запрашиваем сгруппированные данные из SQL View (представления), 
-      // чтобы на фронтенде не было ошибки 500 и данные отображались корректно
+      // Запрашиваем сгруппированные данные из вашего представления
       const { data, error: selectError } = await supabase
         .from('unique_daily_visits')
         .select('visit_date, unique_visitors')
