@@ -742,25 +742,26 @@
             }
         });
 
-        // Подключение к API (относительный путь)
+        // Подключение к API 
         const API_URL = '/api/visit';
 
         async function fetchAndRenderVisits() {
             try {
-                // 1. Фиксируем визит (отправляем POST)
+                // 1. Фиксируем визит 
                 await fetch(API_URL, { method: 'POST' });
 
-                // 2. Получаем общее количество визитов (делаем GET)
+                // 2. Получаем список последних визитов
                 const response = await fetch(API_URL);
                 const data = await response.json(); 
 
-                // Вычисляем размер массива / количество записей
-                const visitsCount = Array.isArray(data) ? data.length : (data.count || 0);
+                if (!Array.isArray(data) || data.length === 0) return;
 
-                const timeLabel = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-                
-                const labels = [timeLabel];
-                const visitCounts = [visitsCount]; 
+                // Разворачиваем, чтобы старые шли в начале, а новые в конце (слева направо)
+                const sortedData = [...data].reverse();
+
+                // Рисуем подписи и значения в виде роста графика
+                const labels = sortedData.map((_, index) => `В. ${index + 1}`);
+                const visitCounts = sortedData.map((_, index) => index + 1);
 
                 // Обновляем график
                 trafficChart.data.labels = labels;
