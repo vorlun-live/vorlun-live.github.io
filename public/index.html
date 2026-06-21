@@ -73,8 +73,8 @@
         }
 
         .header-container {
-            max-width: 1200px;
-            width: 90%;
+            max-width: 1400px;
+            width: 95%;
             margin: 0 auto;
             display: flex;
             justify-content: space-between;
@@ -82,7 +82,7 @@
         }
 
         .logo {
-            font-size: 1.6rem;
+            font-size: 1.8rem;
             font-weight: 900;
             letter-spacing: 2px;
             text-transform: uppercase;
@@ -106,10 +106,10 @@
             font-family: inherit;
             margin-left: 24px;
             font-weight: 600;
-            font-size: 0.95rem;
+            font-size: 1.05rem;
             transition: all 0.2s;
-            padding: 6px 12px;
-            border-radius: 6px;
+            padding: 8px 16px;
+            border-radius: 8px;
         }
 
         nav button:hover, nav button.active { 
@@ -124,10 +124,10 @@
 
         .main-wrapper {
             display: grid;
-            grid-template-columns: 320px 1fr;
-            width: 92%;
-            max-width: 1300px;
-            gap: 30px;
+            grid-template-columns: 350px 1fr;
+            width: 95%;
+            max-width: 1450px;
+            gap: 40px;
             margin: 40px 0;
             flex: 1;
         }
@@ -139,31 +139,31 @@
         .sidebar {
             display: flex;
             flex-direction: column;
-            gap: 25px;
+            gap: 30px;
         }
 
         .sidebar-panel {
             background-color: var(--panel-bg);
-            padding: 22px;
-            border-radius: 16px;
+            padding: 28px;
+            border-radius: 18px;
             border: 1px solid rgba(127, 90, 240, 0.15);
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
         }
 
         .sidebar-panel h4 {
-            margin: 0 0 15px 0;
-            font-size: 0.9rem;
+            margin: 0 0 20px 0;
+            font-size: 1rem;
             text-transform: uppercase;
             letter-spacing: 1px;
             color: var(--text-muted);
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 10px;
         }
 
         .live-indicator {
-            width: 8px;
-            height: 8px;
+            width: 10px;
+            height: 10px;
             background-color: var(--secondary);
             border-radius: 50%;
             box-shadow: 0 0 8px var(--secondary);
@@ -186,9 +186,9 @@
 
         .section {
             background-color: var(--panel-bg);
-            padding: 35px;
-            border-radius: 16px;
-            margin-bottom: 30px;
+            padding: 40px;
+            border-radius: 18px;
+            margin-bottom: 35px;
             border: 1px solid rgba(127, 90, 240, 0.1);
             box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
         }
@@ -196,35 +196,35 @@
         h2 {
             color: var(--text-main);
             margin-top: 0;
-            font-size: 1.5rem;
+            font-size: 1.8rem;
             border-left: 4px solid var(--primary);
-            padding-left: 14px;
+            padding-left: 18px;
             letter-spacing: 0.5px;
         }
 
         .stats-grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
-            gap: 15px;
-            margin-top: 20px;
+            gap: 20px;
+            margin-top: 25px;
         }
         @media (max-width: 500px) { .stats-grid { grid-template-columns: 1fr; } }
 
         .stat-box {
             background: var(--card-bg);
-            padding: 15px;
-            border-radius: 10px;
+            padding: 20px;
+            border-radius: 12px;
             border: 1px solid rgba(255,255,255,0.02);
             text-align: center;
         }
-        .stat-box .num { font-size: 1.6rem; font-weight: 800; color: var(--secondary); }
-        .stat-box .label { font-size: 0.8rem; color: var(--text-muted); margin-top: 5px; text-transform: uppercase; }
+        .stat-box .num { font-size: 2rem; font-weight: 800; color: var(--secondary); }
+        .stat-box .label { font-size: 0.9rem; color: var(--text-muted); margin-top: 8px; text-transform: uppercase; }
 
         .links-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 15px;
-            margin-top: 25px;
+            gap: 20px;
+            margin-top: 30px;
         }
         @media (max-width: 600px) { .links-grid { grid-template-columns: 1fr; } }
 
@@ -232,11 +232,11 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            padding: 16px;
-            border-radius: 10px;
+            padding: 20px;
+            border-radius: 12px;
             text-decoration: none;
             font-weight: 700;
-            font-size: 1rem;
+            font-size: 1.1rem;
             transition: all 0.25s ease;
         }
 
@@ -248,8 +248,8 @@
 
         .catalog-tags {
             display: flex;
-            gap: 10px;
-            margin-bottom: 25px;
+            gap: 12px;
+            margin-bottom: 30px;
             flex-wrap: wrap;
         }
 
@@ -257,11 +257,11 @@
             background-color: var(--card-bg);
             border: 1px solid rgba(255, 255, 255, 0.05);
             color: var(--text-muted);
-            padding: 8px 18px;
+            padding: 10px 22px;
             border-radius: 30px;
             cursor: pointer;
             font-weight: 600;
-            font-size: 0.85rem;
+            font-size: 0.95rem;
             transition: all 0.2s ease;
         }
 
@@ -273,15 +273,15 @@
 
         .catalog-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-            gap: 20px;
-            margin-top: 20px;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 25px;
+            margin-top: 25px;
         }
 
         .post-card {
             background-color: var(--card-bg);
-            padding: 22px;
-            border-radius: 12px;
+            padding: 26px;
+            border-radius: 16px;
             border: 1px solid rgba(255, 255, 255, 0.03);
             transition: all 0.25s ease;
             cursor: pointer;
@@ -298,31 +298,31 @@
             box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4), 0 0 15px var(--primary-glow);
         }
 
-        .post-card h3 { margin: 8px 0 10px 0; color: var(--text-main); font-size: 1.2rem; line-height: 1.4; }
-        .post-card p { color: var(--text-muted); font-size: 0.9rem; line-height: 1.5; margin: 0 0 15px 0; flex-grow: 1; }
+        .post-card h3 { margin: 10px 0 14px 0; color: var(--text-main); font-size: 1.4rem; line-height: 1.4; }
+        .post-card p { color: var(--text-muted); font-size: 1rem; line-height: 1.6; margin: 0 0 20px 0; flex-grow: 1; }
         
         .article-meta {
             display: flex;
-            gap: 12px;
-            font-size: 0.75rem;
+            gap: 15px;
+            font-size: 0.85rem;
             color: var(--secondary);
             font-weight: bold;
             text-transform: uppercase;
         }
 
-        .post-link { color: var(--primary); font-weight: bold; font-size: 0.9rem; }
+        .post-link { color: var(--primary); font-weight: bold; font-size: 1rem; }
 
-        .article-content { line-height: 1.8; font-size: 1.05rem; color: #e1e6eb; }
-        .article-content h3 { color: var(--text-main); margin-top: 30px; font-size: 1.3rem; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 6px; }
-        .article-content hr { border: 0; height: 1px; background: rgba(127, 90, 240, 0.2); margin: 25px 0; }
-        .article-content ul, .article-content ol { padding-left: 20px; margin: 15px 0; }
+        .article-content { line-height: 1.9; font-size: 1.15rem; color: #e1e6eb; }
+        .article-content h3 { color: var(--text-main); margin-top: 35px; font-size: 1.5rem; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 8px; }
+        .article-content hr { border: 0; height: 1px; background: rgba(127, 90, 240, 0.2); margin: 30px 0; }
+        .article-content ul, .article-content ol { padding-left: 25px; margin: 20px 0; }
         
         .tip-box {
             background-color: rgba(127, 90, 240, 0.03);
             border-left: 4px solid var(--primary);
-            padding: 15px 20px;
-            border-radius: 0 10px 10px 0;
-            margin: 20px 0;
+            padding: 18px 24px;
+            border-radius: 0 12px 12px 0;
+            margin: 25px 0;
             color: var(--text-main);
         }
 
@@ -330,34 +330,35 @@
             background: none;
             border: 1px solid var(--text-muted);
             color: var(--text-muted);
-            padding: 8px 16px;
-            border-radius: 6px;
+            padding: 12px 22px;
+            border-radius: 8px;
             cursor: pointer;
             font-weight: 600;
             margin-bottom: 25px;
             transition: all 0.2s;
+            font-size: 1rem;
         }
         .back-btn:hover { border-color: var(--primary); color: var(--text-main); }
 
         .stream-status-widget {
             background: var(--card-bg);
-            border-radius: 12px;
-            padding: 24px;
+            border-radius: 16px;
+            padding: 30px;
             border: 1px solid rgba(255,255,255,0.05);
-            margin-top: 20px;
+            margin-top: 25px;
             text-align: center;
         }
         .stream-offline-msg {
             color: var(--text-muted);
-            font-size: 1rem;
+            font-size: 1.1rem;
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 12px;
+            gap: 20px;
         }
         .stream-offline-dot {
-            width: 10px;
-            height: 10px;
+            width: 12px;
+            height: 12px;
             background-color: var(--text-muted);
             border-radius: 50%;
             display: inline-block;
@@ -365,17 +366,35 @@
         .check-channel-btn {
             display: inline-block;
             margin-top: 10px;
-            padding: 10px 20px;
+            padding: 14px 28px;
             background-color: var(--twitch-color);
             color: #fff;
             text-decoration: none;
-            border-radius: 6px;
+            border-radius: 10px;
             font-weight: bold;
-            font-size: 0.9rem;
+            font-size: 1.05rem;
             transition: background 0.2s;
         }
         .check-channel-btn:hover {
             background-color: var(--twitch-hover);
+        }
+
+        /* SEO Блок в подвале */
+        .seo-section {
+            background-color: var(--panel-bg);
+            padding: 40px;
+            border-radius: 18px;
+            margin-top: 50px;
+            border: 1px solid rgba(127, 90, 240, 0.1);
+            color: var(--text-muted);
+            font-size: 1.05rem;
+            line-height: 1.7;
+        }
+        .seo-section h3 {
+            color: var(--text-main);
+            font-size: 1.5rem;
+            margin-top: 0;
+            margin-bottom: 15px;
         }
     </style>
 </head>
@@ -387,6 +406,7 @@
             <nav>
                 <button id="nav-main" class="active" onclick="showPage('main')">Главная</button>
                 <button id="nav-catalog" onclick="showPage('catalog')">Каталог гайдов</button>
+                <button id="nav-equipment" onclick="showPage('equipment')">Оборудование</button>
             </nav>
         </div>
     </header>
@@ -396,15 +416,15 @@
         <aside class="sidebar">
             <div class="sidebar-panel">
                 <h4><span class="live-indicator"></span> Посещаемость сайта</h4>
-                <div style="width: 100%; height: 130px;">
+                <div style="width: 100%; height: 160px;">
                     <canvas id="trafficChart"></canvas>
                 </div>
             </div>
 
-            <div class="sidebar-panel" style="font-size: 0.9rem; line-height: 1.5;">
+            <div class="sidebar-panel" style="font-size: 1rem; line-height: 1.6;">
                 <h4 style="color: var(--primary);">👤 О проекте</h4>
-                <p style="margin: 0 0 10px 0; color: #e1e6eb;">Привет! Я создаю контент и делюсь рабочими фишками по оптимизации стримов, софта и звука для начинающих авторов.</p>
-                <div style="color: var(--text-muted); font-size: 0.8rem;">Цель: Стабильный и чистый поток без лагов.</div>
+                <p style="margin: 0 0 15px 0; color: #e1e6eb;">Привет! Я создаю контент и делюсь рабочими фишками по оптимизации стримов, софта и звука для начинающих авторов.</p>
+                <div style="color: var(--text-muted); font-size: 0.85rem;">Цель: Стабильный и чистый поток без лагов.</div>
             </div>
         </aside>
 
@@ -413,7 +433,7 @@
             <div id="page-main" class="page active-page">
                 <div class="section">
                     <h2>👾 Статус Стрима (Live)</h2>
-                    <p style="color: var(--text-muted); font-size: 0.9rem; margin-top: 5px;">Проверка идет ли трансляция на Twitch в реальном времени.</p>
+                    <p style="color: var(--text-muted); font-size: 1rem; margin-top: 8px;">Проверка идет ли трансляция на Twitch в реальном времени.</p>
                     
                     <div id="streamStatusWidget" class="stream-status-widget">
                         <div class="stream-offline-msg">
@@ -433,7 +453,7 @@
 
                 <div class="section">
                     <h2>📊 Статистика прогресса</h2>
-                    <p style="color: var(--text-muted); font-size: 0.9rem; margin: 0;">Мониторинг ключевых метрик продвижения каналов:</p>
+                    <p style="color: var(--text-muted); font-size: 1rem; margin: 0;">Мониторинг ключевых метрик продвижения каналов:</p>
                     <div class="stats-grid">
                         <div class="stat-box">
                             <div class="num">1080p</div>
@@ -472,12 +492,18 @@
                         </div>
                     </div>
                 </div>
+                
+                <section class="seo-section">
+                    <h3>О проекте VORLUN — Гайды и обучение стримингу</h3>
+                    <p>Добро пожаловать в базу знаний для начинающих и опытных контент-мейкеров. Если вы хотите начать вести трансляции на Twitch, записывать ролики для YouTube или развивать свой TikTok-канал, здесь собраны актуальные материалы и пошаговые руководства. Мы разбираем ключевые технические аспекты: как настроить OBS Studio до идеального состояния без потери кадров, какие фильтры использовать для получения студийного звука с бюджетного микрофона, а также как правильно выставить свет и экспозицию веб-камеры.</p>
+                    <p>Полноценная оптимизация оборудования и программного обеспечения — залог качественного и стабильного эфира, который удерживает зрителя. Изучайте наши подробные статьи, внедряйте проверенные настройки кодировщиков, избегайте частых ошибок новичков и привлекайте новую аудиторию с помощью органического трафика из социальных сетей!</p>
+                </section>
             </div>
 
             <div id="page-catalog" class="page">
                 <div class="section">
                     <h2>📚 Все публикации</h2>
-                    <p style="color: var(--text-muted); font-size: 0.95rem; margin-bottom: 25px;">Выбирай категорию, чтобы отфильтровать гайды:</p>
+                    <p style="color: var(--text-muted); font-size: 1.05rem; margin-bottom: 25px;">Выбирай категорию, чтобы отфильтровать гайды:</p>
                     
                     <div class="catalog-tags">
                         <button class="tag-filter active-tag" onclick="filterCatalog('all', this)">Все темы</button>
@@ -549,10 +575,46 @@
                 </div>
             </div>
 
+            <div id="page-equipment" class="page">
+                <div class="section">
+                    <h2>🎛️ Каталог оборудования</h2>
+                    <p style="color: var(--text-muted); font-size: 1.05rem; margin-bottom: 25px;">Подборки проверенных устройств для качественного ведения трансляций:</p>
+                    
+                    <div class="catalog-grid">
+                        <div class="post-card">
+                            <div>
+                                <div class="article-meta"><span>#Микрофоны</span> <span>2026</span></div>
+                                <h3>Топ-5 бюджетных микрофонов для стрима</h3>
+                                <p>Обзор лучших USB-микрофонов с кардиоидной направленностью, которые не требуют покупки звуковой карты или микшера.</p>
+                            </div>
+                            <span style="color: var(--text-muted); font-size: 0.9rem;">Скоро здесь появится полный разбор →</span>
+                        </div>
+
+                        <div class="post-card">
+                            <div>
+                                <div class="article-meta"><span>#Свет</span> <span>2026</span></div>
+                                <h3>Выбираем освещение: кольцевой свет или софтбоксы?</h3>
+                                <p>Что лучше подойдет для рабочего места стримера: разбираем типы ламп, их цветовую температуру и влияние на матрицу камеры.</p>
+                            </div>
+                            <span style="color: var(--text-muted); font-size: 0.9rem;">Скоро здесь появится полный разбор →</span>
+                        </div>
+
+                        <div class="post-card">
+                            <div>
+                                <div class="article-meta"><span>#ПК</span> <span>Железо</span></div>
+                                <h3>Оптимальная сборка ПК для стриминга</h3>
+                                <p>Какая видеокарта и процессор нужны, чтобы запускать современные игры в 1080p и параллельно кодировать поток без просадки кадров.</p>
+                            </div>
+                            <span style="color: var(--text-muted); font-size: 0.9rem;">Скоро здесь появится полный разбор →</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <div id="page-obs-guide" class="page">
                 <button class="back-btn" onclick="showPage('catalog')">← Назад в каталог</button>
                 <div class="section">
-                    <h1 style="font-size: 2rem; margin-top: 0; color: var(--text-main);">Как настроить OBS для стрима без лагов в 2026 году</h1>
+                    <h1 style="font-size: 2.2rem; margin-top: 0; color: var(--text-main);">Как настроить OBS для стрима без лагов в 2026 году</h1>
                     <div class="article-content">
                         <p>Каждый начинающий стример сталкивается с одной и той же проблемой: лаги на трансляции при нормальном FPS в игре. Разберем базовый чеклист настройки ОБС.</p>
                         <hr>
@@ -573,7 +635,7 @@
             <div id="page-audio-guide" class="page">
                 <button class="back-btn" onclick="showPage('catalog')">← Назад в каталог</button>
                 <div class="section">
-                    <h1 style="font-size: 2rem; margin-top: 0; color: var(--text-main);">Настройка микрофона в OBS: убираем шумы и клики клавиатуры</h1>
+                    <h1 style="font-size: 2.2rem; margin-top: 0; color: var(--text-main);">Настройка микрофона в OBS: убираем шумы и клики клавиатуры</h1>
                     <div class="article-content">
                         <p>Даже идеальная картинка не спасет стрим, если у тебя фонит микрофон, слышны вздохи или громкий стук механической клавиатуры. Нам не нужно покупать дорогую карту, все настроим встроенными фильтрами ОБС.</p>
                         <hr>
@@ -603,7 +665,7 @@
             <div id="page-donates-guide" class="page">
                 <button class="back-btn" onclick="showPage('catalog')">← Назад в каталог</button>
                 <div class="section">
-                    <h1 style="font-size: 2rem; margin-top: 0; color: var(--text-main);">Подключение донатов на Twitch: пошаговое руководство</h1>
+                    <h1 style="font-size: 2.2rem; margin-top: 0; color: var(--text-main);">Подключение донатов на Twitch: пошаговое руководство</h1>
                     <div class="article-content">
                         <p>Монетизация творчества — важный шаг для любого контент-мейкера. Разберем самый популярный и надежный сервис — DonationAlerts.</p>
                         <hr>
@@ -621,7 +683,7 @@
             <div id="page-tiktok-guide" class="page">
                 <button class="back-btn" onclick="showPage('catalog')">← Назад в каталог</button>
                 <div class="section">
-                    <h1 style="font-size: 2rem; margin-top: 0; color: var(--text-main);">Продвижение стримов через TikTok: алгоритмы 2026 года</h1>
+                    <h1 style="font-size: 2.2rem; margin-top: 0; color: var(--text-main);">Продвижение стримов через TikTok: алгоритмы 2026 года</h1>
                     <div class="article-content">
                         <p>Просто стримить на Твиче в пустоту — это главная ошибка новичков. Твой главный локомотив продвижения — это короткие ролики в ТикТок, которые подхватывают алгоритмы рекомендаций.</p>
                         <hr>
@@ -639,7 +701,7 @@
             <div id="page-camera-guide" class="page">
                 <button class="back-btn" onclick="showPage('catalog')">← Назад в каталог</button>
                 <div class="section">
-                    <h1 style="font-size: 2rem; margin-top: 0; color: var(--text-main);">Как настроить освещение и камеру для стрима</h1>
+                    <h1 style="font-size: 2.2rem; margin-top: 0; color: var(--text-main);">Как настроить освещение и камеру для стрима</h1>
                     <div class="article-content">
                         <p>Плохой свет может превратить даже дорогую камеру в «мыло». В этом гайде разберем, как добиться приятной и четкой картинки.</p>
                         <hr>
@@ -656,7 +718,7 @@
             <div id="page-twitch-panel-guide" class="page">
                 <button class="back-btn" onclick="showPage('catalog')">← Назад в каталог</button>
                 <div class="section">
-                    <h1 style="font-size: 2rem; margin-top: 0; color: var(--text-main);">Оформление канала Twitch: панели, чат и виджеты</h1>
+                    <h1 style="font-size: 2.2rem; margin-top: 0; color: var(--text-main);">Оформление канала Twitch: панели, чат и виджеты</h1>
                     <div class="article-content">
                         <p>Первое впечатление о стримере складывается по визулу канала. Давайте сделаем его аккуратным и привлекательным.</p>
                         <hr>
@@ -671,8 +733,6 @@
 
         </div>
     </div>
-
-    
 
     <script>
         // Переключение страниц
