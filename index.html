@@ -387,7 +387,7 @@
             <button onclick="showPage('main')" class="logo">VORLUN<span>_</span></button>
             <nav>
                 <button id="nav-main" class="active" onclick="showPage('main')">Главная</button>
-                <button id="nav-catalog" onclick="showPage('page-catalog')" style="display:none;">Каталог гайдов</button> <button id="nav-catalog" onclick="showPage('catalog')">Каталог гайдов</button>
+                <button id="nav-catalog" onclick="showPage('catalog')">Каталог гайдов</button>
             </nav>
         </div>
     </header>
@@ -680,34 +680,25 @@
             }
         });
 
-        // Подключение к реальному API Vercel/Supabase
-        const API_URL = 'https://vorlun-live-github-io.vercel.app/api/visit';
+        // Подключение к API (относительный путь)
+        const API_URL = '/api/visit';
 
         async function fetchAndRenderVisits() {
             try {
                 // 1. Фиксируем визит (отправляем POST)
                 await fetch(API_URL, { method: 'POST' });
 
-                // 2. Получаем статистику (делаем GET)
+                // 2. Получаем общее количество визитов (делаем GET)
                 const response = await fetch(API_URL);
-                const data = await response.json(); // Придет массив [{visited_at: '...'}, ...]
+                const data = await response.json(); 
 
-                if (!Array.isArray(data) || data.length === 0) return;
+                // Вычисляем размер массива / количество записей
+                const visitsCount = Array.isArray(data) ? data.length : (data.count || 0);
 
-                // Сортируем визиты по возрастанию даты для графика
-                const sortedData = [...data].reverse();
-
-                const labels = [];
-                const visitCounts = [];
-
-                sortedData.forEach((item, index) => {
-                    const date = new Date(item.visited_at);
-                    // Форматируем время как Часы:Минуты
-                    const timeLabel = String(date.getHours()).padStart(2, '0') + ':' + String(date.getMinutes()).padStart(2, '0');
-                    labels.push(timeLabel);
-                    // В простой реализации каждая запись — это визит
-                    visitCounts.push(index + 1); 
-                });
+                const timeLabel = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                
+                const labels = [timeLabel];
+                const visitCounts = [visitsCount]; 
 
                 // Обновляем график
                 trafficChart.data.labels = labels;
