@@ -828,7 +828,10 @@
             };
 
             try {
-                // Обращаемся к вашей вьюхе/эндпоинту, который собирает сгруппированные уникальные визиты из таблицы site_visits
+                // 1. При каждой загрузке отправляем POST-запрос для автоматического учета визита (с фиксацией IP)
+                await fetch('/api/visit', { method: 'POST' });
+
+                // 2. Получаем статистику для графика
                 const response = await fetch('/api/visit');
                 const data = await response.json();
                 
@@ -839,7 +842,7 @@
 
                 const visitsByDay = {};
                 data.forEach(item => {
-                    // Используем правильные поля из базы: visit_date и unique_visitors
+                    // Используем правильные поля из вьюхи unique_daily_visits: visit_date и unique_visitors
                     if (!item.visit_date) return;
                     const dateObj = new Date(item.visit_date);
                     const day = String(dateObj.getDate()).padStart(2, '0');
@@ -873,6 +876,7 @@
             }
         }
 
+        // Вызов инициализации данных при первой загрузке страницы
         loadVisitsData();
     </script>
 </body>

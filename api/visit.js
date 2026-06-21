@@ -8,6 +8,7 @@ const supabase = (supabaseUrl && supabaseKey)
   : null;
 
 module.exports = async (req, res) => {
+  // Настройка CORS для API
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
@@ -22,17 +23,29 @@ module.exports = async (req, res) => {
 
   try {
     if (req.method === 'POST') {
+      // Извлекаем IP-адрес из заголовков прокси (Vercel/узел) или используем заглушку
+      const ipAddress = req.headers['x-forwarded-for'] || req.headers['x-real-ip'] || req.socket.remoteAddress || '0.0.0.0';
       const nowTime = new Date().toISOString();
-      await supabase.from('site_visits').insert([{ visited_at: nowTime }]);
-      return res.status(200).json({ status: 'ok' });
+      
+      // Отправляем визит вместе с IP
+      await supabase.from('site_visits').insert([{ 
+        visited_at: nowTime,
+        visitor_ip: ipAddress
+      }]);
+
+      return res.status(200).json({ status: 'ok', ip: ipAddress });
     } 
     
     if (req.method === 'GET') {
-      const { data } = await supabase
-        .from('site_visits')
-        .select('visited_at')
-        .order('visited_at', { ascending: false })
+      // Получаем сгруппированные данные из SQL-представления (вьюхи) unique_daily_visits,
+      // где подсчитываются уникальные IP за каждый день (колонка visit_date, unique_visitors)
+      const { data, error } = await supabase
+        .from('unique_daily_visits')
+        .select('visit_date, unique_visitors')
+        .order('visit_date', { ascending: false })
         .limit(30);
+
+      if (error) throw error;
 
       return res.status(200).json(data || []);
     }
