@@ -646,35 +646,30 @@
         // --- СКРИПТЫ ГРАФИКА ПОСЕЩАЕМОСТИ ---
         const ctx = document.getElementById('trafficChart').getContext('2d');
 
-        // Начальные данные (например, за последние 7 часов или дней)
-        const trafficData = {
-            labels: ['12:00', '13:00', '14:00', '15:00', '16:00', '17:00', '18:00'],
-            datasets: [{
-                label: 'Посетители сайта',
-                data: [5, 12, 8, 15, 22, 18, 30], // Ваши базовые числа
-                borderColor: '#7f5af0', // Фиолетовый (основной цвет сайта)
-                backgroundColor: 'rgba(127, 90, 240, 0.15)', // Полупрозрачное свечение
-                borderWidth: 2,
-                fill: true,
-                tension: 0.3 // Сглаживание линии графика
-            }]
-        };
-
         const trafficChart = new Chart(ctx, {
             type: 'line',
-            data: trafficData,
+            data: {
+                labels: [],
+                datasets: [{
+                    label: 'Посетители сайта',
+                    data: [],
+                    borderColor: '#7f5af0',
+                    backgroundColor: 'rgba(127, 90, 240, 0.15)',
+                    borderWidth: 2,
+                    fill: true,
+                    tension: 0.3
+                }]
+            },
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
                 plugins: {
-                    legend: {
-                        display: false // Скрываем подпись, чтобы не занимать место в панели
-                    }
+                    legend: { display: false }
                 },
                 scales: {
                     x: {
-                        ticks: { color: '#94a1b2' }, // Цвет текста меток (серый)
-                        grid: { color: 'rgba(255, 255, 255, 0.05)' } // Еле заметная сетка
+                        ticks: { color: '#94a1b2' },
+                        grid: { color: 'rgba(255, 255, 255, 0.05)' }
                     },
                     y: {
                         beginAtZero: true,
@@ -685,29 +680,46 @@
             }
         });
 
-        // Симуляция обновления данных в реальном времени (каждые 10 секунд)
-        setInterval(() => {
-            // Генерируем случайное число визитов от 1 до 40 
-            // В будущем замените эту логику на запрос к вашему бэкенду/аналитике через fetch(...)
-            const randomVisitCount = Math.floor(Math.random() * 40) + 1;
-            
-            // Получаем текущее время (часы:минуты) для новой метки
-            const now = new Date();
-            const timeLabel = String(now.getHours()).padStart(2, '0') + ':' + String(now.getMinutes()).padStart(2, '0');
+        // Подключение к реальному API Vercel/Supabase
+        const API_URL = 'https://vorlun-live-github-io.vercel.app/api/visit';
 
-            // Добавляем новые данные в конец массивов
-            trafficChart.data.labels.push(timeLabel);
-            trafficChart.data.datasets[0].data.push(randomVisitCount);
+        async function fetchAndRenderVisits() {
+            try {
+                // 1. Фиксируем визит (отправляем POST)
+                await fetch(API_URL, { method: 'POST' });
 
-            // Ограничиваем отображение графика последними 7 точками, чтобы он не сжимался бесконечно
-            if (trafficChart.data.labels.length > 7) {
-                trafficChart.data.labels.shift();
-                trafficChart.data.datasets[0].data.shift();
+                // 2. Получаем статистику (делаем GET)
+                const response = await fetch(API_URL);
+                const data = await response.json(); // Придет массив [{visited_at: '...'}, ...]
+
+                if (!Array.isArray(data) || data.length === 0) return;
+
+                // Сортируем визиты по возрастанию даты для графика
+                const sortedData = [...data].reverse();
+
+                const labels = [];
+                const visitCounts = [];
+
+                sortedData.forEach((item, index) => {
+                    const date = new Date(item.visited_at);
+                    // Форматируем время как Часы:Минуты
+                    const timeLabel = String(date.getHours()).padStart(2, '0') + ':' + String(date.getMinutes()).padStart(2, '0');
+                    labels.push(timeLabel);
+                    // В простой реализации каждая запись — это визит
+                    visitCounts.push(index + 1); 
+                });
+
+                // Обновляем график
+                trafficChart.data.labels = labels;
+                trafficChart.data.datasets[0].data = visitCounts;
+                trafficChart.update();
+            } catch (err) {
+                console.error("Ошибка загрузки статистики визитов:", err);
             }
+        }
 
-            // Применяем изменения
-            trafficChart.update();
-        }, 10000); // 10000 миллисекунд = 10 секунд (для теста обновляется быстро, можете увеличить интервал)
+        // Запуск при загрузке страницы
+        fetchAndRenderVisits();
     </script>
 </body>
 </html>
