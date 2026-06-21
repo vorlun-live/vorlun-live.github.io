@@ -22,7 +22,6 @@ module.exports = async (req, res) => {
 
   try {
     if (req.method === 'POST') {
-      // Принудительно отправляем текущую дату и время при каждом визите
       const nowTime = new Date().toISOString();
       await supabase.from('site_visits').insert([{ visited_at: nowTime }]);
       return res.status(200).json({ status: 'ok' });
