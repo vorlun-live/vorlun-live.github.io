@@ -22,7 +22,9 @@ module.exports = async (req, res) => {
 
   try {
     if (req.method === 'POST') {
-      await supabase.from('site_visits').insert([{}]);
+      // Принудительно отправляем текущую дату и время при каждом визите
+      const nowTime = new Date().toISOString();
+      await supabase.from('site_visits').insert([{ visited_at: nowTime }]);
       return res.status(200).json({ status: 'ok' });
     } 
     
@@ -36,6 +38,7 @@ module.exports = async (req, res) => {
       return res.status(200).json(data || []);
     }
   } catch (err) {
+    console.error("Supabase error:", err);
     return res.status(500).json({ error: err.message });
   }
 };
