@@ -43,7 +43,7 @@ module.exports = async (req, res) => {
     } 
     
     if (req.method === 'GET') {
-      // 1. Запрашиваем визиты из обычной таблицы напрямую
+      // 1. Запрашиваем визиты из таблицы напрямую
       const { data, error: selectError } = await supabase
         .from('site_visits')
         .select('visited_at, visitor_ip')
@@ -72,15 +72,18 @@ module.exports = async (req, res) => {
       const formattedData = Object.keys(visitsMap).map(dateStr => {
         const [day, month] = dateStr.split('.');
         return {
-          visit_date: `2026-${month}-${day}T00:00:00.000Z`, // текущий год 2026
+          visit_date: `2026-${month}-${day}T00:00:00.000Z`,
           unique_visitors: visitsMap[dateStr].size
         };
       });
 
       return res.status(200).json(formattedData);
     }
-  } catch (err) {
-    console.error("Supabase API error:", err);
-    return res.status(500).json({ error: err.message });
+
+    return res.status(404).json({ error: 'Not found' });
+
+  } catch (error) {
+    console.error('Ошибка сервера:', error);
+    return res.status(500).json({ error: error.message });
   }
 };
