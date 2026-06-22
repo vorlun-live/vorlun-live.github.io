@@ -22,7 +22,6 @@ module.exports = async (req, res) => {
 
   try {
     if (req.method === 'POST') {
-      // Получаем реальный IP-адрес, учитывая прокси-сервер (Vercel)
       const clientIp = 
         req.headers['x-forwarded-for'] || 
         req.headers['x-real-ip'] || 
@@ -31,7 +30,6 @@ module.exports = async (req, res) => {
 
       const nowTime = new Date().toISOString();
       
-      // Производим вставку времени и IP-адреса посетителя
       const { error: insertError } = await supabase
         .from('site_visits')
         .insert([{ 
@@ -45,7 +43,7 @@ module.exports = async (req, res) => {
     } 
     
     if (req.method === 'GET') {
-      // Запрашиваем визиты из таблицы напрямую, избегая ошибок представлений
+      // Запрашиваем записи из таблицы напрямую
       const { data, error: selectError } = await supabase
         .from('site_visits')
         .select('visited_at, visitor_ip')
@@ -54,9 +52,8 @@ module.exports = async (req, res) => {
 
       if (selectError) throw selectError;
 
-      // Группируем и считаем уникальные посещения по дням на сервере
-      const visitsMap = {}; // Формат: { "ДД.ММ": Set([IP1, IP2]) }
-
+      // Группируем визиты по дням прямо на сервере
+      const visitsMap = {}; 
       (data || []).forEach(row => {
         if (!row.visited_at) return;
         
@@ -71,14 +68,11 @@ module.exports = async (req, res) => {
         visitsMap[dateKey].add(row.visitor_ip);
       });
 
-      // Превращаем результат в массив, который ожидает ваш фронтенд
-      // Фронтенд ожидает: visit_date (ISO-строка) и unique_visitors
       const formattedData = Object.keys(visitsMap).map(dateStr => {
-        // Разбираем обратно "ДД.ММ" для формирования полной даты (текущий год 2026)
         const [day, month] = dateStr.split('.');
         return {
           visit_date: `2026-${month}-${day}T00:00:00.000Z`,
-          unique_visitors: visitsMap[dateStr].size // Размер множества = количество уникальных IP
+          unique_visitors: visitsMap[dateStr].size
         };
       });
 
