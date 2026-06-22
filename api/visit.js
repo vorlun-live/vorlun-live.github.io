@@ -43,7 +43,6 @@ module.exports = async (req, res) => {
     } 
     
     if (req.method === 'GET') {
-      // 1. Запрашиваем визиты из таблицы напрямую
       const { data, error: selectError } = await supabase
         .from('site_visits')
         .select('visited_at, visitor_ip')
@@ -52,7 +51,6 @@ module.exports = async (req, res) => {
 
       if (selectError) throw selectError;
 
-      // 2. Группируем и считаем уникальные посещения по дням прямо в функции
       const visitsMap = {}; 
       (data || []).forEach(row => {
         if (!row.visited_at) return;
@@ -68,7 +66,6 @@ module.exports = async (req, res) => {
         visitsMap[dateKey].add(row.visitor_ip);
       });
 
-      // 3. Формируем массив объектов для фронтенда
       const formattedData = Object.keys(visitsMap).map(dateStr => {
         const [day, month] = dateStr.split('.');
         return {
