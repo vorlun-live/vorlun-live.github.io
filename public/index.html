@@ -10,6 +10,7 @@
     <meta name="google-site-verification" content="em-FzPvx-EDfwSKd8oKJtHq9x_0OzSksyTe-Tg9n3fs" />
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
     <script type="text/javascript">
         (function(m,e,t,r,i,k,a){
@@ -381,6 +382,81 @@
             background-color: var(--twitch-hover);
         }
 
+        /* Блоки для Стрима и Чата */
+        .stream-chat-wrapper {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+        .stream-side {
+            flex: 2;
+            min-width: 300px;
+        }
+        .chat-side {
+            flex: 1;
+            min-width: 280px;
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 20px;
+            border: 1px solid rgba(255,255,255,0.05);
+            display: flex;
+            flex-direction: column;
+            height: 480px;
+            box-sizing: border-box;
+        }
+
+        .chat-messages-box {
+            flex-grow: 1;
+            overflow-y: auto;
+            border: 1px solid rgba(255,255,255,0.1);
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 8px;
+            background: #0d0b13;
+            font-size: 0.9rem;
+        }
+
+        .chat-input-group {
+            display: flex;
+            gap: 8px;
+        }
+        .chat-input-group input, .auth-group input {
+            background: #100e19;
+            border: 1px solid rgba(255,255,255,0.1);
+            color: #fff;
+            padding: 8px 12px;
+            border-radius: 6px;
+            outline: none;
+        }
+        .chat-input-group input { flex-grow: 1; }
+        .chat-input-group button, .auth-group button {
+            background: var(--primary);
+            color: #fff;
+            border: none;
+            padding: 8px 14px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: 0.2s;
+        }
+        .chat-input-group button:hover:not(:disabled), .auth-group button:hover {
+            background: #6a4ac0;
+        }
+        .chat-input-group button:disabled, .auth-group input:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .auth-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+            margin-bottom: 10px;
+            background: rgba(0,0,0,0.2);
+            padding: 10px;
+            border-radius: 8px;
+        }
+
         .fill-widget {
             background: var(--card-bg);
             border-radius: 12px;
@@ -419,6 +495,7 @@
             .links-grid { grid-template-columns: 1fr; }
             .catalog-grid { grid-template-columns: 1fr; }
             .article-content { font-size: 0.95rem; }
+            .stream-chat-wrapper { flex-direction: column; }
         }
     </style>
 </head>
@@ -467,24 +544,48 @@
         <div class="container">
             
             <div id="page-main" class="page active-page">
-                <div class="section">
-                    <h2>👾 Статус Стрима (Live)</h2>
-                    <p style="color: var(--text-muted); font-size: 0.95rem; margin-top: 5px;">Проверка идет ли трансляция на Twitch в реальном времени.</p>
-                    
-                    <div id="streamStatusWidget" class="stream-status-widget">
-                        <div class="stream-offline-msg">
-                            <div><span class="stream-offline-dot"></span> Трансляция сейчас оффлайн.</div>
-                            <a href="https://www.twitch.tv/vorlun_" target="_blank" class="check-channel-btn">Перейти на канал (ждать уведомлений)</a>
+                <div class="stream-chat-wrapper">
+                    <div class="stream-side">
+                        <div class="section" style="margin-bottom: 0;">
+                            <h2>👾 Статус Стрима (Live)</h2>
+                            <p style="color: var(--text-muted); font-size: 0.95rem; margin-top: 5px;">Проверка идет ли трансляция на Twitch в реальном времени.</p>
+                            
+                            <div id="streamStatusWidget" class="stream-status-widget">
+                                <div class="stream-offline-msg">
+                                    <div><span class="stream-offline-dot"></span> Трансляция сейчас оффлайн.</div>
+                                    <a href="https://www.twitch.tv/vorlun_" target="_blank" class="check-channel-btn">Перейти на канал (ждать уведомлений)</a>
+                                </div>
+                            </div>
+
+                            <div class="fill-widget">
+                                <h5>💡 Быстрый совет</h5>
+                                Обычно перед запуском трансляции полезно проверить статус буфера обмена, запустить OBS от имени Администратора и сделать тестовый прогон звука.
+                            </div>
                         </div>
                     </div>
 
-                    <div class="fill-widget">
-                        <h5>💡 Быстрый совет</h5>
-                        Обычно перед запуском трансляции полезно проверить статус буфера обмена, запустить OBS от имени Администратора и сделать тестовый прогон звука.
+                    <div class="chat-side">
+                        <h4 style="margin: 0 0 10px 0; color: #fffffe; text-transform: uppercase; font-size: 0.9rem; letter-spacing: 0.5px;">💬 Чат трансляции</h4>
+                        
+                        <div class="auth-group" id="authSection">
+                            <input type="email" id="authEmail" placeholder="Email" style="flex:1; min-width: 90px;">
+                            <input type="password" id="authPassword" placeholder="Пароль" style="flex:1; min-width: 90px;">
+                            <button onclick="registerUser()">Регистрация</button>
+                            <button onclick="loginUser()">Войти</button>
+                            <button onclick="logoutUser()" style="display:none; background:#ff4757;" id="btnLogout">Выйти</button>
+                        </div>
+
+                        <div class="chat-messages-box" id="chatMessages">
+                            </div>
+
+                        <div class="chat-input-group">
+                            <input type="text" id="chatInput" placeholder="Оставьте сообщение (требуется регистрация)..." disabled>
+                            <button onclick="sendMessage()" id="btnSend" disabled>Отправить</button>
+                        </div>
                     </div>
                 </div>
 
-                <div class="section">
+                <div class="section" style="margin-top: 25px;">
                     <h2>📱 Мои Медиа</h2>
                     <div class="links-grid">
                         <a href="https://www.twitch.tv/vorlun_" target="_blank" class="btn btn-twitch">👾 Смотреть стримы</a>
@@ -543,8 +644,14 @@
 
             <div id="page-catalog" class="page">
                 <div class="section">
-                    <h2>📚 Все публикации</h2>
-                    <p style="color: var(--text-muted); font-size: 0.95rem; margin-bottom: 25px;">Выбирай категорию, чтобы отфильтровать гайды:</p>
+                    <h2>📚 Каталог публикаций</h2>
+                    <p style="color: var(--text-muted); font-size: 0.95rem; margin-bottom: 15px;">Поиск по базе гайдов:</p>
+                    
+                    <div class="search-section" style="margin-bottom: 25px;">
+                        <input type="text" id="guideSearchInput" placeholder="Введите название гайда..." onkeyup="filterGuides()" style="padding: 10px; width: 100%; max-width: 350px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.2); background:#161424; color:#fff; outline:none;">
+                    </div>
+
+                    <p style="color: var(--text-muted); font-size: 0.95rem; margin-bottom: 25px;">Или выбирай категорию:</p>
                     
                     <div class="catalog-tags">
                         <button class="tag-filter active-tag" onclick="filterCatalog('all', this)">Все темы</button>
@@ -558,7 +665,7 @@
 
                     <div id="catalog-list" class="catalog-grid">
                         
-                        <div class="post-card mix-art obs" onclick="openArticle('obs-guide')">
+                        <div class="post-card mix-art obs" onclick="openArticle('obs-guide')" data-title="Как настроить OBS для стрима без лагов в 2026 году">
                             <div>
                                 <div class="article-meta"><span>#OBS</span></div>
                                 <h3>Как настроить OBS для стрима без лагов в 2026 году</h3>
@@ -567,7 +674,7 @@
                             <span class="post-link">Читать гайд →</span>
                         </div>
 
-                        <div class="post-card mix-art audio" onclick="openArticle('audio-guide')">
+                        <div class="post-card mix-art audio" onclick="openArticle('audio-guide')" data-title="Настройка микрофона в OBS: как убрать шумы, клики и гул">
                             <div>
                                 <div class="article-meta"><span>#Звук</span></div>
                                 <h3>Настройка микрофона в OBS: как убрать шумы, клики и гул</h3>
@@ -576,7 +683,7 @@
                             <span class="post-link">Читать гайд →</span>
                         </div>
 
-                        <div class="post-card mix-art donates" onclick="openArticle('donates-guide')">
+                        <div class="post-card mix-art donates" onclick="openArticle('donates-guide')" data-title="Как подключить донаты на Twitch и настроить оповещения">
                             <div>
                                 <div class="article-meta"><span>#Донаты</span></div>
                                 <h3>Как подключить донаты на Twitch и настроить оповещения</h3>
@@ -585,7 +692,7 @@
                             <span class="post-link">Читать гайд →</span>
                         </div>
 
-                        <div class="post-card mix-art tiktok" onclick="openArticle('tiktok-guide')">
+                        <div class="post-card mix-art tiktok" onclick="openArticle('tiktok-guide')" data-title="Продвижение стримов через TikTok: алгоритмы 2026 года">
                             <div>
                                 <div class="article-meta"><span>#Тренды / TikTok</span></div>
                                 <h3>Продвижение стримов через TikTok: алгоритмы 2026 года</h3>
@@ -594,7 +701,7 @@
                             <span class="post-link">Читать гайд →</span>
                         </div>
 
-                        <div class="post-card mix-art camera" onclick="openArticle('camera-guide')">
+                        <div class="post-card mix-art camera" onclick="openArticle('camera-guide')" data-title="Как настроить освещение и камеру для стрима">
                             <div>
                                 <div class="article-meta"><span>#Камера</span></div>
                                 <h3>Как настроить освещение и камеру для стрима</h3>
@@ -603,7 +710,7 @@
                             <span class="post-link">Читать гайд →</span>
                         </div>
 
-                        <div class="post-card mix-art twitch" onclick="openArticle('twitch-panel-guide')">
+                        <div class="post-card mix-art twitch" onclick="openArticle('twitch-panel-guide')" data-title="Оформление канала Twitch: панели, чат и виджеты">
                             <div>
                                 <div class="article-meta"><span>#Твич</span></div>
                                 <h3>Оформление канала Twitch: панели, чат и виджеты</h3>
@@ -688,17 +795,17 @@
             <div id="page-tiktok-guide" class="page">
                 <button class="back-btn" onclick="showPage('catalog')">← Назад в каталог</button>
                 <div class="section">
-                    <h1 style="font-size: 2rem; margin-top: 0; color: var(--text-main);">Продвижение стримов через TikTok: алгоритмы 2026 года</h1>
+                    <h1 style="font-size: 2rem; margin-top: 0; color: var(--text-main);">Продвижение стримов через TikTok: тренды алгоритмов</h1>
                     <div class="article-content">
-                        <p>Просто стримить на Твиче в пустоту — это главная ошибка новичков. Твой главный локомотив продвижения — это короткие ролики в ТикТок, которые подхватывают алгоритмы рекомендаций.</p>
+                        <p>Органический трафик из TikTok — лучший способ продвижения нового канала на Твиче с нуля.</p>
                         <hr>
-                        <h3>💎 Стратегия перегона трафика на Twitch:</h3>
-                        
-                        <h3>1. Правило первых 3-х секунд</h3>
-                        <p>Алгоритмы ТикТока оценивают удержание. В самом начале ролика должен быть жесткий хук. Не начинай с приветствий, начинай сразу с экшена или интриги.</p>
-                        
-                        <h3>2. Оформление игрового контента</h3>
-                        <p>Используй формат разделенного экрана: сверху лицо с веб-камеры крупно, снизу — геймплей. Текст-субтитры по центру экрана обязательны.</p>
+                        <h3>Как привлекать зрителей:</h3>
+                        <ul>
+                            <li>Нарезайте самые смешные или напряженные моменты со стрима.</li>
+                            <li>Делайте короткие динамичные ролики (длительностью до 15-30 секунд).</li>
+                            <li>Используйте трендовую музыку в качестве фона на низкой громкости.</li>
+                            <li>В описании (био) размещайте прямую ссылку на свой Twitch-канал.</li>
+                        </ul>
                     </div>
                 </div>
             </div>
@@ -706,16 +813,16 @@
             <div id="page-camera-guide" class="page">
                 <button class="back-btn" onclick="showPage('catalog')">← Назад в каталог</button>
                 <div class="section">
-                    <h1 style="font-size: 2rem; margin-top: 0; color: var(--text-main);">Как настроить освещение и камеру для стрима</h1>
+                    <h1 style="font-size: 2rem; margin-top: 0; color: var(--text-main);">Настройка освещения и камеры для стрима</h1>
                     <div class="article-content">
-                        <p>Плохой свет может превратить даже дорогую камеру в «мыло». В этом гайде разберем, как добиться приятной и четкой картинки.</p>
+                        <p>Свет решает всё. Даже недорогая веб-камера с хорошим освещением будет выдавать отличную картинку без зернистости.</p>
                         <hr>
-                        <h3>Порядок настройки:</h3>
-                        <ol>
-                            <li><strong>Схема освещения:</strong> Используйте как минимум два источника света. Рисующий (основной) под углом 45 градусов и заполняющий (для смягчения теней).</li>
-                            <li><strong>Настройки камеры:</strong> Уберите автоматическую экспозицию и баланс белого в настройках веб-камеры. Выставьте параметры вручную.</li>
-                            <li><strong>Фокус и выдержка:</strong> Зафиксируйте фокус, чтобы камера не «елозила» при движении.</li>
-                        </ol>
+                        <h3>Базовые правила студии:</h3>
+                        <ul>
+                            <li><strong>Ключевой свет:</strong> Расположите источник света под углом 45 градусов к вашему лицу.</li>
+                            <li>Избегайте прямого света из окна или ламп, бьющих прямо в объектив.</li>
+                            <li>Скачайте официальный софт вашей камеры (Logitech G HUB и др.) и отключите автоматическую фокусировку и автоэкспозицию (выставьте всё вручную).</li>
+                        </ul>
                     </div>
                 </div>
             </div>
@@ -725,12 +832,13 @@
                 <div class="section">
                     <h1 style="font-size: 2rem; margin-top: 0; color: var(--text-main);">Оформление канала Twitch: панели, чат и виджеты</h1>
                     <div class="article-content">
-                        <p>Первое впечатление о стримере складывается по визулу канала. Давайте сделаем его аккуратным и привлекательным.</p>
+                        <p>Первое впечатление зрителя формируется за доли секунды. Встречают по оформлению — провожают по контенту.</p>
                         <hr>
-                        <h3>Базовый чек-лист:</h3>
+                        <h3>Чеклист оформления:</h3>
                         <ul>
-                            <li><strong>Интерактивные панели:</strong> Добавьте блоки "О себе", "Правила чата", "Расписание" и "Ссылки на соцсети". Используйте одинаковые баннеры-кнопки.</li>
-                            <li><strong>Модерация чата:</strong> Включите авто-модерацию и запретите подозрительные ссылки, чтобы избежать спама во время эфира.</li>
+                            <li>Загрузите качественные аватарку и баннер (рекомендуемое разрешение — 1200х480 пикселей).</li>
+                            <li>Создайте информационные панели под трансляцией: «О себе», «Правила чата», «Ссылки на соцсети».</li>
+                            <li>Добавьте расширения (Extensions), например, Leaderboard для топ-донатеров или Schedule для отображения вашего расписания.</li>
                         </ul>
                     </div>
                 </div>
@@ -740,28 +848,33 @@
     </div>
 
     <script>
+        // Инициализация Supabase
+        const SUPABASE_URL = 'https://cyoqcafwpflfxscnpufk.supabase.co';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN5b3FjYWZ3cGZsZnhzY25wdWZrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE5ODE3MDUsImV4cCI6MjA5NzU1NzcwNX0.nofBw5Q7iJ5nIPbqKQ5ABlmIw3_I3Pi6i-5f7UxWLiI';
+        const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        // Переключение страниц
         function showPage(pageId) {
-            document.querySelectorAll('.page').forEach(page => page.classList.remove('active-page'));
-            document.querySelectorAll('nav button').forEach(btn => btn.classList.remove('active'));
-            
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active-page'));
             document.getElementById('page-' + pageId).classList.add('active-page');
+            
+            document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
             const navBtn = document.getElementById('nav-' + pageId);
             if(navBtn) navBtn.classList.add('active');
-            
+
             window.scrollTo(0, 0);
         }
 
-        function openArticle(articlePageId) {
-            document.querySelectorAll('.page').forEach(page => page.classList.remove('active-page'));
-            document.getElementById('page-' + articlePageId).classList.add('active-page');
-            window.scrollTo(0, 0);
+        function openArticle(articleId) {
+            showPage(articleId);
         }
 
+        // Фильтр категорий каталога
         function filterCatalog(category, btn) {
             document.querySelectorAll('.tag-filter').forEach(b => b.classList.remove('active-tag'));
             btn.classList.add('active-tag');
 
-            const cards = document.querySelectorAll('#catalog-list .post-card');
+            const cards = document.querySelectorAll('.post-card.mix-art');
             cards.forEach(card => {
                 if (category === 'all' || card.classList.contains(category)) {
                     card.style.display = 'flex';
@@ -771,84 +884,82 @@
             });
         }
 
-        async function loadVisitsData() {
-            const ctx = document.getElementById('trafficChart').getContext('2d');
+        // Поиск по каталогу
+        function filterGuides() {
+            const query = document.getElementById('guideSearchInput').value.toLowerCase();
+            const cards = document.querySelectorAll('.post-card.mix-art');
             
-            const getPast7DaysSkeleton = () => {
-                return Array.from({ length: 7 }, (_, i) => {
-                    const date = new Date();
-                    date.setDate(date.getDate() - (6 - i));
-                    const day = String(date.getDate()).padStart(2, '0');
-                    const month = String(date.getMonth() + 1).padStart(2, '0');
-                    return { date: `${day}.${month}`, visits: 0 };
-                });
-            };
-
-            const renderChart = (chartData) => {
-                new Chart(ctx, {
-                    type: 'bar',
-                    data: {
-                        labels: chartData.map(d => d.date),
-                        datasets: [{
-                            label: 'Посещения (уникальные)',
-                            data: chartData.map(d => d.visits),
-                            backgroundColor: '#7f5af0',
-                            borderColor: '#7f5af0',
-                            borderWidth: 1,
-                            borderRadius: 6,
-                            barPercentage: 0.75
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        plugins: {
-                            legend: { display: false },
-                            tooltip: {
-                                backgroundColor: '#161424',
-                                titleFont: { size: 12 },
-                                bodyFont: { size: 12 },
-                                padding: 10,
-                                cornerRadius: 8,
-                                displayColors: false
-                            }
-                        },
-                        scales: {
-                            x: {
-                                grid: { display: false },
-                                ticks: { color: '#94a1b2', font: { size: 10 } }
-                            },
-                            y: {
-                                grid: { color: 'rgba(255, 255, 255, 0.03)' },
-                                ticks: { color: '#94a1b2', font: { size: 9 }, stepSize: 5 }
-                            }
-                        }
-                    }
-                });
-            };
-
-            try {
-                // 1. При каждой загрузке отправляем POST-запрос для автоматического учета визита (с фиксацией IP)
-                await fetch('/api/visit', { method: 'POST' });
-
-                // 2. Получаем статистику для графика
-                const response = await fetch('/api/visit');
-                const data = await response.json();
-                
-                if (!Array.isArray(data) || data.length === 0) {
-                    renderChart(getPast7DaysSkeleton());
-                    return;
+            cards.forEach(card => {
+                const title = card.getAttribute('data-title');
+                if (!title) return;
+                if (title.toLowerCase().includes(query)) {
+                    card.style.display = 'flex';
+                } else {
+                    card.style.display = 'none';
                 }
+            });
+        }
+
+        // Логика визитов (график слева)
+        function getPast7DaysSkeleton() {
+            const skeleton = [];
+            for (let i = 6; i >= 0; i--) {
+                const d = new Date();
+                d.setDate(d.getDate() - i);
+                const day = String(d.getDate()).padStart(2, '0');
+                const month = String(d.getMonth() + 1).padStart(2, '0');
+                skeleton.push({ date: `${day}.${month}`, visits: 0 });
+            }
+            return skeleton;
+        }
+
+        function renderChart(chartData) {
+            const ctx = document.getElementById('trafficChart').getContext('2d');
+            if (window.myVisitsChart) window.myVisitsChart.destroy();
+
+            window.myVisitsChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: chartData.map(item => item.date),
+                    datasets: [{
+                        label: 'Уникальных IP',
+                        data: chartData.map(item => item.visits),
+                        borderColor: '#2cb67d',
+                        backgroundColor: 'rgba(44, 182, 125, 0.08)',
+                        borderWidth: 2,
+                        fill: true,
+                        tension: 0.3
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        x: { grid: { display: false }, ticks: { color: '#94a1b2', font: { size: 10 } } },
+                        y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#94a1b2', font: { size: 10 } } }
+                    }
+                }
+            });
+        }
+
+        async function loadVisitsData() {
+            try {
+                // Фиксируем визит
+                await fetch('/api/visit.js', { method: 'POST' }).catch(() => {});
+                
+                // Получаем статистику
+                const response = await fetch('/api/visit.js');
+                const result = await response.json();
+                if (!result.data) throw new Error("Нет данных");
 
                 const visitsByDay = {};
-                data.forEach(item => {
-                    // Используем правильные поля из вьюхи unique_daily_visits: visit_date и unique_visitors
+                result.data.forEach(item => {
                     if (!item.visit_date) return;
                     const dateObj = new Date(item.visit_date);
                     const day = String(dateObj.getDate()).padStart(2, '0');
                     const month = String(dateObj.getMonth() + 1).padStart(2, '0');
                     const dateKey = `${day}.${month}`;
-                    
                     visitsByDay[dateKey] = parseInt(item.unique_visitors, 10) || 0;
                 });
 
@@ -869,15 +980,112 @@
                 }
 
                 renderChart(chartData);
-
             } catch (error) {
-                console.error('Не удалось загрузить статистику визитов:', error);
+                console.error('Не удалось загрузить статистику:', error);
                 renderChart(getPast7DaysSkeleton());
             }
         }
 
-        // Вызов инициализации данных при первой загрузке страницы
+        // --- ЧАТ И АВТОРИЗАЦИЯ ---
+        async function registerUser() {
+            const email = document.getElementById('authEmail').value;
+            const password = document.getElementById('authPassword').value;
+            if(!email || !password) return alert('Заполните Email и Пароль');
+            
+            const { data, error } = await supabase.auth.signUp({ email, password });
+            if (error) alert(error.message);
+            else alert('Регистрация успешна! Подтвердите почту (если требуется).');
+        }
+
+        async function loginUser() {
+            const email = document.getElementById('authEmail').value;
+            const password = document.getElementById('authPassword').value;
+            if(!email || !password) return alert('Заполните Email и Пароль');
+
+            const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+            if (error) alert(error.message);
+            else {
+                alert('Вход выполнен!');
+                checkAuth();
+            }
+        }
+
+        async function logoutUser() {
+            await supabase.auth.signOut();
+            alert('Вы вышли из системы');
+            checkAuth();
+        }
+
+        async function checkAuth() {
+            const { data: { session } } = await supabase.auth.getSession();
+            const chatInput = document.getElementById('chatInput');
+            const btnSend = document.getElementById('btnSend');
+            const btnLogout = document.getElementById('btnLogout');
+
+            if (session) {
+                chatInput.removeAttribute('disabled');
+                chatInput.placeholder = "Сообщение...";
+                btnSend.removeAttribute('disabled');
+                btnLogout.style.display = 'block';
+            } else {
+                chatInput.setAttribute('disabled', 'true');
+                chatInput.placeholder = "Оставьте сообщение (требуется регистрация)...";
+                btnSend.setAttribute('disabled', 'true');
+                btnLogout.style.display = 'none';
+            }
+        }
+
+        async function sendMessage() {
+            const input = document.getElementById('chatInput');
+            const text = input.value.trim();
+            if (!text) return;
+
+            const { data: { user } } = await supabase.auth.getUser();
+            if (!user) return alert('Требуется авторизация!');
+
+            const { error } = await supabase
+                .from('chat_messages')
+                .insert([{ user_id: user.id, message: text }]);
+
+            if (error) {
+                alert('Ошибка отправки: ' + error.message);
+            } else {
+                input.value = '';
+                alert('Сообщение отправлено на модерацию и появится после проверки администратором.');
+            }
+        }
+
+        async function loadChatMessages() {
+            // Подгружаем только одобренные модератором сообщения
+            const { data, error } = await supabase
+                .from('chat_messages')
+                .select(`id, message, profiles ( username )`)
+                .eq('is_approved', true)
+                .order('created_at', { ascending: true })
+                .limit(50);
+
+            if (error) return console.error('Ошибка загрузки чата:', error);
+
+            const chatContainer = document.getElementById('chatMessages');
+            chatContainer.innerHTML = '';
+
+            data.forEach(item => {
+                const msgElement = document.createElement('div');
+                msgElement.style.margin = '6px 0';
+                msgElement.style.borderBottom = '1px solid rgba(255,255,255,0.05)';
+                msgElement.style.paddingBottom = '4px';
+                msgElement.innerHTML = `<strong style="color: var(--secondary);">${item.profiles?.username || 'Гость'}:</strong> <span style="color:#fff;">${item.message}</span>`;
+                chatContainer.appendChild(msgElement);
+            });
+        }
+
+        // Инициализация при загрузке
         loadVisitsData();
+        checkAuth();
+        loadChatMessages();
+        
+        // Автообновление чата каждые 5 секунд
+        setInterval(loadChatMessages, 5000);
     </script>
 </body>
 </html>
