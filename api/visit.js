@@ -68,11 +68,11 @@ module.exports = async (req, res) => {
         visitsMap[dateKey].add(row.visitor_ip);
       });
 
-      // 3. Формируем массив объектов для фронтенда
+      // 3. Формируем массив объектов для фронтенда (исправленная логика)
       const formattedData = Object.keys(visitsMap).map(dateStr => {
         const [day, month] = dateStr.split('.');
         return {
-          visit_date: `2026-${month}-${day}T00:00:00.000Z`, // текущий год 2026
+          visit_date: `2026-${month}-${day}T00:00:00.000Z`, // текущий рабочий год — 2026
           unique_visitors: visitsMap[dateStr].size
         };
       });
