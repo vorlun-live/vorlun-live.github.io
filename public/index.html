@@ -309,7 +309,6 @@
             color: var(--secondary);
             font-weight: bold;
             text-transform: uppercase;
-            margin-bottom: 6px;
         }
 
         .post-link { color: var(--primary); font-weight: bold; font-size: 0.95rem; }
@@ -362,19 +361,9 @@
         .stream-offline-dot {
             width: 10px;
             height: 10px;
-            background-color: var(--alert-color);
+            background-color: var(--text-muted);
             border-radius: 50%;
             display: inline-block;
-            margin-right: 6px;
-        }
-        .stream-online-dot {
-            width: 10px;
-            height: 10px;
-            background-color: var(--secondary);
-            border-radius: 50%;
-            display: inline-block;
-            margin-right: 6px;
-            box-shadow: 0 0 8px var(--secondary);
         }
         .check-channel-btn {
             display: inline-block;
@@ -483,7 +472,10 @@
                     <p style="color: var(--text-muted); font-size: 0.95rem; margin-top: 5px;">Проверка идет ли трансляция на Twitch в реальном времени.</p>
                     
                     <div id="streamStatusWidget" class="stream-status-widget">
-                        <div style="color: var(--text-muted);">Загрузка статуса трансляции...</div>
+                        <div class="stream-offline-msg">
+                            <div><span class="stream-offline-dot"></span> Трансляция сейчас оффлайн.</div>
+                            <a href="https://www.twitch.tv/vorlun_" target="_blank" class="check-channel-btn">Перейти на канал (ждать уведомлений)</a>
+                        </div>
                     </div>
 
                     <div class="fill-widget">
@@ -539,24 +531,6 @@
                             </div>
                             <span class="post-link">Читать →</span>
                         </div>
-
-                        <div class="post-card" onclick="openArticle('mic-hardware-guide')">
-                            <div>
-                                <div class="article-meta"><span>#Железо</span></div>
-                                <h3>Топ-3 бюджетных микрофона для старта стримов</h3>
-                                <p>Обзор недорогих USB-микрофонов, которые дают студийный звук без лишних звуковых карт.</p>
-                            </div>
-                            <span class="post-link">Читать →</span>
-                        </div>
-
-                        <div class="post-card" onclick="openArticle('burnout-guide')">
-                            <div>
-                                <div class="article-meta"><span>#Быт</span></div>
-                                <h3>Как не выгореть, совмещая стримы и учебу</h3>
-                                <p>Практические советы по тайм-менеджменту и сохранению ментального здоровья стримера.</p>
-                            </div>
-                            <span class="post-link">Читать →</span>
-                        </div>
                     </div>
                 </div>
 
@@ -580,8 +554,6 @@
                         <button class="tag-filter" onclick="filterCatalog('tiktok', this)">Продвижение TikTok</button>
                         <button class="tag-filter" onclick="filterCatalog('camera', this)">Камера и Свет</button>
                         <button class="tag-filter" onclick="filterCatalog('twitch', this)">Фишки Твича</button>
-                        <button class="tag-filter" onclick="filterCatalog('hardware', this)">Железо и Девайсы</button>
-                        <button class="tag-filter" onclick="filterCatalog('lifestyle', this)">Стримерский быт</button>
                     </div>
 
                     <div id="catalog-list" class="catalog-grid">
@@ -636,24 +608,6 @@
                                 <div class="article-meta"><span>#Твич</span></div>
                                 <h3>Оформление канала Twitch: панели, чат и виджеты</h3>
                                 <p>Создаем приятный визуал для зрителя. Как настроить интерактивные панели под стримом и блоки чата.</p>
-                            </div>
-                            <span class="post-link">Читать гайд →</span>
-                        </div>
-
-                        <div class="post-card mix-art hardware" onclick="openArticle('mic-hardware-guide')">
-                            <div>
-                                <div class="article-meta"><span>#Железо</span></div>
-                                <h3>Топ-3 бюджетных микрофона для старта стримов</h3>
-                                <p>Обзор недорогих USB-микрофонов, которые дают студийный звук без лишних звуковых карт.</p>
-                            </div>
-                            <span class="post-link">Читать гайд →</span>
-                        </div>
-
-                        <div class="post-card mix-art lifestyle" onclick="openArticle('burnout-guide')">
-                            <div>
-                                <div class="article-meta"><span>#Быт</span></div>
-                                <h3>Как не выгореть, совмещая стримы и учебу/работу</h3>
-                                <p>Практические советы по тайм-менеджменту и сохранению ментального здоровья стримера.</p>
                             </div>
                             <span class="post-link">Читать гайд →</span>
                         </div>
@@ -738,7 +692,13 @@
                     <div class="article-content">
                         <p>Просто стримить на Твиче в пустоту — это главная ошибка новичков. Твой главный локомотив продвижения — это короткие ролики в ТикТок, которые подхватывают алгоритмы рекомендаций.</p>
                         <hr>
-                        <p>Вскоре здесь появится подробная статья по алгоритмам удержания, нарезке контента и хештегам.</p>
+                        <h3>💎 Стратегия перегона трафика на Twitch:</h3>
+                        
+                        <h3>1. Правило первых 3-х секунд</h3>
+                        <p>Алгоритмы ТикТока оценивают удержание. В самом начале ролика должен быть жесткий хук. Не начинай с приветствий, начинай сразу с экшена или интриги.</p>
+                        
+                        <h3>2. Оформление игрового контента</h3>
+                        <p>Используй формат разделенного экрана: сверху лицо с веб-камеры крупно, снизу — геймплей. Текст-субтитры по центру экрана обязательны.</p>
                     </div>
                 </div>
             </div>
@@ -748,9 +708,14 @@
                 <div class="section">
                     <h1 style="font-size: 2rem; margin-top: 0; color: var(--text-main);">Как настроить освещение и камеру для стрима</h1>
                     <div class="article-content">
-                        <p>Из дешевой веб-камеры делаем студийную картинку. Выставляем свет и убираем шумы с матрицы.</p>
+                        <p>Плохой свет может превратить даже дорогую камеру в «мыло». В этом гайде разберем, как добиться приятной и четкой картинки.</p>
                         <hr>
-                        <p>Полное руководство по настройке экспозиции, баланса белого и выбору правильной лампы (кольцевой или софтбокса) будет добавлено в ближайших обновлениях.</p>
+                        <h3>Порядок настройки:</h3>
+                        <ol>
+                            <li><strong>Схема освещения:</strong> Используйте как минимум два источника света. Рисующий (основной) под углом 45 градусов и заполняющий (для смягчения теней).</li>
+                            <li><strong>Настройки камеры:</strong> Уберите автоматическую экспозицию и баланс белого в настройках веб-камеры. Выставьте параметры вручную.</li>
+                            <li><strong>Фокус и выдержка:</strong> Зафиксируйте фокус, чтобы камера не «елозила» при движении.</li>
+                        </ol>
                     </div>
                 </div>
             </div>
@@ -760,39 +725,12 @@
                 <div class="section">
                     <h1 style="font-size: 2rem; margin-top: 0; color: var(--text-main);">Оформление канала Twitch: панели, чат и виджеты</h1>
                     <div class="article-content">
-                        <p>Создаем приятный визуал для зрителя. Как настроить интерактивные панели под стримом и блоки чата.</p>
+                        <p>Первое впечатление о стримере складывается по визулу канала. Давайте сделаем его аккуратным и привлекательным.</p>
                         <hr>
-                        <p>Материал находится в разработке.</p>
-                    </div>
-                </div>
-            </div>
-
-            <div id="page-mic-hardware-guide" class="page">
-                <button class="back-btn" onclick="showPage('catalog')">← Назад в каталог</button>
-                <div class="section">
-                    <h1 style="font-size: 2rem; margin-top: 0; color: var(--text-main);">Топ-3 бюджетных микрофона для старта стримов</h1>
-                    <div class="article-content">
-                        <p>Не обязательно тратить целое состояние на звуковое оборудование, чтобы вас было приятно слушать. Вот отличные кандидаты:</p>
-                        <ol>
-                            <li><strong>Fifine AmpliGame A6V / A8</strong> — отличное качество «из коробки», удобный пантограф и встроенный поп-фильтр.</li>
-                            <li><strong>Razer Seiren Mini</strong> — компактный, занимает мало места на столе, великолепно отсекает фоновые шумы.</li>
-                            <li><strong>HyperX SoloCast</strong> — классика среди бюджетных USB-микрофонов с быстрым отключением по касанию.</li>
-                        </ol>
-                    </div>
-                </div>
-            </div>
-
-            <div id="page-burnout-guide" class="page">
-                <button class="back-btn" onclick="showPage('catalog')">← Назад в каталог</button>
-                <div class="section">
-                    <h1 style="font-size: 2rem; margin-top: 0; color: var(--text-main);">Как не выгореть, совмещая стримы и реальную жизнь</h1>
-                    <div class="article-content">
-                        <p>Регулярность — ключ к успеху на Twitch и YouTube, но погоня за цифрами часто приводит к полному истощению.</p>
-                        <h3>Советы по предотвращению выгорания:</h3>
+                        <h3>Базовый чек-лист:</h3>
                         <ul>
-                            <li><strong>Четкое расписание:</strong> Стримите определенные дни, оставляйте 2-3 дня в неделю строго на отдых и личные дела.</li>
-                            <li><strong>Не зацикливайтесь на онлайне:</strong> Помните, что первые полгода-год зрителей может быть мало. Главное — получать удовольствие от процесса общения.</li>
-                            <li><strong>Делегируйте нарезку хайлайтов:</strong> Автоматизируйте создание коротких роликов, чтобы не тратить на монтаж часы после каждого эфира.</li>
+                            <li><strong>Интерактивные панели:</strong> Добавьте блоки "О себе", "Правила чата", "Расписание" и "Ссылки на соцсети". Используйте одинаковые баннеры-кнопки.</li>
+                            <li><strong>Модерация чата:</strong> Включите авто-модерацию и запретите подозрительные ссылки, чтобы избежать спама во время эфира.</li>
                         </ul>
                     </div>
                 </div>
@@ -802,77 +740,28 @@
     </div>
 
     <script>
-        // Регистрация визита (вызов API при загрузке)
-        (function() {
-            fetch('/api/visit', { method: 'POST' })
-                .catch(err => console.error('Ошибка записи визита:', err));
-        })();
-
-        // Логика переключения страниц и вкладок
         function showPage(pageId) {
-            // Скрываем все страницы (как .page-main, так и .page)
-            const pages = document.querySelectorAll('.page, #page-main');
-            pages.forEach(page => {
-                page.classList.remove('active-page');
-                if (page.classList.contains('page')) {
-                    page.style.display = 'none';
-                }
-            });
-
-            // Показываем нужную
-            if (pageId === 'main') {
-                const mainPage = document.getElementById('page-main');
-                mainPage.style.display = 'block';
-                mainPage.classList.add('active-page');
-            } else {
-                const targetPage = document.getElementById('page-' + pageId);
-                if (targetPage) {
-                    targetPage.style.display = 'block';
-                    targetPage.classList.add('active-page');
-                }
-            }
-
-            // Переключение кнопок в навбаре
-            const navMain = document.getElementById('nav-main');
-            const navCatalog = document.getElementById('nav-catalog');
+            document.querySelectorAll('.page').forEach(page => page.classList.remove('active-page'));
+            document.querySelectorAll('nav button').forEach(btn => btn.classList.remove('active'));
             
-            if(navMain && navCatalog) {
-                navMain.classList.remove('active');
-                navCatalog.classList.remove('active');
-
-                if (pageId === 'main') {
-                    navMain.classList.add('active');
-                } else if (pageId === 'catalog') {
-                    navCatalog.classList.add('active');
-                }
-            }
+            document.getElementById('page-' + pageId).classList.add('active-page');
+            const navBtn = document.getElementById('nav-' + pageId);
+            if(navBtn) navBtn.classList.add('active');
+            
             window.scrollTo(0, 0);
         }
 
-        function openArticle(articleId) {
-            // Скрываем всё
-            const pages = document.querySelectorAll('.page, #page-main');
-            pages.forEach(page => {
-                page.classList.remove('active-page');
-                if (page.classList.contains('page')) page.style.display = 'none';
-            });
-
-            // Показываем статью
-            const target = document.getElementById('page-' + articleId);
-            if (target) {
-                target.style.display = 'block';
-                target.classList.add('active-page');
-            }
+        function openArticle(articlePageId) {
+            document.querySelectorAll('.page').forEach(page => page.classList.remove('active-page'));
+            document.getElementById('page-' + articlePageId).classList.add('active-page');
             window.scrollTo(0, 0);
         }
 
-        // Фильтрация тегов каталога
         function filterCatalog(category, btn) {
-            const buttons = document.querySelectorAll('.tag-filter');
-            buttons.forEach(b => b.classList.remove('active-tag'));
+            document.querySelectorAll('.tag-filter').forEach(b => b.classList.remove('active-tag'));
             btn.classList.add('active-tag');
 
-            const cards = document.querySelectorAll('.post-card');
+            const cards = document.querySelectorAll('#catalog-list .post-card');
             cards.forEach(card => {
                 if (category === 'all' || card.classList.contains(category)) {
                     card.style.display = 'flex';
@@ -882,115 +771,78 @@
             });
         }
 
-        // Проверка статуса Twitch-трансляции (публичный API без токенов)
-        async function checkPublicStreamStatus() {
-            try {
-                // ВНИМАНИЕ: Замени "vorlun_" на свой точный логин на Twitch!
-                const response = await fetch('https://api.twitch.tv/kraken/streams/vorlun_', {
-                    headers: {
-                        'Client-ID': 'kimne78kx3ncx6br04mvqy8wxcbhn1', 
-                        'Accept': 'application/vnd.twitchtv.v5+json'
-                    }
-                });
-                
-                const data = await response.json();
-                const widget = document.getElementById('streamStatusWidget');
-
-                // Если поле stream не пустое — идет прямая трансляция
-                if (data.stream) {
-                    const stream = data.stream;
-                    widget.innerHTML = `
-                        <div style="color: var(--secondary); font-weight: bold; font-size: 1.1rem; margin-bottom: 10px;">
-                            <span class="stream-online-dot"></span> Прямой эфир идет!
-                        </div>
-                        <div style="color: var(--text-main); margin-bottom: 5px;">
-                            <strong>Игра:</strong> ${stream.game}
-                        </div>
-                        <div style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 15px;">
-                            ${stream.channel.status} • 👁️ Смотрят: ${stream.viewers}
-                        </div>
-                        <a href="${stream.channel.url}" target="_blank" class="check-channel-btn">Смотреть стрим</a>
-                    `;
-                } else {
-                    widget.innerHTML = `
-                        <div class="stream-offline-msg">
-                            <div><span class="stream-offline-dot"></span> Трансляция сейчас оффлайн.</div>
-                            <a href="https://www.twitch.tv/vorlun_" target="_blank" class="check-channel-btn">Перейти на канал (ждать уведомлений)</a>
-                        </div>
-                    `;
-                }
-            } catch (err) {
-                console.error("Не удалось получить статус стрима:", err);
-                document.getElementById('streamStatusWidget').innerHTML = `
-                    <div style="color: var(--text-muted); padding:10px;"><span class="stream-offline-dot"></span> Статус трансляции временно недоступен</div>
-                `;
-            }
-        }
-        
-        // Вызываем проверку при загрузке
-        checkPublicStreamStatus();
-
-        // Отрисовка графика визитов
-        let trafficChartInstance = null;
-
-        function renderChart(chartData) {
+        async function loadVisitsData() {
             const ctx = document.getElementById('trafficChart').getContext('2d');
             
-            if (trafficChartInstance) {
-                trafficChartInstance.destroy();
-            }
+            const getPast7DaysSkeleton = () => {
+                return Array.from({ length: 7 }, (_, i) => {
+                    const date = new Date();
+                    date.setDate(date.getDate() - (6 - i));
+                    const day = String(date.getDate()).padStart(2, '0');
+                    const month = String(date.getMonth() + 1).padStart(2, '0');
+                    return { date: `${day}.${month}`, visits: 0 };
+                });
+            };
 
-            trafficChartInstance = new Chart(ctx, {
-                type: 'bar',
-                data: {
-                    labels: chartData.map(item => item.date),
-                    datasets: [{
-                        label: 'Уникальные визиты',
-                        data: chartData.map(item => item.visits),
-                        backgroundColor: '#7f5af0',
-                        borderColor: '#603fe0',
-                        borderWidth: 1
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: { legend: { display: false } },
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            ticks: { stepSize: 1 }
+            const renderChart = (chartData) => {
+                new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: chartData.map(d => d.date),
+                        datasets: [{
+                            label: 'Посещения (уникальные)',
+                            data: chartData.map(d => d.visits),
+                            backgroundColor: '#7f5af0',
+                            borderColor: '#7f5af0',
+                            borderWidth: 1,
+                            borderRadius: 6,
+                            barPercentage: 0.75
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { display: false },
+                            tooltip: {
+                                backgroundColor: '#161424',
+                                titleFont: { size: 12 },
+                                bodyFont: { size: 12 },
+                                padding: 10,
+                                cornerRadius: 8,
+                                displayColors: false
+                            }
+                        },
+                        scales: {
+                            x: {
+                                grid: { display: false },
+                                ticks: { color: '#94a1b2', font: { size: 10 } }
+                            },
+                            y: {
+                                grid: { color: 'rgba(255, 255, 255, 0.03)' },
+                                ticks: { color: '#94a1b2', font: { size: 9 }, stepSize: 5 }
+                            }
                         }
                     }
-                }
-            });
-        }
+                });
+            };
 
-        function getPast7DaysSkeleton() {
-            const arr = [];
-            for (let i = 6; i >= 0; i--) {
-                const d = new Date();
-                d.setDate(d.getDate() - i);
-                const day = String(d.getDate()).padStart(2, '0');
-                const month = String(d.getMonth() + 1).padStart(2, '0');
-                arr.push({ date: `${day}.${month}`, visits: 0 });
-            }
-            return arr;
-        }
-
-        async function loadVisitsData() {
             try {
+                // 1. При каждой загрузке отправляем POST-запрос для автоматического учета визита (с фиксацией IP)
+                await fetch('/api/visit', { method: 'POST' });
+
+                // 2. Получаем статистику для графика
                 const response = await fetch('/api/visit');
                 const data = await response.json();
                 
-                const visitsByDay = {};
-                const past7Days = getPast7DaysSkeleton();
-                
-                past7Days.forEach(item => {
-                    visitsByDay[item.date] = 0;
-                });
+                if (!Array.isArray(data) || data.length === 0) {
+                    renderChart(getPast7DaysSkeleton());
+                    return;
+                }
 
-                (data || []).forEach(item => {
+                const visitsByDay = {};
+                data.forEach(item => {
+                    // Используем правильные поля из вьюхи unique_daily_visits: visit_date и unique_visitors
                     if (!item.visit_date) return;
                     const dateObj = new Date(item.visit_date);
                     const day = String(dateObj.getDate()).padStart(2, '0');
@@ -1024,9 +876,8 @@
             }
         }
 
-        document.addEventListener("DOMContentLoaded", () => {
-            loadVisitsData();
-        });
+        // Вызов инициализации данных при первой загрузке страницы
+        loadVisitsData();
     </script>
 </body>
 </html>
