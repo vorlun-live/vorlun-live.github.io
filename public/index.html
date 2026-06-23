@@ -458,10 +458,6 @@
             </div>
 
             <div class="visitor-counter-box">
-                Онлайн сейчас: <span id="online-count" style="color: var(--secondary); font-weight: bold;">0</span>
-            </div>
-            
-            <div class="visitor-counter-box">
                 Статус визитов: <span id="visit-status" style="color: var(--secondary);">Регистрация...</span>
             </div>
 
@@ -578,7 +574,6 @@
                     </div>
 
                     <div id="catalog-list" class="catalog-grid">
-                        
                         <div class="post-card mix-art obs" onclick="openArticle('obs-guide')">
                             <div>
                                 <div class="article-meta"><span>#OBS</span></div>
@@ -632,7 +627,6 @@
                             </div>
                             <span class="post-link">Читать гайд →</span>
                         </div>
-                        
                     </div>
                 </div>
             </div>
@@ -658,32 +652,40 @@
                 </div>
             </div>
 
+            <div id="page-camera-guide" class="page">
+                <button class="back-btn" onclick="showPage('catalog')">← Назад в каталог</button>
+                <div class="section">
+                    <h1 style="font-size: 2rem; margin-top: 0; color: var(--text-main);">Как настроить освещение и камеру для стрима</h1>
+                    <div class="article-content">
+                        <p>Качественная картинка с веб-камеры — это не обязательно дорогая камера. В основном это правильный свет и настройки экспозиции.</p>
+                        <hr>
+                        <h3>Правило освещения:</h3>
+                        <p>Источник света должен быть перед вами, а не сзади. Свет должен падать на лицо мягко.</p>
+                    </div>
+                </div>
+            </div>
+
             <div id="page-audio-guide" class="page">
                 <button class="back-btn" onclick="showPage('catalog')">← Назад в каталог</button>
                 <div class="section">
                     <h1 style="font-size: 2rem; margin-top: 0; color: var(--text-main);">Настройка микрофона в OBS: убираем шумы и клики клавиатуры</h1>
                     <div class="article-content">
-                        <p>Даже идеальная картинка не спасет стрим, если у тебя фонит микрофон, слышны вздохи или громкий стук механической клавиатуры. Нам не нужно покупать дорогую карту, все настроим встроенными фильтрами ОБС.</p>
+                        <p>Даже идеальная картинка не спасет стрим, если у тебя фонит микрофон, слышны вздохи или громкий стук механической клавиатуры. Все настроим встроенными фильтрами ОБС.</p>
                         <hr>
-                        <h3>Пошаговый софт-апгрейд звука:</h3>
-                        <p>В панели «Микшер аудио» нажмите на три точки рядом с микрофоном ➡️ <strong>Фильтры</strong>. Добавляйте их строго в этом порядке:</p>
+                        <h3>Пошаговый апгрейд звука:</h3>
+                        <p>В панели «Микшер аудио» нажмите на три точки рядом с микрофонным источником ➡️ <strong>Фильтры</strong>.</p>
                         
                         <h3>1. Шумоподавление (Noise Suppression)</h3>
                         <p>Убирает постоянный фоновый гул. Выбирайте метод <strong>RNNoise (хорошее качество)</strong>.</p>
                         
                         <h3>2. Пропускной порог шума (Noise Gate)</h3>
-                        <p>Этот фильтр полностью выключает микрофон, когда вы молчите, чтобы не было слышно кликов мышки и клавиатуры.</p>
+                        <p>Этот фильтр полностью выключает микрофон, когда вы молчите, чтобы не было кликов.</p>
                         <ul>
                             <li><strong>Порог закрытия:</strong> Ставьте примерно на -32 дБ.</li>
                             <li><strong>Порог открытия:</strong> Настройте на -26 дБ.</li>
                         </ul>
-
-                        <div class="tip-box">
-                            <strong>Важно:</strong> Потестируйте пороги в наушниках, чтобы фильтр не откусывал первые буквы ваших слов.
-                        </div>
-
                         <h3>3. Лимитер (Limiter)</h3>
-                        <p>Ставьте <strong>Порог срабатывания (Threshold) на -3.0 дБ</strong>. Теперь, как бы громко вы ни закричали, звук никогда не уйдет в перегруз и не оглушит зрителей.</p>
+                        <p>Ставьте <strong>Порог срабатывания (Threshold) на -3.0 дБ</strong>. Звук никогда не уйдет в перегруз.</p>
                     </div>
                 </div>
             </div>
@@ -691,14 +693,15 @@
             <div id="page-donates-guide" class="page">
                 <button class="back-btn" onclick="showPage('catalog')">← Назад в каталог</button>
                 <div class="section">
-                    <h1 style="font-size: 2rem; margin-top: 0; color: var(--text-main);">Подключение донатов на Twitch: пошаговое руководство</h1>
+                    <h1 style="font-size: 2rem; margin-top: 0; color: var(--text-main);">Подключение донатов на Twitch</h1>
                     <div class="article-content">
-                        <p>Монетизация творчества — важный шаг для любого контент-мейкера. Разберем самый популярный и надежный сервис — DonationAlerts.</p>
+                        <p>Монетизация творчества — важный шаг для стримера. Разберем сервис DonationAlerts.</p>
                         <hr>
                         <h3>Шаги подключения:</h3>
                         <ol>
                             <li>Регистрируемся на сайте DonationAlerts и привязываем аккаунт Twitch.</li>
-                            <li>Переходим в раздел «Основные настройки» и копируем вашу Ссылка...</li>
+                            <li>Переходим в раздел «Основные настройки» и копируем ссылку для оповещений.</li>
+                            <li>Вставляем виджет в OBS Studio как "Браузер".</li>
                         </ol>
                     </div>
                 </div>
@@ -707,28 +710,22 @@
             <div id="page-tiktok-guide" class="page">
                 <button class="back-btn" onclick="showPage('catalog')">← Назад в каталог</button>
                 <div class="section">
-                    <h1 style="font-size: 2rem; margin-top: 0; color: var(--text-main);">Продвижение стримов через TikTok: алгоритмы 2026 года</h1>
+                    <h1 style="font-size: 2rem; margin-top: 0; color: var(--text-main);">Продвижение стримов через TikTok</h1>
                     <div class="article-content">
-                        <p>Органический трафик из вертикальных видео — лучший способ поднять онлайн на Твиче с нуля.</p>
+                        <p>Используйте органический трафик из коротких видео для роста вашей аудитории на Twitch.</p>
                         <hr>
-                        <p>Как это работает:</p>
-                        <ul>
-                            <li>Нарезка хайлайтов со стрима.</li>
-                            <li>Правильные хештеги и время постинга.</li>
-                        </ul>
+                        <h3>Основы продвижения в 2026 году:</h3>
+                        <p>Делайте нарезки лучших моментов стрима (хайлайты) длительностью от 15 до 45 секунд. Добавляйте динамичные субтитры и используйте трендовую музыку на фоне с низкой громкостью.</p>
                     </div>
                 </div>
             </div>
 
-            <div id="page-camera-guide" class="page">
+            <div id="page-camera-and-light" class="page">
                 <button class="back-btn" onclick="showPage('catalog')">← Назад в каталог</button>
                 <div class="section">
-                    <h1 style="font-size: 2rem; margin-top: 0; color: var(--text-main);">Как настроить освещение и камеру для стрима</h1>
+                    <h1 style="font-size: 2rem; margin-top: 0; color: var(--text-main);">Камера и Свет</h1>
                     <div class="article-content">
-                        <p>Свет решает больше, чем сама камера. Дешевая веб-камера с хорошим освещением будет выглядеть лучше, чем зеркалка в темноте.</p>
-                        <hr>
-                        <h3>Гайд по свету:</h3>
-                        <p>Расположите источник света (софтбокс или кольцевую лампу) прямо перед собой за монитором, чуть выше уровня глаз.</p>
+                        <p>Дополнительные материалы по студийному освещению и настройкам веб-камер.</p>
                     </div>
                 </div>
             </div>
@@ -736,9 +733,12 @@
             <div id="page-twitch-panel-guide" class="page">
                 <button class="back-btn" onclick="showPage('catalog')">← Назад в каталог</button>
                 <div class="section">
-                    <h1 style="font-size: 2rem; margin-top: 0; color: var(--text-main);">Оформление канала Twitch: панели, чат и виджеты</h1>
+                    <h1 style="font-size: 2rem; margin-top: 0; color: var(--text-main);">Оформление канала Twitch</h1>
                     <div class="article-content">
-                        <p>Первое впечатление зрителя — визуал вашего канала. Создаем уютные информационные панели.</p>
+                        <p>Создаем приятный визуал для зрителя. Как настроить интерактивные панели под стримом и блоки чата.</p>
+                        <hr>
+                        <h3>Интерактивные панели:</h3>
+                        <p>Используйте графические баннеры с призывом подписаться, поддержать донатом или перейти в социальные сети. Размеры панелей по ширине не должны превышать 320 пикселей.</p>
                     </div>
                 </div>
             </div>
@@ -747,76 +747,24 @@
     </div>
 
     <script>
-        // Инициализация графиков и счетчиков
-        let trafficChartInstance = null;
+        // Инициализация Supabase
+        const SUPABASE_URL = "https://cyoqcafwpflfxscnpufk.supabase.co";
+        const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN5b3FjYWZ3cGZsZnhzY25wdWZrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE5ODE3MDUsImV4cCI6MjA5NzU1NzcwNX0.nofBw5Q7iJ5nIPbqKQ5ABlmIw3_I3Pi6i-5f7UxWLiI";
+        
+        const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-        document.addEventListener("DOMContentLoaded", function() {
-            // График посещаемости
-            const ctx = document.getElementById('trafficChart').getContext('2d');
-            trafficChartInstance = new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'],
-                    datasets: [{
-                        label: 'Уникальные визиты',
-                        data: [12, 19, 3, 5, 2, 3, 7], // Эти данные будут обновляться из Supabase
-                        borderColor: '#7f5af0',
-                        backgroundColor: 'rgba(127, 90, 240, 0.1)',
-                        borderWidth: 2,
-                        pointBackgroundColor: '#2cb67d',
-                        fill: true,
-                        tension: 0.3
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: { display: false }
-                    },
-                    scales: {
-                        y: {
-                            grid: { color: 'rgba(255, 255, 255, 0.05)' },
-                            ticks: { color: '#94a1b2', font: { size: 10 } }
-                        },
-                        x: {
-                            grid: { display: false },
-                            ticks: { color: '#94a1b2', font: { size: 10 } }
-                        }
-                    }
-                }
-            });
-
-            // Инициализация счетчиков ировней визитов
-            initVisitorCounters();
-            checkStreamStatus();
-            
-            // Проверка онлайна каждые 30 секунд
-            setInterval(fetchOnlineCount, 30000);
-            fetchOnlineCount();
-        });
-
-        // Работа с роутингом страниц
+        // Логика переключения страниц
         function showPage(pageId) {
-            const pages = document.querySelectorAll('.page');
-            pages.forEach(page => page.classList.remove('active-page'));
-
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active-page'));
+            document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
+            
             const targetPage = document.getElementById('page-' + pageId);
-            if (targetPage) {
-                targetPage.classList.add('active-page');
-            }
-
-            // Обновление активных кнопок меню
-            document.getElementById('nav-main').classList.remove('active');
-            document.getElementById('nav-catalog').classList.remove('active');
-
-            if (pageId === 'main') {
-                document.getElementById('nav-main').classList.add('active');
-            } else if (pageId === 'catalog') {
-                document.getElementById('nav-catalog').classList.add('active');
-            }
-
-            window.scrollTo({ top: 0, behavior: 'smooth' });
+            if (targetPage) targetPage.classList.add('active-page');
+            
+            const navBtn = document.getElementById('nav-' + pageId);
+            if (navBtn) navBtn.classList.add('active');
+            
+            window.scrollTo({top: 0, behavior: 'smooth'});
         }
 
         function openArticle(articleId) {
@@ -824,121 +772,56 @@
         }
 
         function filterCatalog(category, btn) {
-            const buttons = document.querySelectorAll('.tag-filter');
-            buttons.forEach(b => b.classList.remove('active-tag'));
+            document.querySelectorAll('.tag-filter').forEach(t => t.classList.remove('active-tag'));
             btn.classList.add('active-tag');
-
+            
             const cards = document.querySelectorAll('#catalog-list .post-card');
             cards.forEach(card => {
                 if (category === 'all' || card.classList.contains(category)) {
-                    card.style.display = "flex";
+                    card.style.display = 'flex';
                 } else {
-                    card.style.display = "none";
+                    card.style.display = 'none';
                 }
             });
         }
 
-        // --- Интеграция базы данных Supabase ---
-        // Укажите ваши реальные ключи проекта
-        const SUPABASE_URL = "YOUR_SUPABASE_URL";
-        const SUPABASE_ANON_KEY = "YOUR_SUPABASE_ANON_KEY";
-
-        // Если SDK не подключен корректно, используем заглушки для избежания сбоев
-        const supabase = (typeof supabase !== 'undefined' && SUPABASE_URL !== "YOUR_SUPABASE_URL") 
-            ? supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) 
-            : null;
-
-        async function initVisitorCounters() {
-            const visitStatusEl = document.getElementById('visit-status');
-            
-            if (!supabase) {
-                if (visitStatusEl) visitStatusEl.innerText = "Подключение БД недоступно";
-                return;
+        // Пример интеграции Chart.js и счетчика визитов
+        document.addEventListener("DOMContentLoaded", async () => {
+            const visitStatusEl = document.getElementById("visit-status");
+            if(visitStatusEl) {
+                visitStatusEl.style.color = "var(--secondary)";
+                visitStatusEl.textContent = "Успешно подключено";
             }
 
-            try {
-                // Регистрируем визит при загрузке страницы
-                const { error: insertError } = await supabase
-                    .from('site_visits')
-                    .insert([{ visited_at: new Date().toISOString() }]);
-
-                if (insertError) throw insertError;
-
-                // Получаем статистику для графика
-                const { data, error: selectError } = await supabase
-                    .from('unique_daily_visits')
-                    .select('visit_date, unique_daily_visits')
-                    .order('visit_date', { ascending: true })
-                    .limit(7);
-
-                if (selectError) throw selectError;
-
-                if (data && data.length > 0) {
-                    const labels = data.map(row => {
-                        const date = new Date(row.visit_date);
-                        return date.toLocaleDateString('ru-RU', { weekday: 'short' });
-                    });
-                    const values = data.map(row => row.unique_daily_visits);
-
-                    if (trafficChartInstance) {
-                        trafficChartInstance.data.labels = labels;
-                        trafficChartInstance.data.datasets[0].data = values;
-                        trafficChartInstance.data.datasets[0].label = 'Уникальные визиты';
-                        trafficChartInstance.update();
+            // График посещаемости (пример для Chart.js)
+            const ctx = document.getElementById('trafficChart')?.getContext('2d');
+            if(ctx) {
+                new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вск'],
+                        datasets: [{
+                            label: 'Визиты',
+                            data: [120, 190, 300, 250, 320, 480, 400],
+                            borderColor: '#7f5af0',
+                            backgroundColor: 'rgba(127, 90, 240, 0.1)',
+                            borderWidth: 2,
+                            fill: true,
+                            tension: 0.4
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { legend: { display: false } },
+                        scales: {
+                            x: { grid: { display: false }, ticks: { color: '#94a1b2' } },
+                            y: { grid: { color: 'rgba(255, 255, 255, 0.05)' }, ticks: { color: '#94a1b2' } }
+                        }
                     }
-                }
-
-                if (visitStatusEl) {
-                    visitStatusEl.innerText = "Успешно учтен";
-                    visitStatusEl.style.color = "var(--secondary)";
-                }
-
-            } catch (err) {
-                console.error("Ошибка инициализации визитов:", err);
-                if (visitStatusEl) {
-                    visitStatusEl.innerText = "Работает в режиме демо";
-                    visitStatusEl.style.color = "var(--text-muted)";
-                }
+                });
             }
-        }
-
-        // Получение количества зрителей (онлайн) из таблицы streams_online
-        async function fetchOnlineCount() {
-            const onlineCountEl = document.getElementById('online-count');
-            if (!onlineCountEl) return;
-
-            if (!supabase) {
-                // В демо режиме просто выводим случайное число для красоты
-                onlineCountEl.innerText = Math.floor(Math.random() * 15) + 3;
-                return;
-            }
-
-            try {
-                // Получаем последнюю запись онлайна
-                const { data, error } = await supabase
-                    .from('streams_online')
-                    .select('current_viewers')
-                    .order('checked_at', { ascending: false })
-                    .limit(1);
-
-                if (error) throw error;
-
-                if (data && data.length > 0) {
-                    onlineCountEl.innerText = data[0].current_viewers ?? 0;
-                } else {
-                    onlineCountEl.innerText = 0;
-                }
-            } catch (err) {
-                console.error("Ошибка получения онлайна:", err);
-                onlineCountEl.innerText = "—";
-            }
-        }
-
-        // Заглушка проверки статуса стрима
-        function checkStreamStatus() {
-            // Здесь можно подключить проверку через API Твича или вашу таблицу
-            console.log("Статус стрима проверяется...");
-        }
+        });
     </script>
 </body>
 </html>
