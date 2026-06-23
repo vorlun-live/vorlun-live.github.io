@@ -775,24 +775,19 @@
         document.addEventListener("DOMContentLoaded", async function() {
             const ctx = document.getElementById('trafficChart').getContext('2d');
 
-            // 1. Получаем количество УНИКАЛЬНЫХ визитов за сегодня
-            let visitsCount = 0;
+            // 1. Сначала получаем реальное количество визитов из Supabase для графика
+            let visitsCount = 1;
             try {
-                const todayStr = new Date().toISOString().split('T')[0];
-                
-                // ⚠️ Убедись, что 'visit_date' совпадает с названием колонки даты в таблице unique_daily_visits
                 const { count, error } = await supabaseClient
-                    .from('unique_daily_visits')
-                    .select('*', { count: 'exact', head: true })
-                    .eq('visit_date', todayStr);
+                    .from('site_visits')
+                    .select('*', { count: 'exact', head: true });
 
                 if (error) throw error;
                 if (count !== null) {
                     visitsCount = count;
                 }
             } catch (err) {
-                console.error("Не удалось загрузить число уникальных визитов для графика:", err.message);
-                visitsCount = 0; // Если таблица пуста или ошибка, ставим 0
+                console.error("Не удалось загрузить число визитов для графика:", err.message);
             }
             
             // 2. Инициализируем график с полученным числом
@@ -801,7 +796,7 @@
                 data: {
                     labels: ["Сегодня"], 
                     datasets: [{
-                        label: 'Уникальные визиты',
+                        label: 'Посещения',
                         data: [visitsCount], 
                         borderColor: '#2cb67d',
                         backgroundColor: 'rgba(44, 182, 125, 0.1)',
