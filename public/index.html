@@ -11,6 +11,8 @@
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
     <script type="text/javascript">
         (function(m,e,t,r,i,k,a){
             m[i]=m[i]||function(){(m[i].a=m[i].a||[]).push(arguments)};
@@ -328,6 +330,17 @@
             font-size: 1rem;
         }
 
+        .visitor-counter-box {
+            padding: 10px;
+            text-align: center;
+            background: var(--card-bg);
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border: 1px solid rgba(44, 182, 125, 0.2);
+            color: var(--text-muted);
+            font-size: 0.95rem;
+        }
+
         .back-btn {
             background: none;
             border: 1px solid var(--text-muted);
@@ -444,6 +457,10 @@
                 </div>
             </div>
 
+            <div class="visitor-counter-box">
+                Статус визитов: <span id="visit-status" style="color: var(--secondary);">Регистрация...</span>
+            </div>
+
             <div class="sidebar-panel" style="font-size: 0.95rem; line-height: 1.6;">
                 <h4 style="color: var(--primary);">🎮 О чем мои стримы</h4>
                 <p style="margin: 0 0 12px 0; color: #e1e6eb;">Привет! Я создаю контент, делюсь фишками по оптимизации стримов, а также веду трансляции.</p>
@@ -480,7 +497,7 @@
 
                     <div class="fill-widget">
                         <h5>💡 Быстрый совет</h5>
-                        Обычно перед запуском трансляции полезно проверить статус буфера обмена, запустить OBS от имени Администратора и сделать тестовый прогон звука.
+                        Usually, before starting a broadcast, it's useful to check the clipboard status, run OBS as Administrator, and do a sound test.
                     </div>
                 </div>
 
@@ -701,9 +718,39 @@
     </div>
 
     <script>
-        // АБСОЛЮТНЫЙ URL ВАШЕГО БЕКЕНДА НА VERCEL
-        // Вставьте сюда ваш домен вида https://vorlun-live-github-io.vercel.app
+        // Бэкенд на Vercel (для редиректов и статики)
         const API_URL = 'https://vorlun-live-github-io.vercel.app'; 
+
+        // Инициализация ключей Supabase и коннекта
+        const SUPABASE_URL = "https://cyoqcafwpflfxscnpufk.supabase.co";
+        const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN5b3FjYWZ3cGZsZnhzY25wdWZrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE5ODE3MDUsImV4cCI6MjA5NzU1NzcwNX0.nofBw5Q7iJ5nIPbqKQ5ABlmIw3_I3Pi6i-5f7UxWLiI";
+
+        // Инициализация клиента Supabase в браузере
+        const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        // Функция фиксации визита (срабатывает при загрузке)
+        async function registerVisit() {
+            try {
+                const clientIp = "client-browser-visit"; 
+                const nowTime = new Date().toISOString();
+
+                // Фиксируем визит в таблице site_visits
+                const { error: insertError } = await supabase
+                    .from('site_visits')
+                    .insert([{ 
+                        visited_at: nowTime,
+                        visitor_ip: clientIp
+                    }]);
+
+                if (insertError) throw insertError;
+
+                console.log("Визит успешно учтен в Supabase!");
+                document.getElementById('visit-status').innerText = "Учтен";
+            } catch (err) {
+                console.error("Ошибка при фиксации визита:", err.message);
+                document.getElementById('visit-status').innerText = "Ошибка фиксации";
+            }
+        }
 
         // Инициализация Chart.js для графика посещаемости
         let myChart;
@@ -713,10 +760,10 @@
             myChart = new Chart(ctx, {
                 type: 'line',
                 data: {
-                    labels: [], // Будут заполнены датами
+                    labels: [], // Будут заполнены датами из статистики
                     datasets: [{
                         label: 'Посещения',
-                        data: [], // Будут заполнены значениями
+                        data: [], // Значения
                         borderColor: '#2cb67d',
                         backgroundColor: 'rgba(44, 182, 125, 0.1)',
                         borderWidth: 2,
@@ -735,15 +782,17 @@
                 }
             });
 
+            // Сразу регистрируем визит и грузим статусы
+            await registerVisit();
             await fetchVisitStats();
         });
 
-        // Функция отправки визита (срабатывает при загрузке главной)
+        // Получение статистики (можно использовать для отображения графика)
         async function fetchVisitStats() {
             try {
-                // Отправляем POST для фиксации визита и получаем обновленные данные за 7 дней
+                // Прямой вызов GET /api/visit для получения данных за 7 дней (агрегация с Vercel-бэка)
                 const response = await fetch(`${API_URL}/api/visit`, {
-                    method: 'POST',
+                    method: 'GET',
                     headers: { 'Content-Type': 'application/json' }
                 });
                 
