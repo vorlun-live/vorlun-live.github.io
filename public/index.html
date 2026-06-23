@@ -692,46 +692,7 @@
                     <div class="article-content">
                         <p>Просто стримить на Твиче в пустоту — это главная ошибка новичков. Твой главный локомотив продвижения — это короткие ролики в ТикТок, которые подхватывают алгоритмы рекомендаций.</p>
                         <hr>
-                        <h3>💎 Стратегия перегона трафика на Twitch:</h3>
-                        
-                        <h3>1. Правило первых 3-х секунд</h3>
-                        <p>Алгоритмы ТикТока оценивают удержание. В самом начале ролика должен быть жесткий хук. Не начинай с приветствий, начинай сразу с экшена или интриги.</p>
-                        
-                        <h3>2. Оформление игрового контента</h3>
-                        <p>Используй формат разделенного экрана: сверху лицо с веб-камеры крупно, снизу — геймплей. Текст-субтитры по центру экрана обязательны.</p>
-                    </div>
-                </div>
-            </div>
-
-            <div id="page-camera-guide" class="page">
-                <button class="back-btn" onclick="showPage('catalog')">← Назад в каталог</button>
-                <div class="section">
-                    <h1 style="font-size: 2rem; margin-top: 0; color: var(--text-main);">Как настроить освещение и камеру для стрима</h1>
-                    <div class="article-content">
-                        <p>Плохой свет может превратить даже дорогую камеру в «мыло». В этом гайде разберем, как добиться приятной и четкой картинки.</p>
-                        <hr>
-                        <h3>Порядок настройки:</h3>
-                        <ol>
-                            <li><strong>Схема освещения:</strong> Используйте как минимум два источника света. Рисующий (основной) под углом 45 градусов и заполняющий (для смягчения теней).</li>
-                            <li><strong>Настройки камеры:</strong> Уберите автоматическую экспозицию и баланс белого в настройках веб-камеры. Выставьте параметры вручную.</li>
-                            <li><strong>Фокус и выдержка:</strong> Зафиксируйте фокус, чтобы камера не «елозила» при движении.</li>
-                        </ol>
-                    </div>
-                </div>
-            </div>
-
-            <div id="page-twitch-panel-guide" class="page">
-                <button class="back-btn" onclick="showPage('catalog')">← Назад в каталог</button>
-                <div class="section">
-                    <h1 style="font-size: 2rem; margin-top: 0; color: var(--text-main);">Оформление канала Twitch: панели, чат и виджеты</h1>
-                    <div class="article-content">
-                        <p>Первое впечатление о стримере складывается по визулу канала. Давайте сделаем его аккуратным и привлекательным.</p>
-                        <hr>
-                        <h3>Базовый чек-лист:</h3>
-                        <ul>
-                            <li><strong>Интерактивные панели:</strong> Добавьте блоки "О себе", "Правила чата", "Расписание" и "Ссылки на соцсети". Используйте одинаковые баннеры-кнопки.</li>
-                            <li><strong>Модерация чата:</strong> Включите авто-модерацию и запретите подозрительные ссылки, чтобы избежать спама во время эфира.</li>
-                        </ul>
+                        <p>Секрет успеха прост: делайте нарезки лучших моментов, добавляйте динамичные субтитры и призывайте переходить по ссылке в профиле.</p>
                     </div>
                 </div>
             </div>
@@ -740,28 +701,107 @@
     </div>
 
     <script>
-        function showPage(pageId) {
-            document.querySelectorAll('.page').forEach(page => page.classList.remove('active-page'));
-            document.querySelectorAll('nav button').forEach(btn => btn.classList.remove('active'));
+        // АБСОЛЮТНЫЙ URL ВАШЕГО БЕКЕНДА НА VERCEL
+        // Вставьте сюда ваш домен вида https://vorlun-live-github-io.vercel.app
+        const API_URL = 'https://vorlun-live-github-io.vercel.app'; 
+
+        // Инициализация Chart.js для графика посещаемости
+        let myChart;
+        document.addEventListener("DOMContentLoaded", async function() {
+            const ctx = document.getElementById('trafficChart').getContext('2d');
             
-            document.getElementById('page-' + pageId).classList.add('active-page');
-            const navBtn = document.getElementById('nav-' + pageId);
-            if(navBtn) navBtn.classList.add('active');
-            
-            window.scrollTo(0, 0);
+            myChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: [], // Будут заполнены датами
+                    datasets: [{
+                        label: 'Посещения',
+                        data: [], // Будут заполнены значениями
+                        borderColor: '#2cb67d',
+                        backgroundColor: 'rgba(44, 182, 125, 0.1)',
+                        borderWidth: 2,
+                        fill: true,
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        x: { grid: { display: false }, ticks: { color: '#94a1b2', font: { size: 10 } } },
+                        y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#94a1b2', font: { size: 10 } } }
+                    }
+                }
+            });
+
+            await fetchVisitStats();
+        });
+
+        // Функция отправки визита (срабатывает при загрузке главной)
+        async function fetchVisitStats() {
+            try {
+                // Отправляем POST для фиксации визита и получаем обновленные данные за 7 дней
+                const response = await fetch(`${API_URL}/api/visit`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+                
+                if (response.ok) {
+                    const stats = await response.json();
+                    if (stats && stats.dates && stats.counts) {
+                        updateChart(stats.dates, stats.counts);
+                    }
+                }
+            } catch (err) {
+                console.error("Ошибка загрузки или отправки статистики:", err);
+            }
         }
 
-        function openArticle(articlePageId) {
-            document.querySelectorAll('.page').forEach(page => page.classList.remove('active-page'));
-            document.getElementById('page-' + articlePageId).classList.add('active-page');
-            window.scrollTo(0, 0);
+        // Рендер данных в график
+        function updateChart(labels, data) {
+            if (myChart) {
+                myChart.data.labels = labels;
+                myChart.data.datasets[0].data = data;
+                myChart.update();
+            }
+        }
+
+        // Роутинг (переключение страниц внутри SPA)
+        function showPage(pageId) {
+            const pages = document.querySelectorAll('.page');
+            pages.forEach(page => page.classList.remove('active-page'));
+
+            const targetPage = document.getElementById('page-' + pageId);
+            if (targetPage) {
+                targetPage.classList.add('active-page');
+            }
+
+            const navMain = document.getElementById('nav-main');
+            const navCatalog = document.getElementById('nav-catalog');
+
+            if(navMain && navCatalog) {
+                if (pageId === 'main') {
+                    navMain.classList.add('active');
+                    navCatalog.classList.remove('active');
+                } else if (pageId === 'catalog') {
+                    navCatalog.classList.add('active');
+                    navMain.classList.remove('active');
+                }
+            }
+            window.scrollTo({top: 0, behavior: 'smooth'});
+        }
+
+        function openArticle(articleId) {
+            showPage(articleId);
         }
 
         function filterCatalog(category, btn) {
-            document.querySelectorAll('.tag-filter').forEach(b => b.classList.remove('active-tag'));
+            const buttons = document.querySelectorAll('.tag-filter');
+            buttons.forEach(b => b.classList.remove('active-tag'));
             btn.classList.add('active-tag');
 
-            const cards = document.querySelectorAll('#catalog-list .post-card');
+            const cards = document.querySelectorAll('.post-card.mix-art');
             cards.forEach(card => {
                 if (category === 'all' || card.classList.contains(category)) {
                     card.style.display = 'flex';
@@ -770,114 +810,6 @@
                 }
             });
         }
-
-        async function loadVisitsData() {
-            const ctx = document.getElementById('trafficChart').getContext('2d');
-            
-            const getPast7DaysSkeleton = () => {
-                return Array.from({ length: 7 }, (_, i) => {
-                    const date = new Date();
-                    date.setDate(date.getDate() - (6 - i));
-                    const day = String(date.getDate()).padStart(2, '0');
-                    const month = String(date.getMonth() + 1).padStart(2, '0');
-                    return { date: `${day}.${month}`, visits: 0 };
-                });
-            };
-
-            const renderChart = (chartData) => {
-                new Chart(ctx, {
-                    type: 'bar',
-                    data: {
-                        labels: chartData.map(d => d.date),
-                        datasets: [{
-                            label: 'Посещения (уникальные)',
-                            data: chartData.map(d => d.visits),
-                            backgroundColor: '#7f5af0',
-                            borderColor: '#7f5af0',
-                            borderWidth: 1,
-                            borderRadius: 6,
-                            barPercentage: 0.75
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        plugins: {
-                            legend: { display: false },
-                            tooltip: {
-                                backgroundColor: '#161424',
-                                titleFont: { size: 12 },
-                                bodyFont: { size: 12 },
-                                padding: 10,
-                                cornerRadius: 8,
-                                displayColors: false
-                            }
-                        },
-                        scales: {
-                            x: {
-                                grid: { display: false },
-                                ticks: { color: '#94a1b2', font: { size: 10 } }
-                            },
-                            y: {
-                                grid: { color: 'rgba(255, 255, 255, 0.03)' },
-                                ticks: { color: '#94a1b2', font: { size: 9 }, stepSize: 5 }
-                            }
-                        }
-                    }
-                });
-            };
-
-            try {
-                // 1. При каждой загрузке отправляем POST-запрос для автоматического учета визита (с фиксацией IP)
-                await fetch('/api/visit', { method: 'POST' });
-
-                // 2. Получаем статистику для графика
-                const response = await fetch('/api/visit');
-                const data = await response.json();
-                
-                if (!Array.isArray(data) || data.length === 0) {
-                    renderChart(getPast7DaysSkeleton());
-                    return;
-                }
-
-                const visitsByDay = {};
-                data.forEach(item => {
-                    // Используем правильные поля из вьюхи unique_daily_visits: visit_date и unique_visitors
-                    if (!item.visit_date) return;
-                    const dateObj = new Date(item.visit_date);
-                    const day = String(dateObj.getDate()).padStart(2, '0');
-                    const month = String(dateObj.getMonth() + 1).padStart(2, '0');
-                    const dateKey = `${day}.${month}`;
-                    
-                    visitsByDay[dateKey] = parseInt(item.unique_visitors, 10) || 0;
-                });
-
-                const sortedDays = Object.keys(visitsByDay).sort();
-                const last7DaysKeys = sortedDays.slice(-7);
-
-                const chartData = last7DaysKeys.map(date => ({
-                    date: date,
-                    visits: visitsByDay[date]
-                }));
-
-                while (chartData.length < 7) {
-                    const pastDate = new Date();
-                    pastDate.setDate(pastDate.getDate() - (6 - chartData.length));
-                    const day = String(pastDate.getDate()).padStart(2, '0');
-                    const month = String(pastDate.getMonth() + 1).padStart(2, '0');
-                    chartData.unshift({ date: `${day}.${month}`, visits: 0 });
-                }
-
-                renderChart(chartData);
-
-            } catch (error) {
-                console.error('Не удалось загрузить статистику визитов:', error);
-                renderChart(getPast7DaysSkeleton());
-            }
-        }
-
-        // Вызов инициализации данных при первой загрузке страницы
-        loadVisitsData();
     </script>
 </body>
 </html>
