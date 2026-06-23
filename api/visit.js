@@ -30,6 +30,7 @@ module.exports = async (req, res) => {
 
       const nowTime = new Date().toISOString();
       
+      // Запись визита по-прежнему идет в таблицу сырых визитов
       const { error: insertError } = await supabase
         .from('site_visits')
         .insert([{ 
@@ -43,38 +44,16 @@ module.exports = async (req, res) => {
     } 
     
     if (req.method === 'GET') {
+      // Запрашиваем данные из таблицы с агрегированной статистикой
       const { data, error: selectError } = await supabase
-        .from('site_visits')
-        .select('visited_at, visitor_ip')
-        .order('visited_at', { ascending: false })
-        .limit(500);
+        .from('unique_daily_visits')
+        .select('visit_date, unique_visitors')
+        .order('visit_date', { ascending: false })
+        .limit(30);
 
       if (selectError) throw selectError;
 
-      const visitsMap = {}; 
-      (data || []).forEach(row => {
-        if (!row.visited_at) return;
-        
-        const dateObj = new Date(row.visited_at);
-        const day = String(dateObj.getDate()).padStart(2, '0');
-        const month = String(dateObj.getMonth() + 1).padStart(2, '0');
-        const dateKey = `${day}.${month}`;
-
-        if (!visitsMap[dateKey]) {
-          visitsMap[dateKey] = new Set();
-        }
-        visitsMap[dateKey].add(row.visitor_ip);
-      });
-
-      const formattedData = Object.keys(visitsMap).map(dateStr => {
-        const [day, month] = dateStr.split('.');
-        return {
-          visit_date: `2026-${month}-${day}T00:00:00.000Z`,
-          unique_visitors: visitsMap[dateStr].size
-        };
-      });
-
-      return res.status(200).json(formattedData);
+      return res.status(200).json(data || []);
     }
   } catch (err) {
     console.error("Supabase API error:", err);
