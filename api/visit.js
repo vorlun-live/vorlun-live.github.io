@@ -1,76 +1,78 @@
 import { createClient } from '@supabase/supabase-js';
 
-// Инициализация клиента Supabase с использованием переменных окружения Vercel
-const supabaseUrl = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL;
-const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_KEY;
-const supabase = createClient(supabaseUrl, supabaseKey);
-
 export default async function handler(req, res) {
-  // Разрешаем CORS для любых доменов (чтобы не было проблем с fetch с GitHub Pages / Vercel)
-  res.setHeader('Access-Control-Allow-Credentials', 'true');
+  // Настройка CORS для предотвращения блокировок
   res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,POST');
-  res.setHeader('Access-Control-Allow-Headers', 'X-Requested-With, Content-Type, Accept, Authorization');
+  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
   if (req.method === 'OPTIONS') {
-    res.status(200).end();
-    return;
+    return res.status(200).end();
   }
 
-  // Получаем сегодняшнюю дату в формате YYYY-MM-DD (только дату, без времени)
-  const today = new Date().toISOString().split('T')[0];
+  // Строго разрешаем только POST-запросы
+  if (req.method !== 'POST') {
+    return res.status(405).json({ error: 'Method not allowed' });
+  }
 
   try {
-    if (req.method === 'GET') {
-      // Логика получения данных: суммируем уникальных посетителей или отдаем записи
-      const { data, error } = await supabase
-        .from('unique_daily_visits')
-        .select('*')
-        .eq('visit_date', today)
-        .maybeSingle();
+    // Безопасное извлечение IP-адреса клиента
+    const ip = req.headers['x-forwarded-for'] || 
+               req.socket.remoteAddress || 
+               '127.0.0.1';
 
-      if (error) throw error;
+    const supabaseUrl = process.env.SUPABASE_URL;
+    const supabaseKey = process.env.SUPABASE_KEY;
 
-      return res.status(200).json(data || { visit_date: today, unique_visitors: 0 });
+    if (!supabaseUrl || !supabaseKey) {
+      throw new Error('Server Environment Variables SUPABASE_URL or SUPABASE_KEY are missing.');
     }
 
-    if (req.method === 'POST') {
-      // Сначала проверяем, есть ли запись за сегодня
-      const { data: existingRecord, error: fetchError } = await supabase
-        .from('unique_daily_visits')
-        .select('*')
-        .eq('visit_date', today)
-        .maybeSingle();
+    const supabase = createClient(supabaseUrl, supabaseKey);
 
-      if (fetchError) throw fetchError;
+    const now = new Date();
+    const timezoneOffset = -now.getTimezoneOffset();
+    const offsetHours = String(Math.floor(Math.abs(timezoneOffset) / 60)).padStart(2, '0');
+    const offsetMinutes = String(Math.abs(timezoneOffset) % 60).padStart(2, '0');
+    const offsetSign = timezoneOffset >= 0 ? '+' : '-';
+    
+    const yyyy = now.getFullYear();
+    const mm = String(now.getMonth() + 1).padStart(2, '0');
+    const dd = String(now.getDate()).padStart(2, '0');
+    const dateOnlyStr = `${yyyy}-${mm}-${dd}T00:00:00${offsetSign}${offsetHours}:${offsetMinutes}`;
 
-      if (existingRecord) {
-        // Если запись есть — обновляем (инкрементируем счетчик на 1)
-        const { data: updateData, error: updateError } = await supabase
-          .from('unique_daily_visits')
-          .update({ unique_visitors: existingRecord.unique_visitors + 1 })
-          .eq('visit_date', today)
-          .select()
-          .single();
+    const todayStart = `${yyyy}-${mm}-${dd}T00:00:00Z`;
+    const todayEnd = `${yyyy}-${mm}-${dd}T23:59:59Z`;
 
-        if (updateError) throw updateError;
-        return res.status(200).json(updateData);
-      } else {
-        // Если записи нет — создаем новую со значением 1
-        const { data: insertData, error: insertError } = await supabase
-          .from('unique_daily_visits')
-          .insert([{ visit_date: today, unique_visitors: 1 }])
-          .select()
-          .single();
+    // Поиск визита с таким же IP за текущие сутки
+    const { data: existingVisits, error: selectError } = await supabase
+      .from('site_visits')
+      .select('id')
+      .eq('ip', ip)
+      .gte('visited_at', todayStart)
+      .lte('visited_at', todayEnd);
 
-        if (insertError) throw insertError;
-        return res.status(200).json(insertData);
+    if (selectError) {
+      throw new Error(`Supabase select error: ${selectError.message}`);
+    }
+
+    // Если записей за сегодня нет — фиксируем визит и его IP
+    if (!existingVisits || existingVisits.length === 0) {
+      const { error: insertError } = await supabase
+        .from('site_visits')
+        .insert([{ visited_at: dateOnlyStr, ip: ip }]);
+
+      if (insertError) {
+        throw new Error(`Supabase insert error: ${insertError.message}`);
       }
+
+      return res.status(200).json({ success: true, message: 'Visit successfully recorded with IP.' });
     }
 
-    return res.status(405).json({ error: 'Метод не поддерживается' });
-  } catch (err) {
-    console.error('Ошибка в API функции:', err.message);
-    return res.status(500).json({ error: 'Внутренняя ошибка сервера', details: err.message });
+    return res.status(200).json({ success: true, message: 'Visit is already counted for this IP today.' });
+
+  } catch (error) {
+    console.error('API /visit error:', error.message);
+    return res.status(500).json({ error: error.message });
   }
 }
