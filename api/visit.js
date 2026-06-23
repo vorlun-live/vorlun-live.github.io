@@ -9,6 +9,7 @@ export default async function handler(req, res) {
     return res.status(200).end();
   }
 
+  // Разрешаем строго POST, чтобы исключить GET/PUT коллизии
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
@@ -20,27 +21,24 @@ export default async function handler(req, res) {
     const supabaseKey = process.env.SUPABASE_KEY;
 
     if (!supabaseUrl || !supabaseKey) {
-      throw new Error('Server Environment Variables SUPABASE_URL or SUPABASE_KEY are missing.');
+      throw new Error('Environment variables are missing');
     }
 
     const supabase = createClient(supabaseUrl, supabaseKey);
 
-    // Принудительно используем корректную ISO-дату без сдвигов часовых поясов, чтобы избежать конфликтов валидации в Supabase
-    const now = new Date().toISOString(); 
+    // Используем чистую ISO-строку времени для предотвращения конфликтов формата
+    const now = new Date().toISOString();
 
-    console.log('Попытка записи визита. IP:', ip, 'Дата:', now);
-
-    // Упрощенная вставка: напрямую добавляем запись в таблицу, не выполняя предварительный SELECT, 
-    // чтобы исключить ошибку падения при запросе или фильтрации по дате
+    // Проверяем вставку напрямую, чтобы исключить ошибки выборки
     const { error: insertError } = await supabase
       .from('site_visits')
       .insert([{ visited_at: now, ip: ip }]);
 
     if (insertError) {
-      throw new Error(`Supabase insert error: ${insertError.message}`);
+      throw new Error(`DB insert failed: ${insertError.message}`);
     }
 
-    return res.status(200).json({ success: true, message: 'Visit successfully recorded with IP.' });
+    return res.status(200).json({ success: true });
 
   } catch (error) {
     console.error('API /visit error:', error.message);

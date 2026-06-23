@@ -1,11 +1,12 @@
 {
   "version": 2,
-  "routes": [
+  "rewrites": [
     {
-      "src": "/api/visit",
-      "methods": ["POST"],
-      "dest": "/api/visit.js"
-    },
+      "source": "/api/visit",
+      "destination": "/api/visit.js"
+    }
+  ],
+  "routes": [
     {
       "src": "/favicon.ico",
       "dest": "/favicon.ico"
