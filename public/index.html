@@ -459,7 +459,7 @@
             </div>
 
             <div class="visitor-counter-box">
-                Уникальные визиты (сегодня): <span id="visit-status" style="color: var(--secondary);">Подсчет...</span>
+                Уникальные визиты (за сегодня): <span id="visit-status" style="color: var(--secondary);">Подсчет...</span>
             </div>
 
             <div class="sidebar-panel" style="font-size: 0.95rem; line-height: 1.6;">
@@ -719,25 +719,20 @@
     </div>
 
     <script>
-        // Переменные Vercel (будут подставлены автоматически при деплое)
         let SUPABASE_URL = "%SUPABASE_URL%";
         let SUPABASE_KEY = "%SUPABASE_KEY%";
 
-        // Автоматический фикс для локальной проверки:
         if (SUPABASE_URL.startsWith('%')) {
             SUPABASE_URL = "https://cyoqcafwpflfxscnpufk.supabase.co";
             SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN5b3FjYWZ3cGZsZnhzY25wdWZrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE5ODE3MDUsImV4cCI6MjA5NzU1NzcwNX0.nofBw5Q7iJ5nIPbqKQ5ABlmIw3_I3Pi6i-5f7UxWLiI";
         }
 
-        // Инициализация Supabase
         const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-        // Функция фиксации визита (срабатывает при загрузке страницы)
         async function registerVisit() {
             try {
                 const today = new Date().toISOString().split('T')[0];
 
-                // Напрямую из фронтенда проверяем наличие записи за сегодня
                 const { data: existing } = await supabaseClient
                     .from('unique_daily_visits')
                     .select('*')
@@ -745,19 +740,16 @@
                     .maybeSingle();
 
                 if (existing) {
-                    // Если запись есть — инкрементируем счетчик визитов
                     await supabaseClient
                         .from('unique_daily_visits')
                         .update({ unique_visitors: existing.unique_visitors + 1 })
                         .eq('visit_date', today);
                 } else {
-                    // Если записи за сегодня нет — создаем новую
                     await supabaseClient
                         .from('unique_daily_visits')
                         .insert([{ visit_date: today, unique_visitors: 1 }]);
                 }
 
-                // Обновляем текст на карточке для виджета сегодня
                 const { data: currentVisit } = await supabaseClient
                     .from('unique_daily_visits')
                     .select('unique_visitors')
@@ -771,52 +763,46 @@
             }
         }
 
-        // Инициализация Chart.js для графика посещаемости (За последние 7 дней)
         let myChart;
         document.addEventListener("DOMContentLoaded", async function() {
             const ctx = document.getElementById('trafficChart').getContext('2d');
 
-            // Получаем сегодняшнюю дату
             const todayObj = new Date();
             const labels = [];
-            const visitsData = [];
+            const datesArr = [];
 
-            // Генерируем массив последних 7 дней
+            // Формируем 7 дней, заканчивая сегодняшним
             for (let i = 6; i >= 0; i--) {
-                const d = new Date(todayObj);
-                d.setDate(todayObj.getDate() - i);
+                const d = new Date();
+                d.setDate(constObj.getDate() - i);
                 
-                // Форматируем дату как YYYY-MM-DD для поиска в базе
                 const dateStr = d.toISOString().split('T')[0];
-                // Форматируем для отображения на графике (ДД.ММ)
                 const displayStr = ('0' + d.getDate()).slice(-2) + '.' + ('0' + (d.getMonth() + 1)).slice(-2);
                 
                 labels.push(displayStr);
-                visitsData.push({ dateStr, displayStr });
+                datesArr.push(dateStr);
             }
 
-            // Запрашиваем из таблицы unique_daily_visits данные за эту неделю
-            const queryDateStart = labels[0].dateStr; 
+            // Запрашиваем данные за эту неделю из базы
             const { data: rawVisits } = await supabaseClient
                 .from('unique_daily_visits')
                 .select('visit_date, unique_visitors')
-                .gte('visit_date', visitsData[0].dateStr)
-                .lte('visit_date', visitsData[6].dateStr);
+                .gte('visit_date', datesArr[0])
+                .lte('visit_date', datesArr[6]);
 
-            // Сопоставляем полученные данные из базы с нашими 7 днями
-            const finalValues = visitsData.map(day => {
-                const found = rawVisits ? rawVisits.find(v => v.visit_date === day.dateStr) : null;
+            // Сопоставляем дни: если записи нет — ставим 0, убирая любые нули и плавающие значения
+            const finalValues = datesArr.map(dateStr => {
+                const found = rawVisits ? rawVisits.find(v => v.visit_date === dateStr) : null;
                 return found ? found.unique_visitors : 0;
             });
 
-            // 2. Инициализируем график с полученными числами за неделю
             myChart = new Chart(ctx, {
                 type: 'line',
                 data: {
-                    labels: labels, // Подписи (даты) последних 7 дней
+                    labels: labels,
                     datasets: [{
                         label: 'Уникальные визиты',
-                        data: finalValues, // Значения для каждого из 7 дней
+                        data: finalValues,
                         borderColor: '#2cb67d',
                         backgroundColor: 'rgba(44, 182, 125, 0.1)',
                         borderWidth: 2,
@@ -840,7 +826,7 @@
                             ticks: { 
                                 color: '#94a1b2', 
                                 font: { size: 10 },
-                                // ВАЖНО: убираем нули после запятой в оси графика (шаг 1 целый визит)
+                                // Принудительно отсекаем дробные значения (только целые числа)
                                 callback: function(value) {
                                     return Number.isInteger(value) ? value : '';
                                 }
@@ -850,11 +836,9 @@
                 }
             });
 
-            // 3. Запуск регистрации сегодняшнего визита
             await registerVisit();
         });
 
-        // Роутинг (переключение страниц внутри SPA)
         function showPage(pageId) {
             const pages = document.querySelectorAll('.page');
             pages.forEach(page => page.classList.remove('active-page'));
