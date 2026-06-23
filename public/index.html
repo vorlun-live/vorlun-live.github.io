@@ -556,7 +556,7 @@
                 <section class="seo-section">
                     <h3>О проекте VORLUN — Гайды и обучение стримингу</h3>
                     <p>Добро пожаловать в базу знаний для начинающих и опытных контент-мейкеров. Если вы хотите начать вести трансляции на Twitch, записывать ролики для YouTube или развивать свой TikTok-канал, здесь собраны актуальные материалы и пошаговые руководства. Мы разбираем ключевые технические аспекты: как настроить OBS Studio до идеального состояния без потери кадров, какие фильтры использовать для получения студийного звука с бюджетного микрофона, а также как правильно выставить свет и экспозицию веб-камеры.</p>
-                    <p>Оптимизация оборудования и программного обеспечения — залог качественного и стабильного эфира, который удерживает зрителя. Изучайте наши подробные статьи, внедряйте проверенные настройки кодировщиков, избегайте частых ошибок новичков и привлекайте новую аудиторию с помощью органического трафика из социальных сетей!</p>
+                    <p>Оптимизация оборудования и программного обеспечения — залог качественного и стабильного эфира, который удерживает зрителя. Изучайте наши подробные статьи, внедряйте проверенные настройки кодировщиков, избегайте частых ошибок новинков и привлекайте новую аудиторию с помощью органического трафика из социальных сетей!</p>
                 </section>
             </div>
 
@@ -720,9 +720,9 @@
     </div>
 
     <script>
-        // Ключи доступа Supabase
-        const SUPABASE_URL = "https://cyoqcafwpflfxscnpufk.supabase.co";
-        const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN5b3FjYWZ3cGZsZnhzY25wdWZrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE5ODE3MDUsImV4cCI6MjA5NzU1NzcwNX0.nofBw5Q7iJ5nIPbqKQ5ABlmIw3_I3Pi6i-5f7UxWLiI";
+        // Получение ключей из переменных окружения Vercel (Environment Variables)
+        const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL || "https://cyoqcafwpflfxscnpufk.supabase.co";
+        const SUPABASE_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN5b3FjYWZ3cGZsZnhzY25wdWZrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE5ODE3MDUsImV4cCI6MjA5NzU1NzcwNX0.nofBw5Q7iJ5nIPbqKQ5ABlmIw3_I3Pi6i-5f7UxWLiI";
 
         // Инициализация клиента Supabase в браузере
         const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
