@@ -2,6 +2,15 @@
   "version": 2,
   "routes": [
     {
+      "src": "/api/visit",
+      "methods": ["POST"],
+      "dest": "/api/visit.js"
+    },
+    {
+      "src": "/favicon.ico",
+      "dest": "/favicon.ico"
+    },
+    {
       "src": "/(.*)",
       "dest": "/index.html"
     }
