@@ -10,7 +10,6 @@
     <meta name="google-site-verification" content="em-FzPvx-EDfwSKd8oKJtHq9x_0OzSksyTe-Tg9n3fs" />
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
     <script type="text/javascript">
@@ -720,8 +719,8 @@
     </div>
 
     <script>
-        // Бэкенд для статики/редиректов
-        const API_URL = 'https://vorlun-live.github.io'; 
+        // Бэкенд для статики/редиректов (адрес вашего Vercel-сервера из ошибки)
+        const API_URL = 'https://vorlun-live-github-io.vercel.app'; 
 
         // Переменные Vercel (будут подставлены автоматически при деплое)
         let SUPABASE_URL = "%SUPABASE_URL%";
@@ -742,9 +741,8 @@
                 // Получение сегодняшней даты для БД (формат YYYY-MM-DD)
                 const today = new Date().toISOString().split('T')[0];
 
-                // Вызываем наш API `visit.js` (деплоится на Vercel как серверная функция),
-                // который инкрементирует счетчик уникальных визитов за сегодня с помощью метода POST
-                const response = await fetch('/api/visit', {
+                // Вызываем API, используя абсолютный URL на Vercel, чтобы избежать ошибки 405
+                const response = await fetch(`${API_URL}/api/visit`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' }
                 });
