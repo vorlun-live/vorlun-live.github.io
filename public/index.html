@@ -718,10 +718,10 @@
     </div>
 
     <script>
-        // Бэкенд на Vercel (для редиректов и статики)
+        // Бэкенд (для редиректов и статики)
         const API_URL = 'https://vorlun-live-github-io.vercel.app'; 
 
-        // Инициализация ключей Supabase и коннекта
+        // Ключи доступа Supabase
         const SUPABASE_URL = "https://cyoqcafwpflfxscnpufk.supabase.co";
         const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN5b3FjYWZ3cGZsZnhzY25wdWZrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE5ODE3MDUsImV4cCI6MjA5NzU1NzcwNX0.nofBw5Q7iJ5nIPbqKQ5ABlmIw3_I3Pi6i-5f7UxWLiI";
 
@@ -734,7 +734,7 @@
                 const clientIp = "client-browser-visit"; 
                 const nowTime = new Date().toISOString();
 
-                // Фиксируем визит в таблице site_visits
+                // Фиксируем визит в таблице site_visits напрямую из браузера
                 const { error: insertError } = await supabase
                     .from('site_visits')
                     .insert([{ 
@@ -760,10 +760,10 @@
             myChart = new Chart(ctx, {
                 type: 'line',
                 data: {
-                    labels: [], // Будут заполнены датами из статистики
+                    labels: [], 
                     datasets: [{
                         label: 'Посещения',
-                        data: [], // Значения
+                        data: [], 
                         borderColor: '#2cb67d',
                         backgroundColor: 'rgba(44, 182, 125, 0.1)',
                         borderWidth: 2,
@@ -782,39 +782,9 @@
                 }
             });
 
-            // Сразу регистрируем визит и грузим статусы
+            // Запуск регистрации визита
             await registerVisit();
-            await fetchVisitStats();
         });
-
-        // Получение статистики (можно использовать для отображения графика)
-        async function fetchVisitStats() {
-            try {
-                // Прямой вызов GET /api/visit для получения данных за 7 дней (агрегация с Vercel-бэка)
-                const response = await fetch(`${API_URL}/api/visit`, {
-                    method: 'GET',
-                    headers: { 'Content-Type': 'application/json' }
-                });
-                
-                if (response.ok) {
-                    const stats = await response.json();
-                    if (stats && stats.dates && stats.counts) {
-                        updateChart(stats.dates, stats.counts);
-                    }
-                }
-            } catch (err) {
-                console.error("Ошибка загрузки или отправки статистики:", err);
-            }
-        }
-
-        // Рендер данных в график
-        function updateChart(labels, data) {
-            if (myChart) {
-                myChart.data.labels = labels;
-                myChart.data.datasets[0].data = data;
-                myChart.update();
-            }
-        }
 
         // Роутинг (переключение страниц внутри SPA)
         function showPage(pageId) {
