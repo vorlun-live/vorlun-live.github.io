@@ -681,7 +681,7 @@
                         </div>
 
                         <h3>3. Лимитер (Limiter)</h3>
-                        <p>Поставьте <strong>Порог срабатывания (Threshold) на -3.0 дБ</strong>. Теперь, как бы громко вы ни закричали, звук никогда не уйдет в перегруз и не оглушит зрителей.</p>
+                        <p>ставьте <strong>Порог срабатывания (Threshold) на -3.0 дБ</strong>. Теперь, как бы громко вы ни закричали, звук никогда не уйдет в перегруз и не оглушит зрителей.</p>
                     </div>
                 </div>
             </div>
@@ -709,7 +709,7 @@
                 <div class="section">
                     <h1 style="font-size: 2rem; margin-top: 0; color: var(--text-main);">Продвижение стримов через TikTok: алгоритмы 2026 года</h1>
                     <div class="article-content">
-                        <p>Просто стримить на Твиче в пустоту — это главная ошибка новичков. Твой главный локомотив продвижения — это короткие ролики в ТикТок, которые подхватывают алгоритмы рекомендаций.</p>
+                        <p>Просто стримить на Твиче в пустоту — это главная ошибка новинков. Твой главный локомотив продвижения — это короткие ролики в ТикТок, которые подхватывают алгоритмы рекомендаций.</p>
                         <hr>
                         <p>Секрет успеха прост: делайте нарезки лучших моментов, добавляйте динамичные субтитры и призывайте переходить по ссылке в профиле.</p>
                     </div>
@@ -720,12 +720,12 @@
     </div>
 
     <script>
-        // Подстановка переменных из настроек Environment Variables в Vercel
+        // Подстановка ключей из Vercel Environment Variables
         const SUPABASE_URL = "%SUPABASE_URL%";
         const SUPABASE_KEY = "%SUPABASE_KEY%";
 
-        // Инициализация клиента Supabase в браузере
-        const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        // 2. Инициализация (теперь библиотека точно загружена)
+        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
         // Функция фиксации визита (срабатывает при загрузке)
         async function registerVisit() {
@@ -734,7 +734,7 @@
                 const nowTime = new Date().toISOString();
 
                 // Фиксируем визит в таблице site_visits напрямую из браузера
-                const { error: insertError } = await supabase
+                const { error: insertError } = await supabaseClient
                     .from('site_visits')
                     .insert([{ 
                         visited_at: nowTime,
