@@ -123,44 +123,6 @@
             background: rgba(127, 90, 240, 0.15);
         }
 
-        /* Новое расположение и стили кнопок Входа и Регистрации */
-        .header-auth {
-            display: flex;
-            gap: 12px;
-            align-items: center;
-        }
-
-        .btn-auth {
-            padding: 8px 18px;
-            border-radius: 8px;
-            font-weight: 600;
-            font-size: 0.9rem;
-            text-decoration: none;
-            transition: all 0.2s;
-            cursor: pointer;
-        }
-
-        .btn-login {
-            background-color: transparent;
-            color: var(--text-main);
-            border: 1px solid rgba(127, 90, 240, 0.3);
-        }
-
-        .btn-login:hover {
-            border-color: var(--primary);
-            background: rgba(127, 90, 240, 0.1);
-        }
-
-        .btn-register {
-            background-color: var(--primary);
-            color: #ffffff;
-            border: none;
-        }
-
-        .btn-register:hover {
-            background-color: var(--twitch-hover);
-        }
-
         .main-wrapper {
             display: grid;
             grid-template-columns: 320px 1fr;
@@ -172,14 +134,10 @@
             box-sizing: border-box;
         }
 
-        /* Статичная панель стримера (сайдбар) */
         .sidebar {
             display: flex;
             flex-direction: column;
             gap: 22px;
-            position: sticky; 
-            top: 100px; 
-            align-self: flex-start;
         }
 
         .sidebar-panel {
@@ -384,46 +342,41 @@
         }
         .back-btn:hover { border-color: var(--primary); color: var(--text-main); }
 
-        /* Восстановленные (уменьшенные) исходные размеры для статуса стрима */
         .stream-status-widget {
             background: var(--card-bg);
             border-radius: 12px;
-            padding: 18px;
+            padding: 22px;
             border: 1px solid rgba(255,255,255,0.05);
             margin-top: 18px;
             text-align: center;
         }
-
         .stream-offline-msg {
             color: var(--text-muted);
-            font-size: 0.95rem; 
+            font-size: 0.95rem;
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 12px;
+            gap: 15px;
         }
-
         .stream-offline-dot {
-            width: 8px; 
-            height: 8px;
+            width: 10px;
+            height: 10px;
             background-color: var(--text-muted);
             border-radius: 50%;
             display: inline-block;
         }
-
         .check-channel-btn {
             display: inline-block;
             margin-top: 5px;
-            padding: 10px 20px;
+            padding: 12px 24px;
             background-color: var(--twitch-color);
             color: #fff;
             text-decoration: none;
             border-radius: 8px;
             font-weight: bold;
-            font-size: 0.9rem;
+            font-size: 0.95rem;
             transition: background 0.2s;
         }
-
         .check-channel-btn:hover {
             background-color: var(--twitch-hover);
         }
@@ -461,9 +414,7 @@
         @media (max-width: 850px) {
             .header-container { flex-direction: column; gap: 10px; }
             nav { width: 100%; justify-content: center; overflow-x: auto; padding-bottom: 5px; }
-            .header-auth { width: 100%; justify-content: center; padding-bottom: 8px; }
             .main-wrapper { grid-template-columns: 1fr; width: 95%; margin: 20px auto; gap: 20px; }
-            .sidebar { position: static; } /* На смартфонах отменяем статичность панели для удобства */
             .stats-grid { grid-template-columns: 1fr; }
             .links-grid { grid-template-columns: 1fr; }
             .catalog-grid { grid-template-columns: 1fr; }
@@ -480,11 +431,6 @@
                 <button id="nav-main" class="active" onclick="showPage('main')">Главная</button>
                 <button id="nav-catalog" onclick="showPage('catalog')">Каталог гайдов</button>
             </nav>
-            
-            <div class="header-auth">
-                <a href="#login" class="btn-auth btn-login">Вход</a>
-                <a href="#register" class="btn-auth btn-register">Регистрация</a>
-            </div>
         </div>
     </header>
 
@@ -882,10 +828,10 @@
             };
 
             try {
-                // При каждой загрузке отправляем POST-запрос для автоматического учета визита
+                // 1. При каждой загрузке отправляем POST-запрос для автоматического учета визита (с фиксацией IP)
                 await fetch('/api/visit', { method: 'POST' });
 
-                // Получаем статистику для графика
+                // 2. Получаем статистику для графика
                 const response = await fetch('/api/visit');
                 const data = await response.json();
                 
@@ -896,6 +842,7 @@
 
                 const visitsByDay = {};
                 data.forEach(item => {
+                    // Используем правильные поля из вьюхи unique_daily_visits: visit_date и unique_visitors
                     if (!item.visit_date) return;
                     const dateObj = new Date(item.visit_date);
                     const day = String(dateObj.getDate()).padStart(2, '0');
@@ -929,7 +876,7 @@
             }
         }
 
-        // Инициализация данных визитов
+        // Вызов инициализации данных при первой загрузке страницы
         loadVisitsData();
     </script>
 </body>
