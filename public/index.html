@@ -677,11 +677,11 @@
                         </ul>
 
                         <div class="tip-box">
-                            <strong>Важно:</strong> Потестируйте пороги в наушниках, чтобы фильтр не «откусывал» первые буквы ваших слов.
+                            <strong>Важно:</strong> Потестируйте пороги в наушниках, чтобы фильтр не «откусывой» первые буквы ваших слов.
                         </div>
 
                         <h3>3. Лимитер (Limiter)</h3>
-                        <p>ставьте <strong>Порог срабатывания (Threshold) на -3.0 дБ</strong>. Теперь, как бы громко вы ни закричали, звук никогда не уйдет в перегруз и не оглушит зрителей.</p>
+                        <p>Ставьте <strong>Порог срабатывания (Threshold) на -3.0 дБ</strong>. Теперь, как бы громко вы ни закричали, звук никогда не уйдет в перегруз и не оглушит зрителей.</p>
                     </div>
                 </div>
             </div>
@@ -720,11 +720,18 @@
     </div>
 
     <script>
-        // Подстановка ключей из Vercel Environment Variables
-        const SUPABASE_URL = "%SUPABASE_URL%";
-        const SUPABASE_KEY = "%SUPABASE_KEY%";
+        // Переменные Vercel (будут подставлены автоматически при деплое)
+        let SUPABASE_URL = "%SUPABASE_URL%";
+        let SUPABASE_KEY = "%SUPABASE_KEY%";
 
-        // 2. Инициализация (теперь библиотека точно загружена)
+        // АВТОМАТИЧЕСКИЙ ФИКС ДЛЯ ЛОКАЛЬНОЙ ПРОВЕРКИ:
+        // Если проект открыт локально (не собран Vercel), подставляем переданные вами ключи
+        if (SUPABASE_URL.startsWith('%')) {
+            SUPABASE_URL = "https://cyoqcafwpflfxscnpufk.supabase.co";
+            SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN5b3FjYWZ3cGZsZnhzY25wdWZrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE5ODE3MDUsImV4cCI6MjA5NzU1NzcwNX0.nofBw5Q7iJ5nIPbqKQ5ABlmIw3_I3Pi6i-5f7UxWLiI";
+        }
+
+        // Инициализация Supabase
         const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
         // Функция фиксации визита (срабатывает при загрузке)
