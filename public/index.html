@@ -828,11 +828,13 @@
             };
 
             try {
-                // Отправляем POST для фиксации визита (относительный путь /api/visits)
-                await fetch('/api/visits', { method: 'POST' });
+                // Используем относительные пути для вызовов роутов API Vercel
+                await fetch('/api/visit', { method: 'POST' });
 
-                // Получаем статистику по относительному пути
-                const response = await fetch('/api/visits', { method: 'GET' });
+                const response = await fetch('/api/visit', {
+                    method: 'GET'
+                });
+                
                 const data = await response.json();
                 
                 if (!Array.isArray(data) || data.length === 0) {
@@ -875,6 +877,7 @@
             }
         }
 
+        // Вызов инициализации данных при первой загрузке страницы
         loadVisitsData();
     </script>
 </body>
