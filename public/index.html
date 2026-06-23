@@ -732,9 +732,6 @@
     </div>
 
     <script>
-        // Бэкенд-логика. Путь к Vercel бэкенду
-        const API_URL = 'https://vorlun-live-github-io.vercel.app'; 
-
         // Инициализация Supabase
         let SUPABASE_URL = "%SUPABASE_URL%";
         let SUPABASE_KEY = "%SUPABASE_KEY%";
@@ -746,19 +743,47 @@
 
         const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-        // Облегченная фиксация визита в фоне
-        async function registerVisit() {
+        // Функция фиксации визита напрямую в Supabase таблицу `site_visits`
+        async function registerVisitDirectly() {
             try {
-                await fetch(`${API_URL}/api/visit`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' }
-                });
+                const now = new Date();
+                const timezoneOffset = -now.getTimezoneOffset(); // Смещение в минутах
+                const offsetHours = String(Math.floor(Math.abs(timezoneOffset) / 60)).padStart(2, '0');
+                const offsetMinutes = String(Math.abs(timezoneOffset) % 60).padStart(2, '0');
+                const offsetSign = timezoneOffset >= 0 ? '+' : '-';
+                
+                // Форматируем дату в ISO 8601 со смещением (например: 2026-06-24T00:00:00+03:00)
+                const yyyy = now.getFullYear();
+                const mm = String(now.getMonth() + 1).padStart(2, '0');
+                const dd = String(now.getDate()).padStart(2, '0');
+                const dateOnlyStr = `${yyyy}-${mm}-${dd}T00:00:00${offsetSign}${offsetHours}:${offsetMinutes}`;
+
+                // Проверяем, есть ли запись за сегодня в таблице site_visits, чтобы не дублировать при перезагрузках
+                const todayStart = `${yyyy}-${mm}-${dd}T00:00:00Z`;
+                const todayEnd = `${yyyy}-${mm}-${dd}T23:59:59Z`;
+
+                const { data: existingVisits } = await supabaseClient
+                    .from('site_visits')
+                    .select('id')
+                    .gte('visited_at', todayStart)
+                    .lte('visited_at', todayEnd);
+
+                // Если записей за сегодня от этого пользователя (браузера) еще не было — добавляем
+                if (!existingVisits || existingVisits.length === 0) {
+                    await supabaseClient.from('site_visits').insert([
+                        { visited_at: dateOnlyStr }
+                    ]);
+                    console.log("Визит успешно зафиксирован в базе данных напрямую.");
+                } else {
+                    console.log("Визит за сегодня уже учтен.");
+                }
+
             } catch (err) {
-                console.log("Фоновая фиксация визита пропущена (работа в оффлайн-режиме).");
+                console.error("Ошибка при прямой фиксации визита:", err.message);
             }
         }
 
-        // Инициализация Chart.js с обходом пустых значений (если таблица пуста, рисуем нули)
+        // Инициализация Chart.js
         let myChart;
         document.addEventListener("DOMContentLoaded", async function() {
             const ctx = document.getElementById('trafficChart').getContext('2d');
@@ -767,6 +792,7 @@
             let visits = [];
             
             try {
+                // Забираем данные из представления unique_daily_visits
                 const { data, error } = await supabaseClient
                     .from('unique_daily_visits')
                     .select('visit_date, unique_visitors')
@@ -837,7 +863,8 @@
                 }
             });
 
-            await registerVisit();
+            // Фиксируем визит
+            await registerVisitDirectly();
         });
 
         function showPage(pageId) {
