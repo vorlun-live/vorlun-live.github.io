@@ -10,7 +10,6 @@
     <meta name="google-site-verification" content="em-FzPvx-EDfwSKd8oKJtHq9x_0OzSksyTe-Tg9n3fs" />
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
     <script type="text/javascript">
@@ -460,7 +459,7 @@
             </div>
 
             <div class="visitor-counter-box">
-                Уникальные визиты (за сегодня): <span id="visit-status" style="color: var(--secondary);">Подсчет...</span>
+                Уникальные визиты (сегодня): <span id="visit-status" style="color: var(--secondary);">Подсчет...</span>
             </div>
 
             <div class="sidebar-panel" style="font-size: 0.95rem; line-height: 1.6;">
@@ -720,9 +719,6 @@
     </div>
 
     <script>
-        // Бэкенд для статики/редиректов
-        const API_URL = 'https://vorlun-live.github.io'; 
-
         // Переменные Vercel (будут подставлены автоматически при деплое)
         let SUPABASE_URL = "%SUPABASE_URL%";
         let SUPABASE_KEY = "%SUPABASE_KEY%";
@@ -736,61 +732,91 @@
         // Инициализация Supabase
         const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-        // Функция фиксации визита (срабатывает при загрузке)
+        // Функция фиксации визита (срабатывает при загрузке страницы)
         async function registerVisit() {
             try {
-                // Получение сегодняшней даты для БД (формат YYYY-MM-DD)
                 const today = new Date().toISOString().split('T')[0];
 
-                // Вызываем наш API `visit.js` (деплоится на Vercel как серверная функция),
-                // который инкрементирует счетчик уникальных визитов за сегодня с помощью метода POST
-                const response = await fetch('/api/visit', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' }
-                });
-                
-                if (!response.ok) throw new Error('Ошибка обновления счетчика');
-                
-                const data = await response.json();
-                console.log("Уникальный визит зафиксирован:", data);
-                document.getElementById('visit-status').innerText = data.unique_visitors || 1;
-            } catch (err) {
-                console.error("Ошибка при фиксации визита:", err.message);
-                document.getElementById('visit-status').innerText = "Ошибка загрузки";
-            }
-        }
+                // Напрямую из фронтенда проверяем наличие записи за сегодня
+                const { data: existing } = await supabaseClient
+                    .from('unique_daily_visits')
+                    .select('*')
+                    .eq('visit_date', today)
+                    .maybeSingle();
 
-        // Инициализация Chart.js для графика посещаемости
-        let myChart;
-        document.addEventListener("DOMContentLoaded", async function() {
-            const ctx = document.getElementById('trafficChart').getContext('2d');
+                if (existing) {
+                    // Если запись есть — инкрементируем счетчик визитов
+                    await supabaseClient
+                        .from('unique_daily_visits')
+                        .update({ unique_visitors: existing.unique_visitors + 1 })
+                        .eq('visit_date', today);
+                } else {
+                    // Если записи за сегодня нет — создаем новую
+                    await supabaseClient
+                        .from('unique_daily_visits')
+                        .insert([{ visit_date: today, unique_visitors: 1 }]);
+                }
 
-            // 1. Получаем число визитов за сегодня из таблицы unique_daily_visits
-            let visitsCount = 0;
-            try {
-                const today = new Date().toISOString().split('T')[0];
-                const { data, error } = await supabaseClient
+                // Обновляем текст на карточке для виджета сегодня
+                const { data: currentVisit } = await supabaseClient
                     .from('unique_daily_visits')
                     .select('unique_visitors')
                     .eq('visit_date', today)
                     .maybeSingle();
 
-                if (error) throw error;
-                if (data && data.unique_visitors !== null) {
-                    visitsCount = data.unique_visitors;
-                }
+                document.getElementById('visit-status').innerText = currentVisit ? currentVisit.unique_visitors : 1;
             } catch (err) {
-                console.error("Не удалось загрузить число визитов для графика:", err.message);
+                console.error("Ошибка при фиксации визита:", err.message);
+                document.getElementById('visit-status').innerText = "Ошибка записи";
             }
-            
-            // 2. Инициализируем график с полученным числом
+        }
+
+        // Инициализация Chart.js для графика посещаемости (За последние 7 дней)
+        let myChart;
+        document.addEventListener("DOMContentLoaded", async function() {
+            const ctx = document.getElementById('trafficChart').getContext('2d');
+
+            // Получаем сегодняшнюю дату
+            const todayObj = new Date();
+            const labels = [];
+            const visitsData = [];
+
+            // Генерируем массив последних 7 дней
+            for (let i = 6; i >= 0; i--) {
+                const d = new Date(todayObj);
+                d.setDate(todayObj.getDate() - i);
+                
+                // Форматируем дату как YYYY-MM-DD для поиска в базе
+                const dateStr = d.toISOString().split('T')[0];
+                // Форматируем для отображения на графике (ДД.ММ)
+                const displayStr = ('0' + d.getDate()).slice(-2) + '.' + ('0' + (d.getMonth() + 1)).slice(-2);
+                
+                labels.push(displayStr);
+                visitsData.push({ dateStr, displayStr });
+            }
+
+            // Запрашиваем из таблицы unique_daily_visits данные за эту неделю
+            const queryDateStart = labels[0].dateStr; 
+            const { data: rawVisits } = await supabaseClient
+                .from('unique_daily_visits')
+                .select('visit_date, unique_visitors')
+                .gte('visit_date', visitsData[0].dateStr)
+                .lte('visit_date', visitsData[6].dateStr);
+
+            // Сопоставляем полученные данные из базы с нашими 7 днями
+            const finalValues = visitsData.map(day => {
+                const found = rawVisits ? rawVisits.find(v => v.visit_date === day.dateStr) : null;
+                return found ? found.unique_visitors : 0;
+            });
+
+            // 2. Инициализируем график с полученными числами за неделю
             myChart = new Chart(ctx, {
                 type: 'line',
                 data: {
-                    labels: ["Сегодня"], 
+                    labels: labels, // Подписи (даты) последних 7 дней
                     datasets: [{
                         label: 'Уникальные визиты',
-                        data: [visitsCount], 
+                        data: finalValues, // Значения для каждого из 7 дней
                         borderColor: '#2cb67d',
                         backgroundColor: 'rgba(44, 182, 125, 0.1)',
                         borderWidth: 2,
@@ -801,15 +827,30 @@
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
-                    plugins: { legend: { display: false } },
+                    plugins: { 
+                        legend: { display: false } 
+                    },
                     scales: {
-                        x: { grid: { display: false }, ticks: { color: '#94a1b2', font: { size: 10 } } },
-                        y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#94a1b2', font: { size: 10 } } }
+                        x: { 
+                            grid: { display: false }, 
+                            ticks: { color: '#94a1b2', font: { size: 10 } } 
+                        },
+                        y: { 
+                            grid: { color: 'rgba(255,255,255,0.05)' }, 
+                            ticks: { 
+                                color: '#94a1b2', 
+                                font: { size: 10 },
+                                // ВАЖНО: убираем нули после запятой в оси графика (шаг 1 целый визит)
+                                callback: function(value) {
+                                    return Number.isInteger(value) ? value : '';
+                                }
+                            } 
+                        }
                     }
                 }
             });
 
-            // 3. Запуск регистрации визита (вызов API для обновления счетчика)
+            // 3. Запуск регистрации сегодняшнего визита
             await registerVisit();
         });
 
