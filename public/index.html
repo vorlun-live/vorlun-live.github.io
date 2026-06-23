@@ -677,7 +677,7 @@
                         </ul>
 
                         <div class="tip-box">
-                            <strong>Важно:</strong> Потестируйте пороги в наушниках, чтобы фильтр не «откусывой» первые буквы ваших слов.
+                            <strong>Важно:</strong> Потестируйте пороги в наушниках, чтобы фильтр не откусывал первые буквы ваших слов.
                         </div>
 
                         <h3>3. Лимитер (Limiter)</h3>
@@ -720,12 +720,14 @@
     </div>
 
     <script>
-        // Переменные Vercel (будут подставлены автоматически при деплое)
+        // Бэкенд для статики/редиректов
+        const API_URL = 'https://vorlun-live-github-io.vercel.app'; 
+
+        // Переменные Vercel (подставляются автоматически при деплое)
         let SUPABASE_URL = "%SUPABASE_URL%";
         let SUPABASE_KEY = "%SUPABASE_KEY%";
 
-        // АВТОМАТИЧЕСКИЙ ФИКС ДЛЯ ЛОКАЛЬНОЙ ПРОВЕРКИ:
-        // Если проект открыт локально (не собран Vercel), подставляем переданные вами ключи
+        // Автоматический фикс для локальной проверки
         if (SUPABASE_URL.startsWith('%')) {
             SUPABASE_URL = "https://cyoqcafwpflfxscnpufk.supabase.co";
             SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN5b3FjYWZ3cGZsZnhzY25wdWZrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE5ODE3MDUsImV4cCI6MjA5NzU1NzcwNX0.nofBw5Q7iJ5nIPbqKQ5ABlmIw3_I3Pi6i-5f7UxWLiI";
@@ -734,10 +736,20 @@
         // Инициализация Supabase
         const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-        // Функция фиксации визита (срабатывает при загрузке)
+        // Функция фиксации визита (срабатывает при загрузке страницы)
         async function registerVisit() {
             try {
-                const clientIp = "client-browser-visit"; 
+                // Получаем реальный IP-адрес посетителя через внешний сервис
+                let clientIp = "unknown-ip";
+                try {
+                    const response = await fetch('https://api.ipify.org?format=json');
+                    const data = await response.json();
+                    clientIp = data.ip;
+                } catch (ipErr) {
+                    console.error("Не удалось получить IP, используем дефолтную заглушку:", ipErr);
+                    clientIp = "client-browser-visit";
+                }
+
                 const nowTime = new Date().toISOString();
 
                 // Фиксируем визит в таблице site_visits напрямую из браузера
@@ -750,7 +762,7 @@
 
                 if (insertError) throw insertError;
 
-                console.log("Визит успешно учтен в Supabase!");
+                console.log("Визит успешно учтен в Supabase с IP:", clientIp);
                 document.getElementById('visit-status').innerText = "Учтен";
             } catch (err) {
                 console.error("Ошибка при фиксации визита:", err.message);
