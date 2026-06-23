@@ -117,6 +117,7 @@
             transition: all 0.2s;
             padding: 8px 14px;
             border-radius: 8px;
+            cursor: pointer;
             white-space: nowrap;
         }
 
@@ -241,6 +242,7 @@
             transition: all 0.25s ease;
             text-align: center;
             box-sizing: border-box;
+            cursor: pointer;
         }
 
         .btn-twitch { background-color: var(--twitch-color); color: #ffffff; box-shadow: 0 4px 12px rgba(100, 65, 165, 0.2); }
@@ -718,10 +720,7 @@
     </div>
 
     <script>
-        // Бэкенд (для редиректов и статики)
-        const API_URL = 'https://vorlun-live-github-io.vercel.app'; 
-
-        // Ключи доступа Supabase
+        // Ключи доступа Supabase (замените при необходимости на ваши реальные)
         const SUPABASE_URL = "https://cyoqcafwpflfxscnpufk.supabase.co";
         const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN5b3FjYWZ3cGZsZnhzY25wdWZrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE5ODE3MDUsImV4cCI6MjA5NzU1NzcwNX0.nofBw5Q7iJ5nIPbqKQ5ABlmIw3_I3Pi6i-5f7UxWLiI";
 
@@ -760,10 +759,10 @@
             myChart = new Chart(ctx, {
                 type: 'line',
                 data: {
-                    labels: [], 
+                    labels: ["Сегодня"], 
                     datasets: [{
                         label: 'Посещения',
-                        data: [], 
+                        data: [1], 
                         borderColor: '#2cb67d',
                         backgroundColor: 'rgba(44, 182, 125, 0.1)',
                         borderWidth: 2,
