@@ -116,7 +116,6 @@
             transition: all 0.2s;
             padding: 8px 14px;
             border-radius: 8px;
-            cursor: pointer;
             white-space: nowrap;
         }
 
@@ -719,29 +718,24 @@
     </div>
 
     <script>
-        // Бэкенд для статики/редиректов (адрес вашего Vercel-сервера из ошибки)
+        // Абсолютный путь к вашему бэкенду на Vercel (исправляет ошибку 405 Method Not Allowed)
         const API_URL = 'https://vorlun-live-github-io.vercel.app'; 
 
-        // Переменные Vercel (будут подставлены автоматически при деплое)
+        // Инициализация переменных Supabase (будут подставлены Vercel автоматически при деплое)
         let SUPABASE_URL = "%SUPABASE_URL%";
         let SUPABASE_KEY = "%SUPABASE_KEY%";
 
-        // Автоматический фикс для локальной проверки:
+        // Автоматический fallback для локальной разработки / проверок
         if (SUPABASE_URL.startsWith('%')) {
             SUPABASE_URL = "https://cyoqcafwpflfxscnpufk.supabase.co";
             SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN5b3FjYWZ3cGZsZnhzY25wdWZrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE5ODE3MDUsImV4cCI6MjA5NzU1NzcwNX0.nofBw5Q7iJ5nIPbqKQ5ABlmIw3_I3Pi6i-5f7UxWLiI";
         }
 
-        // Инициализация Supabase
         const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-        // Функция фиксации визита (срабатывает при загрузке)
+        // Фиксация визита (вызов API для обновления счетчика)
         async function registerVisit() {
             try {
-                // Получение сегодняшней даты для БД (формат YYYY-MM-DD)
-                const today = new Date().toISOString().split('T')[0];
-
-                // Вызываем API, используя абсолютный URL на Vercel, чтобы избежать ошибки 405
                 const response = await fetch(`${API_URL}/api/visit`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' }
@@ -758,37 +752,69 @@
             }
         }
 
-        // Инициализация Chart.js для графика посещаемости
+        // Инициализация Chart.js для графика посещаемости (с заполнением недостающих дней недели)
         let myChart;
         document.addEventListener("DOMContentLoaded", async function() {
             const ctx = document.getElementById('trafficChart').getContext('2d');
 
-            // 1. Получаем число визитов за сегодня из таблицы unique_daily_visits
-            let visitsCount = 0;
+            let dates = [];
+            let visits = [];
+            
             try {
-                const today = new Date().toISOString().split('T')[0];
+                // 1. Загружаем существующие данные из Supabase (от старых к новым)
                 const { data, error } = await supabaseClient
                     .from('unique_daily_visits')
-                    .select('unique_visitors')
-                    .eq('visit_date', today)
-                    .maybeSingle();
+                    .select('visit_date, unique_visitors')
+                    .order('visit_date', { ascending: true });
 
                 if (error) throw error;
-                if (data && data.unique_visitors !== null) {
-                    visitsCount = data.unique_visitors;
+
+                // 2. Генерируем эталонный массив из последних 7 дней (сегодня и 6 дней назад)
+                const expectedDates = [];
+                for (let i = 6; i >= 0; i--) {
+                    const d = new Date();
+                    d.setDate(d.getDate() - i);
+                    d.setHours(0,0,0,0);
+                    expectedDates.push(d);
                 }
+
+                // 3. Сопоставляем реальные записи из базы с 7 днями
+                const finalData = expectedDates.map(expectedDate => {
+                    const dateStr = expectedDate.toISOString().split('T')[0];
+                    
+                    // Ищем, есть ли визиты за этот день в базе
+                    const found = data ? data.find(item => {
+                        if (!item.visit_date) return false;
+                        return item.visit_date.split('T')[0] === constStr;
+                    }) : null;
+
+                    return {
+                        date: expectedDate,
+                        visits: found ? found.unique_visitors : 0 // Если день пустой — ставим 0
+                    };
+                });
+
+                // 4. Формируем массивы для отрисовки графика
+                dates = finalData.map(item => {
+                    const d = item.date;
+                    return `${String(d.getDate()).padStart(2, '0')}.${String(d.getMonth() + 1).padStart(2, '0')}`;
+                });
+                visits = finalData.map(item => item.visits);
+
             } catch (err) {
-                console.error("Не удалось загрузить число визитов для графика:", err.message);
+                console.error("Не удалось загрузить данные для графика:", err.message);
+                dates = ["Сегодня"];
+                visits = [0];
             }
             
-            // 2. Инициализируем график с полученным числом
+            // Инициализируем график полученными массивами
             myChart = new Chart(ctx, {
                 type: 'line',
                 data: {
-                    labels: ["Сегодня"], 
+                    labels: dates, 
                     datasets: [{
                         label: 'Уникальные визиты',
-                        data: [visitsCount], 
+                        data: visits, 
                         borderColor: '#2cb67d',
                         backgroundColor: 'rgba(44, 182, 125, 0.1)',
                         borderWidth: 2,
@@ -807,7 +833,7 @@
                 }
             });
 
-            // 3. Запуск регистрации визита (вызов API для обновления счетчика)
+            // Регистрируем визит за сегодня
             await registerVisit();
         });
 
