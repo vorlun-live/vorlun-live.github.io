@@ -717,6 +717,13 @@
         </div>
     </div>
 
+    <div id="api-endpoints" style="display:none;">
+        <script>
+            // Бэкенд-логика (ранее ваш visit.js) теперь встроена как Serverless-функция прямо на Vercel. 
+            // При обращении к Vercel, если роут не совпадает с /api, срабатывает роутер из vercel.json и отдает index.html
+        </script>
+    </div>
+
     <script>
         // Абсолютный путь к вашему бэкенду на Vercel (исправляет ошибку 405 Method Not Allowed)
         const API_URL = 'https://vorlun-live-github-io.vercel.app'; 
@@ -778,14 +785,13 @@
                     expectedDates.push(d);
                 }
 
-                // 3. Сопоставляем реальные записи из базы с 7 днями
+                // 3. Сопоставляем реальные записи из базы с 7 днями (исправлена опечатка dateStr)
                 const finalData = expectedDates.map(expectedDate => {
                     const dateStr = expectedDate.toISOString().split('T')[0];
                     
-                    // Ищем, есть ли визиты за этот день в базе
                     const found = data ? data.find(item => {
                         if (!item.visit_date) return false;
-                        return item.visit_date.split('T')[0] === constStr;
+                        return item.visit_date.split('T')[0] === dateStr;
                     }) : null;
 
                     return {
