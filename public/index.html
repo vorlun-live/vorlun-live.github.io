@@ -828,14 +828,11 @@
             };
 
             try {
-                // 1. При каждой загрузке отправляем POST-запрос для автоматического учета визита (с фиксацией IP)
-                await fetch('https://vorlun-live-github-io.vercel.app/api/visit', { method: 'POST' });
+                // Отправляем POST для фиксации визита (относительный путь /api/visits)
+                await fetch('/api/visits', { method: 'POST' });
 
-                // 2. Получаем статистику для графика (исправлено на GET)
-                const response = await fetch('https://vorlun-live-github-io.vercel.app/api/visit', {
-                    method: 'GET'
-                });
-                
+                // Получаем статистику по относительному пути
+                const response = await fetch('/api/visits', { method: 'GET' });
                 const data = await response.json();
                 
                 if (!Array.isArray(data) || data.length === 0) {
@@ -845,7 +842,6 @@
 
                 const visitsByDay = {};
                 data.forEach(item => {
-                    // Используем поля, которые возвращает API: visit_date и unique_visitors
                     if (!item.visit_date) return;
                     const dateObj = new Date(item.visit_date);
                     const day = String(dateObj.getDate()).padStart(2, '0');
@@ -879,7 +875,6 @@
             }
         }
 
-        // Вызов инициализации данных при первой загрузке страницы
         loadVisitsData();
     </script>
 </body>
