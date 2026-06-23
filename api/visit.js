@@ -30,6 +30,7 @@ module.exports = async (req, res) => {
 
       const nowTime = new Date().toISOString();
       
+      // Запись визитов по-прежнему идет в сырую таблицу site_visits
       const { error: insertError } = await supabase
         .from('site_visits')
         .insert([{ 
@@ -43,41 +44,16 @@ module.exports = async (req, res) => {
     } 
     
     if (req.method === 'GET') {
-      // 1. Запрашиваем визиты из обычной таблицы напрямую
+      // Запрашиваем уже агрегированные данные из таблицы unique_daily_visits
       const { data, error: selectError } = await supabase
-        .from('site_visits')
-        .select('visited_at, visitor_ip')
-        .order('visited_at', { ascending: false })
-        .limit(500);
+        .from('unique_daily_visits')
+        .select('visit_date, unique_visitors')
+        .order('visit_date', { ascending: false })
+        .limit(30);
 
       if (selectError) throw selectError;
 
-      // 2. Группируем и считаем уникальные посещения по дням прямо в функции
-      const visitsMap = {}; 
-      (data || []).forEach(row => {
-        if (!row.visited_at) return;
-        
-        const dateObj = new Date(row.visited_at);
-        const day = String(dateObj.getDate()).padStart(2, '0');
-        const month = String(dateObj.getMonth() + 1).padStart(2, '0');
-        const dateKey = `${day}.${month}`;
-
-        if (!visitsMap[dateKey]) {
-          visitsMap[dateKey] = new Set();
-        }
-        visitsMap[dateKey].add(row.visitor_ip);
-      });
-
-      // 3. Формируем массив объектов для фронтенда
-      const formattedData = Object.keys(visitsMap).map(dateStr => {
-        const [day, month] = dateStr.split('.');
-        return {
-          visit_date: `2026-${month}-${day}T00:00:00.000Z`, // текущий год 2026
-          unique_visitors: visitsMap[dateStr].size
-        };
-      });
-
-      return res.status(200).json(formattedData);
+      return res.status(200).json(data || []);
     }
   } catch (err) {
     console.error("Supabase API error:", err);
