@@ -1,5 +1,11 @@
 {
   "version": 2,
+  "builds": [
+    {
+      "src": "api/*.js",
+      "use": "@vercel/node"
+    }
+  ],
   "rewrites": [
     {
       "source": "/api/visit",
@@ -10,6 +16,10 @@
     {
       "src": "/favicon.ico",
       "dest": "/favicon.ico"
+    },
+    {
+      "src": "/api/visit",
+      "dest": "/api/visit.js"
     },
     {
       "src": "/(.*)",
