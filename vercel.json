@@ -2,18 +2,6 @@
   "version": 2,
   "routes": [
     {
-      "src": "/favicon.ico",
-      "dest": "/favicon.ico"
-    },
-    {
-      "src": "/api/visit",
-      "dest": "/visit.js"
-    },
-    {
-      "src": "/",
-      "dest": "/index.html"
-    },
-    {
       "src": "/(.*)",
       "dest": "/index.html"
     }

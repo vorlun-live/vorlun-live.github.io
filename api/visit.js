@@ -1,60 +1,76 @@
 import { createClient } from '@supabase/supabase-js';
 
-export const config = {
-  runtime: 'edge',
-};
+// Инициализация клиента Supabase с использованием переменных окружения Vercel
+const supabaseUrl = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL;
+const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_KEY;
+const supabase = createClient(supabaseUrl, supabaseKey);
 
-export default async function handler(request) {
-  // Обработка CORS для предотвращения блокировок
-  const headers = new Headers({
-    'Access-Control-Allow-Origin': '*',
-    'Access-Control-Allow-Methods': 'POST, OPTIONS',
-    'Access-Control-Allow-Headers': 'Content-Type',
-  });
+export default async function handler(req, res) {
+  // Разрешаем CORS для любых доменов (чтобы не было проблем с fetch с GitHub Pages / Vercel)
+  res.setHeader('Access-Control-Allow-Credentials', 'true');
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,POST');
+  res.setHeader('Access-Control-Allow-Headers', 'X-Requested-With, Content-Type, Accept, Authorization');
 
-  if (request.method === 'OPTIONS') {
-    return new Response(null, { headers });
+  if (req.method === 'OPTIONS') {
+    res.status(200).end();
+    return;
   }
 
-  if (request.method !== 'POST') {
-    return new Response(JSON.stringify({ error: 'Method not allowed' }), {
-      status: 405,
-      headers,
-    });
-  }
+  // Получаем сегодняшнюю дату в формате YYYY-MM-DD (только дату, без времени)
+  const today = new Date().toISOString().split('T')[0];
 
   try {
-    // Получение IP (в Edge-среде берем из заголовков Vercel)
-    const ip = request.headers.get('x-forwarded-for') || '127.0.0.1';
+    if (req.method === 'GET') {
+      // Логика получения данных: суммируем уникальных посетителей или отдаем записи
+      const { data, error } = await supabase
+        .from('unique_daily_visits')
+        .select('*')
+        .eq('visit_date', today)
+        .maybeSingle();
 
-    const supabaseUrl = process.env.SUPABASE_URL;
-    const supabaseKey = process.env.SUPABASE_KEY;
+      if (error) throw error;
 
-    if (!supabaseUrl || !supabaseKey) {
-      throw new Error('Environment variables SUPABASE_URL or SUPABASE_KEY are missing.');
+      return res.status(200).json(data || { visit_date: today, unique_visitors: 0 });
     }
 
-    const supabase = createClient(supabaseUrl, supabaseKey);
-    const now = new Date().toISOString();
+    if (req.method === 'POST') {
+      // Сначала проверяем, есть ли запись за сегодня
+      const { data: existingRecord, error: fetchError } = await supabase
+        .from('unique_daily_visits')
+        .select('*')
+        .eq('visit_date', today)
+        .maybeSingle();
 
-    const { error: insertError } = await supabase
-      .from('site_visits')
-      .insert([{ visited_at: now, ip }]);
+      if (fetchError) throw fetchError;
 
-    if (insertError) {
-      throw new Error(`DB insert failed: ${insertError.message}`);
+      if (existingRecord) {
+        // Если запись есть — обновляем (инкрементируем счетчик на 1)
+        const { data: updateData, error: updateError } = await supabase
+          .from('unique_daily_visits')
+          .update({ unique_visitors: existingRecord.unique_visitors + 1 })
+          .eq('visit_date', today)
+          .select()
+          .single();
+
+        if (updateError) throw updateError;
+        return res.status(200).json(updateData);
+      } else {
+        // Если записи нет — создаем новую со значением 1
+        const { data: insertData, error: insertError } = await supabase
+          .from('unique_daily_visits')
+          .insert([{ visit_date: today, unique_visitors: 1 }])
+          .select()
+          .single();
+
+        if (insertError) throw insertError;
+        return res.status(200).json(insertData);
+      }
     }
 
-    return new Response(JSON.stringify({ success: true }), {
-      status: 200,
-      headers: { ...headers, 'Content-Type': 'application/json' },
-    });
-
-  } catch (error) {
-    console.error('API /api/visit error:', error.message);
-    return new Response(JSON.stringify({ error: error.message }), {
-      status: 500,
-      headers: { ...headers, 'Content-Type': 'application/json' },
-    });
+    return res.status(405).json({ error: 'Метод не поддерживается' });
+  } catch (err) {
+    console.error('Ошибка в API функции:', err.message);
+    return res.status(500).json({ error: 'Внутренняя ошибка сервера', details: err.message });
   }
 }

@@ -32,18 +32,10 @@
                     firstScript.parentNode.insertBefore(script, firstScript);
                 }
             }
-            ym(110005197, 'init', {
-                ssr: true, 
-                webvisor: true, 
-                clickmap: true, 
-                ecommerce: "dataLayer", 
-                accurateTrackBounce: true, 
-                trackLinks: true
-            });
+            ym(110005197, 'init', {ssr: true, webvisor: true, clickmap: true, ecommerce: "dataLayer", accurateTrackBounce: true, trackLinks: true});
         });
     </script>
     <noscript><div><img src="https://mc.yandex.ru/watch/110005197" style="position:absolute; left:-9999px;" alt="" /></div></noscript>
-
     <style>
         :root {
             --bg-color: #08070b;
@@ -56,6 +48,7 @@
             --text-main: #fffffe;
             --text-muted: #94a1b2;
             --alert-color: #ff4757;
+            
             --twitch-color: #6441a5;
             --twitch-hover: #7d5bbe;
             --tiktok-color: #121212;
@@ -120,7 +113,10 @@
 
         .logo span { color: var(--primary); }
 
-        nav { display: flex; gap: 10px; }
+        nav {
+            display: flex;
+            gap: 10px;
+        }
 
         nav button {
             background: none;
@@ -152,7 +148,11 @@
             box-sizing: border-box;
         }
 
-        .sidebar { display: flex; flex-direction: column; gap: 22px; }
+        .sidebar {
+            display: flex;
+            flex-direction: column;
+            gap: 22px;
+        }
 
         .sidebar-panel {
             background-color: var(--panel-bg);
@@ -189,7 +189,11 @@
             100% { opacity: 0.4; }
         }
 
-        .container { width: 100%; z-index: 2; min-width: 0; }
+        .container {
+            width: 100%;
+            z-index: 2;
+            min-width: 0;
+        }
 
         .page { display: none; }
         .page.active-page { display: block; }
@@ -258,7 +262,12 @@
         .btn-tiktok { background-color: var(--tiktok-color); color: #ffffff; border: 1px solid rgba(255, 255, 255, 0.1); }
         .btn-tiktok:hover { border-color: var(--tiktok-border); transform: translateY(-2px); }
 
-        .catalog-tags { display: flex; gap: 8px; margin-bottom: 20px; flex-wrap: wrap; }
+        .catalog-tags {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
 
         .tag-filter {
             background-color: var(--card-bg);
@@ -395,7 +404,9 @@
             font-size: 0.95rem;
             transition: background 0.2s;
         }
-        .check-channel-btn:hover { background-color: var(--twitch-hover); }
+        .check-channel-btn:hover {
+            background-color: var(--twitch-hover);
+        }
 
         .fill-widget {
             background: var(--card-bg);
@@ -494,7 +505,7 @@
                     <div id="streamStatusWidget" class="stream-status-widget">
                         <div class="stream-offline-msg">
                             <div><span class="stream-offline-dot"></span> Трансляция сейчас оффлайн.</div>
-                            <a href="https://www.twitch.tv/vorlun_" target="_blank" class="check-channel-btn">Перейти на канал</a>
+                            <a href="https://www.twitch.tv/vorlun_" target="_blank" class="check-channel-btn">Перейти на канал (ждать уведомлений)</a>
                         </div>
                     </div>
 
@@ -557,7 +568,7 @@
                 <section class="seo-section">
                     <h3>О проекте VORLUN — Гайды и обучение стримингу</h3>
                     <p>Добро пожаловать в базу знаний для начинающих и опытных контент-мейкеров. Если вы хотите начать вести трансляции на Twitch, записывать ролики для YouTube или развивать свой TikTok-канал, здесь собраны актуальные материалы и пошаговые руководства. Мы разбираем ключевые технические аспекты: как настроить OBS Studio до идеального состояния без потери кадров, какие фильтры использовать для получения студийного звука с бюджетного микрофона, а также как правильно выставить свет и экспозицию веб-камеры.</p>
-                    <p>Оптимизация оборудования и программного обеспечения — залог качественного и стабильного эфира, который удерживает зрителя. Изучайте наши подробные статьи, внедряйте проверенные настройки кодировщиков, избегайте частых ошибок новичков и привлекайте новую аудиторию с помощью органического трафика из социальных сетей!</p>
+                    <p>Оптимизация оборудования и программного обеспечения — залог качественного и стабильного эфира, который удерживает зрителя. Изучайте наши подробные статьи, внедряйте проверенные настройки кодировщиков, избегайте частых ошибок новинков и привлекайте новую аудиторию с помощью органического трафика из социальных сетей!</p>
                 </section>
             </div>
 
@@ -710,7 +721,7 @@
                 <div class="section">
                     <h1 style="font-size: 2rem; margin-top: 0; color: var(--text-main);">Продвижение стримов через TikTok: алгоритмы 2026 года</h1>
                     <div class="article-content">
-                        <p>Просто стримить на Твиче в пустоту — это главная ошибка новичков. Твой главный локомотив продвижения — это короткие ролики в ТикТок, которые подхватывают алгоритмы рекомендаций.</p>
+                        <p>Просто стримить на Твиче в пустоту — это главная ошибка новинков. Твой главный локомотив продвижения — это короткие ролики в ТикТок, которые подхватывают алгоритмы рекомендаций.</p>
                         <hr>
                         <p>Секрет успеха прост: делайте нарезки лучших моментов, добавляйте динамичные субтитры и призывайте переходить по ссылке в профиле.</p>
                     </div>
@@ -721,34 +732,58 @@
     </div>
 
     <script>
-        // Эндпоинт указывает на роут серверной функции Vercel
-        const API_URL = '/api/visit'; 
-
-        // Инициализация Supabase (будет подтягивать реальные переменные из Vercel)
+        // Инициализация Supabase
         let SUPABASE_URL = "%SUPABASE_URL%";
         let SUPABASE_KEY = "%SUPABASE_KEY%";
 
         if (SUPABASE_URL.startsWith('%')) {
-            // Подстраховка для локального тестирования или дефолтного билда
             SUPABASE_URL = "https://cyoqcafwpflfxscnpufk.supabase.co";
             SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN5b3FjYWZ3cGZsZnhzY25wdWZrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE5ODE3MDUsImV4cCI6MjA5NzU1NzcwNX0.nofBw5Q7iJ5nIPbqKQ5ABlmIw3_I3Pi6i-5f7UxWLiI";
         }
 
         const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-        // Фиксация визита через обращение к API эндпоинту
-        async function registerVisitWithIP() {
+        // Функция фиксации визита напрямую в Supabase таблицу `site_visits`
+        async function registerVisitDirectly() {
             try {
-                await fetch(API_URL, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' }
-                });
-                console.log("Визит успешно отправлен в API для фиксации.");
+                const now = new Date();
+                const timezoneOffset = -now.getTimezoneOffset(); // Смещение в минутах
+                const offsetHours = String(Math.floor(Math.abs(timezoneOffset) / 60)).padStart(2, '0');
+                const offsetMinutes = String(Math.abs(timezoneOffset) % 60).padStart(2, '0');
+                const offsetSign = timezoneOffset >= 0 ? '+' : '-';
+                
+                // Форматируем дату в ISO 8601 со смещением (например: 2026-06-24T00:00:00+03:00)
+                const yyyy = now.getFullYear();
+                const mm = String(now.getMonth() + 1).padStart(2, '0');
+                const dd = String(now.getDate()).padStart(2, '0');
+                const dateOnlyStr = `${yyyy}-${mm}-${dd}T00:00:00${offsetSign}${offsetHours}:${offsetMinutes}`;
+
+                // Проверяем, есть ли запись за сегодня в таблице site_visits, чтобы не дублировать при перезагрузках
+                const todayStart = `${yyyy}-${mm}-${dd}T00:00:00Z`;
+                const todayEnd = `${yyyy}-${mm}-${dd}T23:59:59Z`;
+
+                const { data: existingVisits } = await supabaseClient
+                    .from('site_visits')
+                    .select('id')
+                    .gte('visited_at', todayStart)
+                    .lte('visited_at', todayEnd);
+
+                // Если записей за сегодня от этого пользователя (браузера) еще не было — добавляем
+                if (!existingVisits || existingVisits.length === 0) {
+                    await supabaseClient.from('site_visits').insert([
+                        { visited_at: dateOnlyStr }
+                    ]);
+                    console.log("Визит успешно зафиксирован в базе данных напрямую.");
+                } else {
+                    console.log("Визит за сегодня уже учтен.");
+                }
+
             } catch (err) {
-                console.error("Ошибка при отправке визита на сервер:", err.message);
+                console.error("Ошибка при прямой фиксации визита:", err.message);
             }
         }
 
+        // Инициализация Chart.js
         let myChart;
         document.addEventListener("DOMContentLoaded", async function() {
             const ctx = document.getElementById('trafficChart').getContext('2d');
@@ -757,7 +792,7 @@
             let visits = [];
             
             try {
-                // Получение данных из Supabase (вьюха unique_daily_visits)
+                // Забираем данные из представления unique_daily_visits
                 const { data, error } = await supabaseClient
                     .from('unique_daily_visits')
                     .select('visit_date, unique_visitors')
@@ -794,7 +829,7 @@
                 visits = finalData.map(item => item.visits);
 
             } catch (err) {
-                console.error("Ошибка сбора данных графика из БД:", err.message);
+                console.error("Сбор данных графика:", err.message);
                 for (let i = 6; i >= 0; i--) {
                     const d = new Date();
                     d.setDate(d.getDate() - i);
@@ -803,7 +838,6 @@
                 }
             }
             
-            // Отрисовка графика
             myChart = new Chart(ctx, {
                 type: 'line',
                 data: {
@@ -829,8 +863,8 @@
                 }
             });
 
-            // Отправка визита (счетчик)
-            await registerVisitWithIP();
+            // Фиксируем визит
+            await registerVisitDirectly();
         });
 
         function showPage(pageId) {
@@ -857,8 +891,8 @@
             window.scrollTo({top: 0, behavior: 'smooth'});
         }
 
-        function openArticle(articleId) { 
-            showPage(articleId); 
+        function openArticle(articleId) {
+            showPage(articleId);
         }
 
         function filterCatalog(category, btn) {
