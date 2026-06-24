@@ -1,76 +1,46 @@
 import { createClient } from '@supabase/supabase-js';
 
-// Инициализация клиента Supabase с использованием переменных окружения Vercel
-const supabaseUrl = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL;
-const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_KEY;
-const supabase = createClient(supabaseUrl, supabaseKey);
-
 export default async function handler(req, res) {
-  // Разрешаем CORS для любых доменов (чтобы не было проблем с fetch с GitHub Pages / Vercel)
-  res.setHeader('Access-Control-Allow-Credentials', 'true');
+  // Настройка CORS
   res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,POST');
-  res.setHeader('Access-Control-Allow-Headers', 'X-Requested-With, Content-Type, Accept, Authorization');
+  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
   if (req.method === 'OPTIONS') {
-    res.status(200).end();
-    return;
+    return res.status(200).end();
   }
 
-  // Получаем сегодняшнюю дату в формате YYYY-MM-DD (только дату, без времени)
-  const today = new Date().toISOString().split('T')[0];
+  // Строго требуем POST, отсекая любые другие попытки вызова
+  if (req.method !== 'POST') {
+    return res.status(405).json({ error: 'Method not allowed' });
+  }
 
   try {
-    if (req.method === 'GET') {
-      // Логика получения данных: суммируем уникальных посетителей или отдаем записи
-      const { data, error } = await supabase
-        .from('unique_daily_visits')
-        .select('*')
-        .eq('visit_date', today)
-        .maybeSingle();
+    const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress || '127.0.0.1';
 
-      if (error) throw error;
+    const supabaseUrl = process.env.SUPABASE_URL;
+    const supabaseKey = process.env.SUPABASE_KEY;
 
-      return res.status(200).json(data || { visit_date: today, unique_visitors: 0 });
+    if (!supabaseUrl || !supabaseKey) {
+      throw new Error('Environment variables are missing');
     }
 
-    if (req.method === 'POST') {
-      // Сначала проверяем, есть ли запись за сегодня
-      const { data: existingRecord, error: fetchError } = await supabase
-        .from('unique_daily_visits')
-        .select('*')
-        .eq('visit_date', today)
-        .maybeSingle();
+    const supabase = createClient(supabaseUrl, supabaseKey);
 
-      if (fetchError) throw fetchError;
+    const now = new Date().toISOString();
 
-      if (existingRecord) {
-        // Если запись есть — обновляем (инкрементируем счетчик на 1)
-        const { data: updateData, error: updateError } = await supabase
-          .from('unique_daily_visits')
-          .update({ unique_visitors: existingRecord.unique_visitors + 1 })
-          .eq('visit_date', today)
-          .select()
-          .single();
+    const { error: insertError } = await supabase
+      .from('site_visits')
+      .insert([{ visited_at: now, ip: ip }]);
 
-        if (updateError) throw updateError;
-        return res.status(200).json(updateData);
-      } else {
-        // Если записи нет — создаем новую со значением 1
-        const { data: insertData, error: insertError } = await supabase
-          .from('unique_daily_visits')
-          .insert([{ visit_date: today, unique_visitors: 1 }])
-          .select()
-          .single();
-
-        if (insertError) throw insertError;
-        return res.status(200).json(insertData);
-      }
+    if (insertError) {
+      throw new Error(`DB insert failed: ${insertError.message}`);
     }
 
-    return res.status(405).json({ error: 'Метод не поддерживается' });
-  } catch (err) {
-    console.error('Ошибка в API функции:', err.message);
-    return res.status(500).json({ error: 'Внутренняя ошибка сервера', details: err.message });
+    return res.status(200).json({ success: true });
+
+  } catch (error) {
+    console.error('API /visit error:', error.message);
+    return res.status(500).json({ error: error.message });
   }
 }

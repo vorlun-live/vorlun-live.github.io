@@ -1,6 +1,26 @@
 {
   "version": 2,
+  "builds": [
+    {
+      "src": "api/*.js",
+      "use": "@vercel/node"
+    }
+  ],
+  "rewrites": [
+    {
+      "source": "/api/visit",
+      "destination": "/api/visit.js"
+    }
+  ],
   "routes": [
+    {
+      "src": "/favicon.ico",
+      "dest": "/favicon.ico"
+    },
+    {
+      "src": "/api/visit",
+      "dest": "/api/visit.js"
+    },
     {
       "src": "/(.*)",
       "dest": "/index.html"
