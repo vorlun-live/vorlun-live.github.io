@@ -1,11 +1,5 @@
 {
   "version": 2,
-  "rewrites": [
-    {
-      "source": "/api/visit",
-      "destination": "/api/visit.js"
-    }
-  ],
   "routes": [
     {
       "src": "/favicon.ico",
@@ -13,11 +7,7 @@
     },
     {
       "src": "/api/visit",
-      "dest": "/api/visit.js"
-    },
-    {
-      "src": "/api/(.*)",
-      "dest": "/api/$1.js"
+      "dest": "/visit.js"
     },
     {
       "src": "/",
