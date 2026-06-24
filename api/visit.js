@@ -1,6 +1,7 @@
 import { createClient } from '@supabase/supabase-js';
 
 export default async function handler(req, res) {
+  // Настройка CORS
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
@@ -9,7 +10,7 @@ export default async function handler(req, res) {
     return res.status(200).end();
   }
 
-  // Разрешаем строго POST, чтобы исключить GET/PUT коллизии
+  // Строго требуем POST, отсекая любые другие попытки вызова
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
@@ -26,10 +27,8 @@ export default async function handler(req, res) {
 
     const supabase = createClient(supabaseUrl, supabaseKey);
 
-    // Используем чистую ISO-строку времени для предотвращения конфликтов формата
     const now = new Date().toISOString();
 
-    // Проверяем вставку напрямую, чтобы исключить ошибки выборки
     const { error: insertError } = await supabase
       .from('site_visits')
       .insert([{ visited_at: now, ip: ip }]);
