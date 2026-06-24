@@ -15,7 +15,6 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
     <script type="text/javascript">
-        // Безопасная инициализация Яндекс Метрики
         window.ym = window.ym || function(){(window.ym.a=window.ym.a||[]).push(arguments)};
         window.ym.l = 1 * new Date();
         
@@ -48,7 +47,6 @@
             --text-main: #fffffe;
             --text-muted: #94a1b2;
             --alert-color: #ff4757;
-            
             --twitch-color: #6441a5;
             --twitch-hover: #7d5bbe;
             --tiktok-color: #121212;
@@ -113,10 +111,7 @@
 
         .logo span { color: var(--primary); }
 
-        nav {
-            display: flex;
-            gap: 10px;
-        }
+        nav { display: flex; gap: 10px; }
 
         nav button {
             background: none;
@@ -148,11 +143,7 @@
             box-sizing: border-box;
         }
 
-        .sidebar {
-            display: flex;
-            flex-direction: column;
-            gap: 22px;
-        }
+        .sidebar { display: flex; flex-direction: column; gap: 22px; }
 
         .sidebar-panel {
             background-color: var(--panel-bg);
@@ -189,11 +180,7 @@
             100% { opacity: 0.4; }
         }
 
-        .container {
-            width: 100%;
-            z-index: 2;
-            min-width: 0;
-        }
+        .container { width: 100%; z-index: 2; min-width: 0; }
 
         .page { display: none; }
         .page.active-page { display: block; }
@@ -262,12 +249,7 @@
         .btn-tiktok { background-color: var(--tiktok-color); color: #ffffff; border: 1px solid rgba(255, 255, 255, 0.1); }
         .btn-tiktok:hover { border-color: var(--tiktok-border); transform: translateY(-2px); }
 
-        .catalog-tags {
-            display: flex;
-            gap: 8px;
-            margin-bottom: 20px;
-            flex-wrap: wrap;
-        }
+        .catalog-tags { display: flex; gap: 8px; margin-bottom: 20px; flex-wrap: wrap; }
 
         .tag-filter {
             background-color: var(--card-bg);
@@ -404,9 +386,7 @@
             font-size: 0.95rem;
             transition: background 0.2s;
         }
-        .check-channel-btn:hover {
-            background-color: var(--twitch-hover);
-        }
+        .check-channel-btn:hover { background-color: var(--twitch-hover); }
 
         .fill-widget {
             background: var(--card-bg);
@@ -732,10 +712,8 @@
     </div>
 
     <script>
-        // Бэкенд-логика. Относительный путь перенаправляет запросы на Vercel бэкенд
         const API_URL = ''; 
 
-        // Инициализация Supabase
         let SUPABASE_URL = "%SUPABASE_URL%";
         let SUPABASE_KEY = "%SUPABASE_KEY%";
 
@@ -746,7 +724,7 @@
 
         const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-        // Функция отправки визита на серверную часть для фиксации IP
+        // Фиксация визита на сервере
         async function registerVisitWithIP() {
             try {
                 await fetch('/api/visit', {
@@ -759,7 +737,6 @@
             }
         }
 
-        // Инициализация Chart.js
         let myChart;
         document.addEventListener("DOMContentLoaded", async function() {
             const ctx = document.getElementById('trafficChart').getContext('2d');
@@ -768,7 +745,6 @@
             let visits = [];
             
             try {
-                // Забираем данные из представления unique_daily_visits
                 const { data, error } = await supabaseClient
                     .from('unique_daily_visits')
                     .select('visit_date, unique_visitors')
@@ -839,7 +815,6 @@
                 }
             });
 
-            // Регистрируем визит с фиксацией IP
             await registerVisitWithIP();
         });
 
@@ -867,9 +842,7 @@
             window.scrollTo({top: 0, behavior: 'smooth'});
         }
 
-        function openArticle(articleId) {
-            showPage(articleId);
-        }
+        function openArticle(articleId) { showPage(articleId); }
 
         function filterCatalog(category, btn) {
             const buttons = document.querySelectorAll('.tag-filter');

@@ -10,7 +10,6 @@ export default async function handler(req, res) {
     return res.status(200).end();
   }
 
-  // Строго требуем POST, отсекая любые другие попытки вызова
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
@@ -22,11 +21,10 @@ export default async function handler(req, res) {
     const supabaseKey = process.env.SUPABASE_KEY;
 
     if (!supabaseUrl || !supabaseKey) {
-      throw new Error('Environment variables are missing');
+      throw new Error('SUPABASE_URL or SUPABASE_KEY are missing in Vercel Environment Variables.');
     }
 
     const supabase = createClient(supabaseUrl, supabaseKey);
-
     const now = new Date().toISOString();
 
     const { error: insertError } = await supabase
@@ -40,7 +38,7 @@ export default async function handler(req, res) {
     return res.status(200).json({ success: true });
 
   } catch (error) {
-    console.error('API /visit error:', error.message);
+    console.error('API /api/visit error:', error.message);
     return res.status(500).json({ error: error.message });
   }
 }
