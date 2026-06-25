@@ -16,9 +16,10 @@ export default async function handler(req, res) {
     return res.status(200).end();
   }
 
-  // Получаем сегодняшнюю дату в формате YYYY-MM-DD (по часовому поясу UTC)
+  // Определяем точное время вызова и приводим дату к часовому поясу UTC+3
   const now = new Date();
-  const today = now.toISOString().split('T')[0];
+  const userTime = new Date(now.getTime() + (3 * 60 * 60 * 1000));
+  const today = userTime.toISOString().split('T')[0];
 
   try {
     // GET: получение записей счетчика уникальных визитов за день
@@ -41,16 +42,17 @@ export default async function handler(req, res) {
       const ip = rawIp ? rawIp.split(',')[0].trim() : (req.socket?.remoteAddress || '127.0.0.1');
 
       // 2. Добавляем запись с IP-адресом в таблицу истории визитов site_visits
-      const timestamp = now.toISOString();
+      const timestamp = now.toISOString(); // Время визита оставляем в формате UTC, чтобы не было путаницы
       const { error: insertVisitError } = await supabase
         .from('site_visits')
         .insert([{ visited_at: timestamp, ip: ip }]);
 
       if (insertVisitError) {
         console.error('Ошибка вставки визита в таблицу site_visits:', insertVisitError.message);
+        throw insertVisitError;
       }
 
-      // 3. Логика счетчика уникальных визитов за день
+      // 3. Логика счетчика уникальных визитов за день (unique_daily_visits)
       const { data: existingRecord, error: fetchError } = await supabase
         .from('unique_daily_visits')
         .select('*')
