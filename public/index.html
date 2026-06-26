@@ -344,7 +344,7 @@
         }
 
         .visitor-counter-box {
-            padding: 12px;
+            padding: 14px;
             text-align: center;
             background: var(--card-bg);
             border-radius: 8px;
@@ -471,8 +471,8 @@
                 </div>
             </div>
 
-            <div class="visitor-counter-box">
-                Уникальные визиты за сегодня
+            <div class="visitor-counter-box" id="visitorCounter">
+                Уникальные визиты за сегодня: <span id="visitCountNum" style="color: #fffffe;">0</span>
             </div>
 
             <div class="sidebar-panel" style="font-size: 0.95rem; line-height: 1.6;">
@@ -746,19 +746,26 @@
         // Функция фиксации визита напрямую в Supabase таблицу `site_visits`
         async function registerVisitDirectly() {
             try {
+                // Защита от частых запросов при перезагрузке в одной сессии (экономим лимиты БД)
+                if (localStorage.getItem('vorlun_visit_recorded') === 'true') {
+                    console.log("Визит за сегодня уже учтен локально.");
+                    // Подтягиваем значение из unique_daily_visits для отображения на экране
+                    await fetchDailyVisitsCount();
+                    return;
+                }
+
                 const now = new Date();
                 const timezoneOffset = -now.getTimezoneOffset(); // Смещение в минутах
                 const offsetHours = String(Math.floor(Math.abs(timezoneOffset) / 60)).padStart(2, '0');
                 const offsetMinutes = String(Math.abs(timezoneOffset) % 60).padStart(2, '0');
                 const offsetSign = timezoneOffset >= 0 ? '+' : '-';
                 
-                // Форматируем дату в ISO 8601 со смещением (например: 2026-06-24T00:00:00+03:00)
+                // Форматируем дату в ISO 8601 со смещением
                 const yyyy = now.getFullYear();
                 const mm = String(now.getMonth() + 1).padStart(2, '0');
                 const dd = String(now.getDate()).padStart(2, '0');
                 const dateOnlyStr = `${yyyy}-${mm}-${dd}T00:00:00${offsetSign}${offsetHours}:${offsetMinutes}`;
 
-                // Проверяем, есть ли запись за сегодня в таблице site_visits, чтобы не дублировать при перезагрузках
                 const todayStart = `${yyyy}-${mm}-${dd}T00:00:00Z`;
                 const todayEnd = `${yyyy}-${mm}-${dd}T23:59:59Z`;
 
@@ -768,18 +775,55 @@
                     .gte('visited_at', todayStart)
                     .lte('visited_at', todayEnd);
 
-                // Если записей за сегодня от этого пользователя (браузера) еще не было — добавляем
                 if (!existingVisits || existingVisits.length === 0) {
                     await supabaseClient.from('site_visits').insert([
                         { visited_at: dateOnlyStr }
                     ]);
                     console.log("Визит успешно зафиксирован в базе данных напрямую.");
                 } else {
-                    console.log("Визит за сегодня уже учтен.");
+                    console.log("Визит за сегодня уже учтен в БД.");
                 }
+
+                localStorage.setItem('vorlun_visit_recorded', 'true');
+                await fetchDailyVisitsCount();
 
             } catch (err) {
                 console.error("Ошибка при прямой фиксации визита:", err.message);
+            }
+        }
+
+        // Функция для получения и отображения количества визитов за текущий день
+        async function fetchDailyVisitsCount() {
+            try {
+                const now = new Date();
+                const yyyy = now.getFullYear();
+                const mm = String(now.getMonth() + 1).padStart(2, '0');
+                const dd = String(now.getDate()).padStart(2, '0');
+                const dateStr = `${yyyy}-${mm}-${dd}`;
+
+                const { data, error } = await supabaseClient
+                    .from('unique_daily_visits')
+                    .select('unique_visitors')
+                    .maybeSingle(); // или фильтруем по дате, если таблица хранит несколько дней
+
+                if (error && error.code !== 'PGRST116') throw error;
+
+                // В зависимости от того, как возвращаются данные (одна запись на день или фильтр), 
+                // если это вьюшка или таблица, найдем сегодняшнюю дату:
+                const { data: visitData } = await supabaseClient
+                    .from('unique_daily_visits')
+                    .select('unique_visitors')
+                    .gte('visit_date', `${dateStr}T00:00:00`)
+                    .lte('visit_date', `${dateStr}T23:59:59`)
+                    .maybeSingle();
+
+                if (visitData && visitData.unique_visitors !== undefined) {
+                    document.getElementById('visitCountNum').innerText = visitData.unique_visitors;
+                } else if (data && data.unique_visitors !== undefined) {
+                    document.getElementById('visitCountNum').innerText = data.unique_visitors;
+                }
+            } catch (err) {
+                console.error("Не удалось обновить счетчик визитов:", err.message);
             }
         }
 
