@@ -746,14 +746,6 @@
         // Функция фиксации визита напрямую в Supabase таблицу `site_visits`
         async function registerVisitDirectly() {
             try {
-                // Защита от частых запросов при перезагрузке в одной сессии (экономим лимиты БД)
-                if (localStorage.getItem('vorlun_visit_recorded') === 'true') {
-                    console.log("Визит за сегодня уже учтен локально.");
-                    // Подтягиваем значение из unique_daily_visits для отображения на экране
-                    await fetchDailyVisitsCount();
-                    return;
-                }
-
                 const now = new Date();
                 const timezoneOffset = -now.getTimezoneOffset(); // Смещение в минутах
                 const offsetHours = String(Math.floor(Math.abs(timezoneOffset) / 60)).padStart(2, '0');
@@ -769,6 +761,7 @@
                 const todayStart = `${yyyy}-${mm}-${dd}T00:00:00Z`;
                 const todayEnd = `${yyyy}-${mm}-${dd}T23:59:59Z`;
 
+                // Проверка без локального кэша — каждая загрузка опрашивает базу
                 const { data: existingVisits } = await supabaseClient
                     .from('site_visits')
                     .select('id')
@@ -784,7 +777,6 @@
                     console.log("Визит за сегодня уже учтен в БД.");
                 }
 
-                localStorage.setItem('vorlun_visit_recorded', 'true');
                 await fetchDailyVisitsCount();
 
             } catch (err) {
@@ -804,12 +796,10 @@
                 const { data, error } = await supabaseClient
                     .from('unique_daily_visits')
                     .select('unique_visitors')
-                    .maybeSingle(); // или фильтруем по дате, если таблица хранит несколько дней
+                    .maybeSingle(); 
 
                 if (error && error.code !== 'PGRST116') throw error;
 
-                // В зависимости от того, как возвращаются данные (одна запись на день или фильтр), 
-                // если это вьюшка или таблица, найдем сегодняшнюю дату:
                 const { data: visitData } = await supabaseClient
                     .from('unique_daily_visits')
                     .select('unique_visitors')
@@ -907,7 +897,7 @@
                 }
             });
 
-            // Фиксируем визит
+            // Запуск отправки визита при загрузке
             await registerVisitDirectly();
         });
 
