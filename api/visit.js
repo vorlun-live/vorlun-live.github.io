@@ -24,24 +24,30 @@ export default async function handler(req, res) {
   const timestamp = userTime.toISOString();
 
   try {
-    // 1. ЛОГИКА GET: Читаем данные из View (unique_daily_visits)
+    // 1. ЛОГИКА GET: Безопасное чтение данных из View (unique_daily_visits)
     if (req.method === 'GET') {
       const { data, error } = await supabase
         .from('unique_daily_visits')
-        .select('*')
-        .eq('created_at', today)
-        .maybeSingle();
+        .select('*');
 
       if (error) throw error;
 
-      return res.status(200).json(data || { created_at: today, views: 0 });
+      // Ищем строку за сегодня, проверяя любые текстовые поля на совпадение с YYYY-MM-DD
+      const todayRow = data?.find(row => 
+        Object.values(row).some(val => String(val).startsWith(today))
+      );
+
+      // Если нашли строку — отдаем её, если нет — берем первую попавшуюся или 0
+      const viewsCount = todayRow ? (todayRow.views ?? 0) : (data?.[0]?.views ?? 0);
+
+      return res.status(200).json({ views: viewsCount });
     }
 
     // 2. ЛОГИКА POST: Добавляем новый IP в таблицу site_visits
     if (req.method === 'POST') {
       const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress || 'unknown';
 
-      // Проверка по точным колонкам 'visited_at' и 'visitor_ip'
+      // Проверяем, заходил ли этот IP сегодня (по колонкам visited_at и visitor_ip)
       const { data: ipCheck, error: ipCheckError } = await supabase
         .from('site_visits')
         .select('id')
@@ -52,7 +58,7 @@ export default async function handler(req, res) {
 
       if (ipCheckError) throw ipCheckError;
 
-      // Если IP сегодня еще не было — делаем вставку в правильные колонки visited_at и visitor_ip
+      // Если IP новый — вставляем строку
       if (!ipCheck || ipCheck.length === 0) {
         const { error: insertVisitError } = await supabase
           .from('site_visits')
@@ -61,14 +67,17 @@ export default async function handler(req, res) {
         if (insertVisitError) throw insertVisitError;
       }
 
-      // Запрашиваем актуальное значение из View, чтобы вернуть клиенту
-      const { data: updatedView } = await supabase
+      // Запрашиваем актуальные данные для ответа
+      const { data: finalData } = await supabase
         .from('unique_daily_visits')
-        .select('*')
-        .eq('created_at', today)
-        .maybeSingle();
+        .select('*');
 
-      return res.status(200).json(updatedView || { created_at: today, views: 1 });
+      const todayRow = finalData?.find(row => 
+        Object.values(row).some(val => String(val).startsWith(today))
+      );
+      const viewsCount = todayRow ? (todayRow.views ?? 0) : (finalData?.[0]?.views ?? 1);
+
+      return res.status(200).json({ views: viewsCount });
     }
 
     return res.status(405).json({ error: 'Метод не поддерживается' });
