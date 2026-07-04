@@ -1,9 +1,7 @@
 {
-  "name": "vorlun-project",
+  "name": "visit-counter",
   "version": "1.0.0",
-  "description": "Сайт VORLUN с защищенным счетчиком визитов",
-  "main": "api/visit.js",
   "dependencies": {
-    "@supabase/supabase-js": "^2.39.8"
+    "@supabase/supabase-js": "^2.39.0"
   }
 }
