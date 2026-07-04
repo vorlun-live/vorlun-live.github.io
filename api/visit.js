@@ -2,7 +2,13 @@ import { createClient } from '@supabase/supabase-js';
 
 const supabaseUrl = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL;
 const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_KEY;
-const supabase = createClient(supabaseUrl, supabaseKey);
+
+// Защита от пустых переменных окружения
+if (!supabaseUrl || !supabaseKey || supabaseUrl.includes('placeholder')) {
+  console.error('КРИТИЧЕСКАЯ ОШИБКА: Переменные SUPABASE_URL или SUPABASE_SERVICE_ROLE_KEY не заданы в настройках Vercel!');
+}
+
+const supabase = (supabaseUrl && supabaseKey) ? createClient(supabaseUrl, supabaseKey) : null;
 
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Credentials', 'true');
@@ -15,14 +21,19 @@ export default async function handler(req, res) {
     return;
   }
 
-  // Берем текущую дату МСК (UTC+3)
+  if (!supabase) {
+    return res.status(500).json({ 
+      error: 'Конфигурация базы данных отсутствует. Проверьте Environment Variables в панели Vercel.' 
+    });
+  }
+
   const now = new Date();
   const userTime = new Date(now.getTime() + (3 * 60 * 60 * 1000)); 
   const today = userTime.toISOString().split('T')[0];
   const timestamp = userTime.toISOString();
 
   try {
-    // 1. ЛОГИКА GET: Считаем уникальные IP за сегодня прямо из физической таблицы site_visits
+    // 1. ЛОГИКА GET: Считаем уникальные визиты прямо по таблице site_visits
     if (req.method === 'GET') {
       const { data, error } = await supabase
         .from('site_visits')
@@ -32,16 +43,14 @@ export default async function handler(req, res) {
 
       if (error) throw error;
 
-      // Считаем количество уникальных IP в полученном массиве
       const uniqueIPs = new Set(data?.map(item => item.visitor_ip) || []);
       return res.status(200).json({ views: uniqueIPs.size });
     }
 
-    // 2. ЛОГИКА POST: Записываем визит
+    // 2. ЛОГИКА POST: Запись нового визита
     if (req.method === 'POST') {
       const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress || 'unknown';
 
-      // Проверяем, был ли этот IP сегодня
       const { data: ipCheck, error: ipCheckError } = await supabase
         .from('site_visits')
         .select('id')
@@ -52,7 +61,6 @@ export default async function handler(req, res) {
 
       if (ipCheckError) throw ipCheckError;
 
-      // Если IP новый — вставляем строку в site_visits
       if (!ipCheck || ipCheck.length === 0) {
         const { error: insertVisitError } = await supabase
           .from('site_visits')
@@ -61,7 +69,6 @@ export default async function handler(req, res) {
         if (insertVisitError) throw insertVisitError;
       }
 
-      // Считаем итоговое количество уникальных посетителей за сегодня для мгновенного ответа
       const { data: allVisitsToday } = await supabase
         .from('site_visits')
         .select('visitor_ip')
