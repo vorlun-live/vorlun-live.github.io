@@ -1,6 +1,9 @@
 {
   "version": 2,
-  "rewrites": [
-    { "source": "/api/visit", "destination": "/api/visit.js" }
+  "routes": [
+    {
+      "src": "/(.*)",
+      "dest": "/index.html"
+    }
   ]
 }

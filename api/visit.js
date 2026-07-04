@@ -1,66 +1,76 @@
 import { createClient } from '@supabase/supabase-js';
 
-// Инициализация Supabase клиента с использованием переменных окружения Vercel
-const supabase = createClient(
-  process.env.SUPABASE_URL,
-  process.env.SUPABASE_SERVICE_ROLE_KEY
-);
+// Инициализация клиента Supabase с использованием переменных окружения Vercel
+const supabaseUrl = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL;
+const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_KEY;
+const supabase = createClient(supabaseUrl, supabaseKey);
 
 export default async function handler(req, res) {
-  // Настройка CORS заголовков для безопасного обращения с любого фронтенда (например, GitHub Pages)
-  res.setHeader('Access-Control-Allow-Credentials', true);
+  // Разрешаем CORS для любых доменов (чтобы не было проблем с fetch с GitHub Pages / Vercel)
+  res.setHeader('Access-Control-Allow-Credentials', 'true');
   res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT');
-  res.setHeader(
-    'Access-Control-Allow-Headers',
-    'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version'
-  );
+  res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,POST');
+  res.setHeader('Access-Control-Allow-Headers', 'X-Requested-With, Content-Type, Accept, Authorization');
 
-  // Обработка Preflight-запросов браузера перед POST
   if (req.method === 'OPTIONS') {
-    return res.status(200).end();
+    res.status(200).end();
+    return;
   }
 
-  // 1. РЕГИСТРАЦИЯ ВИЗИТА (POST)
-  if (req.method === 'POST') {
-    try {
-      // Vercel автоматически прокидывает IP пользователя в заголовки
-      const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress || 'unknown';
+  // Получаем сегодняшнюю дату в формате YYYY-MM-DD (только дату, без времени)
+  const today = new Date().toISOString().split('T')[0];
 
+  try {
+    if (req.method === 'GET') {
+      // Логика получения данных: суммируем уникальных посетителей или отдаем записи
       const { data, error } = await supabase
-        .from('site_visits')
-        .insert([{ visitor_ip: ip, visited_at: new Date().toISOString() }]);
+        .from('unique_daily_visits')
+        .select('*')
+        .eq('visit_date', today)
+        .maybeSingle();
 
       if (error) throw error;
 
-      return res.status(200).json({ success: true, message: "Visit registered" });
-    } catch (err) {
-      return res.status(500).json({ success: false, error: err.message });
+      return res.status(200).json(data || { visit_date: today, unique_visitors: 0 });
     }
-  }
 
-  // 2. ПОЛУЧЕНИЕ СЧЕТЧИКА УНИКАЛЬНЫХ ЗА СЕГОДНЯ (GET)
-  if (req.method === 'GET') {
-    try {
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
+    if (req.method === 'POST') {
+      // Сначала проверяем, есть ли запись за сегодня
+      const { data: existingRecord, error: fetchError } = await supabase
+        .from('unique_daily_visits')
+        .select('*')
+        .eq('visit_date', today)
+        .maybeSingle();
 
-      const { data, error } = await supabase
-        .from('site_visits')
-        .select('visitor_ip')
-        .gte('visited_at', today.toISOString());
+      if (fetchError) throw fetchError;
 
-      if (error) throw error;
+      if (existingRecord) {
+        // Если запись есть — обновляем (инкрементируем счетчик на 1)
+        const { data: updateData, error: updateError } = await supabase
+          .from('unique_daily_visits')
+          .update({ unique_visitors: existingRecord.unique_visitors + 1 })
+          .eq('visit_date', today)
+          .select()
+          .single();
 
-      // Считаем количество строго уникальных IP-адресов
-      const uniqueIPs = new Set(data.map(v => v.visitor_ip));
+        if (updateError) throw updateError;
+        return res.status(200).json(updateData);
+      } else {
+        // Если записи нет — создаем новую со значением 1
+        const { data: insertData, error: insertError } = await supabase
+          .from('unique_daily_visits')
+          .insert([{ visit_date: today, unique_visitors: 1 }])
+          .select()
+          .single();
 
-      return res.status(200).json({ unique_visitors: uniqueIPs.size });
-    } catch (err) {
-      return res.status(500).json({ success: false, error: err.message });
+        if (insertError) throw insertError;
+        return res.status(200).json(insertData);
+      }
     }
-  }
 
-  // Защита от вызова неподдерживаемых сервером методов
-  return res.status(405).json({ success: false, error: `Method ${req.method} Not Allowed` });
+    return res.status(405).json({ error: 'Метод не поддерживается' });
+  } catch (err) {
+    console.error('Ошибка в API функции:', err.message);
+    return res.status(500).json({ error: 'Внутренняя ошибка сервера', details: err.message });
+  }
 }
