@@ -511,7 +511,7 @@
 
                     <div class="fill-widget">
                         <h5>💡 Быстрый совет</h5>
-                        Usually, before starting a broadcast, it's useful to check the clipboard status, run OBS as Administrator, and do a sound test.
+                        Обычно перед началом трансляции полезно проверить статус буфера обмена, запустить OBS от имени Администратора и сделать тест звука.
                     </div>
                 </div>
 
@@ -718,6 +718,7 @@
         </div>
     </div>
 
+    <!-- Основной управляющий скрипт -->
     <script>
         // Функция фиксации визита через наш серверный API на Vercel
         async function registerVisitDirectly() {
@@ -735,6 +736,7 @@
                     console.error("Сервер API вернул ошибку при фиксации визита.");
                 }
 
+                // После фиксации сразу запрашиваем свежие данные для счетчика
                 await fetchDailyVisitsCount();
             } catch (err) {
                 console.error("Критическая ошибка при обращении к API визитов:", err.message);
@@ -745,7 +747,7 @@
         async function fetchDailyVisitsCount() {
             try {
                 const response = await fetch('/api/visit', { method: 'GET' });
-                if (!response.ok) throw new Error('Не удалось получить данные с сервера');
+                if (!response.ok) throw new Error('Не удалось получить данные с сервера или сервер вернул ошибку');
                 
                 const data = await response.json();
                 
@@ -804,12 +806,12 @@
             });
         }
 
-        // Инициализация при полной загрузке DOM
+        // Инициализация при полной загрузке DOM страницы
         document.addEventListener('DOMContentLoaded', () => {
-            // Фиксируем визит
+            // Фиксируем визит в базу данных
             registerVisitDirectly();
 
-            // Создаем заглушку красивого графика посещаемости через Chart.js
+            // Создаем график посещаемости через Chart.js
             const ctx = document.getElementById('trafficChart');
             if (ctx) {
                 new Chart(ctx, {
