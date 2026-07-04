@@ -17,14 +17,14 @@ export default async function handler(req, res) {
     return;
   }
 
-  // Получаем текущую дату в формате YYYY-MM-DD для МСК (UTC+3)
+  // Получаем текущую дату в формате YYYY-MM-DD для часового пояса МСК (UTC+3)
   const now = new Date();
   const userTime = new Date(now.getTime() + (3 * 60 * 60 * 1000)); 
   const today = userTime.toISOString().split('T')[0];
   const timestamp = userTime.toISOString();
 
   try {
-    // 1. ЛОГИКА GET: Отдаем фронтенду число визитов из колонки 'views'
+    // 1. ЛОГИКА GET: Читаем готовые данные из вашего View (по колонкам created_at и views)
     if (req.method === 'GET') {
       const { data, error } = await supabase
         .from('unique_daily_visits')
@@ -37,75 +37,43 @@ export default async function handler(req, res) {
       return res.status(200).json(data || { created_at: today, views: 0 });
     }
 
-    // 2. ЛОГИКА POST: Фиксируем визит с защитой от накрутки
+    // 2. ЛОГИКА POST: Добавляем новый IP в таблицу site_visits
     if (req.method === 'POST') {
       const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress || 'unknown';
 
-      // Проверяем по колонке 'create_at', заходил ли этот IP сегодня
+      // Проверяем по колонкам 'create_at' и 'visitor_ip', заходил ли этот IP сегодня
       const { data: ipCheck, error: ipCheckError } = await supabase
         .from('site_visits')
         .select('id')
-        .eq('ip', ip)
+        .eq('visitor_ip', ip)
         .gte('create_at', today + 'T00:00:00.000Z')
         .lte('create_at', today + 'T23:59:59.999Z')
         .limit(1);
 
       if (ipCheckError) throw ipCheckError;
 
-      // ЗАЩИТА: Если IP уже был сегодня, не увеличиваем счетчик, просто отдаем текущую инфу
-      if (ipCheck && ipCheck.length > 0) {
-        const { data: currentRecord } = await supabase
-          .from('unique_daily_visits')
-          .select('*')
-          .eq('created_at', today)
-          .maybeSingle();
+      // Если IP новый за сегодня — делаем вставку в таблицу site_visits (колонки create_at и visitor_ip)
+      if (!ipCheck || ipCheck.length === 0) {
+        const { error: insertVisitError } = await supabase
+          .from('site_visits')
+          .insert([{ create_at: timestamp, visitor_ip: ip }]);
 
-        return res.status(200).json(currentRecord || { created_at: today, views: 1 });
+        if (insertVisitError) throw insertVisitError;
       }
 
-      // Если IP новый — записываем его в site_visits (в колонку 'create_at')
-      const { error: insertVisitError } = await supabase
-        .from('site_visits')
-        .insert([{ create_at: timestamp, ip: ip }]);
-
-      if (insertVisitError) throw insertVisitError;
-
-      // Проверяем, есть ли уже строка для сегодняшнего дня в unique_daily_visits
-      const { data: existingRecord, error: fetchError } = await supabase
+      // Запрашиваем актуальное значение из View, чтобы вернуть клиенту
+      const { data: updatedView } = await supabase
         .from('unique_daily_visits')
         .select('*')
         .eq('created_at', today)
         .maybeSingle();
 
-      if (fetchError) throw fetchError;
-
-      if (existingRecord) {
-        // Строка есть — увеличиваем значение в колонке 'views' на 1
-        const { data: updateData, error: updateError } = await supabase
-          .from('unique_daily_visits')
-          .update({ views: existingRecord.views + 1 })
-          .eq('created_at', today)
-          .select()
-          .single();
-
-        if (updateError) throw updateError;
-        return res.status(200).json(updateData);
-      } else {
-        // Строки нет — создаем новую со значением views = 1
-        const { data: insertData, error: insertError } = await supabase
-          .from('unique_daily_visits')
-          .insert([{ created_at: today, views: 1 }])
-          .select()
-          .single();
-
-        if (insertError) throw insertError;
-        return res.status(200).json(insertData);
-      }
+      return res.status(200).json(updatedView || { created_at: today, views: 1 });
     }
 
     return res.status(405).json({ error: 'Метод не поддерживается' });
   } catch (err) {
-    console.error('Ошибка в обработчике API:', err.message);
+    console.error('Ошибка в бэкенд-обработчике API:', err.message);
     return res.status(500).json({ error: err.message });
   }
 }
