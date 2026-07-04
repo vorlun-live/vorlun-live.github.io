@@ -509,7 +509,7 @@
                     </div>
 
                     <div class="fill-widget">
-                        <h5>💡 Быстрый совет</h5>
+                        fancy<h5>💡 Быстрый совет</h5>
                         Обычно перед началом трансляции полезно проверить статус буфера обмена, запустить OBS от имени Администратора и сделать тест звука.
                     </div>
                 </div>
@@ -702,7 +702,7 @@
                 <div class="section">
                     <h1 style="font-size: 2rem; margin-top: 0; color: var(--text-main);">Подключение донатов на Twitch: пошаговое руководство</h1>
                     <div class="article-content">
-                        <p>Монетизация творчества — важный шаг для любого контент-мейкера. Разберем самый популярный и надежный сервис — DonationAlerts.</p>
+                        <p>Монетизация творчества — важный шаг для любого контент-мейкеров. Разберем самый популярный и надежный сервис — DonationAlerts.</p>
                         <hr>
                         <h3>Шаги подключения:</h3>
                         <ol>
@@ -742,7 +742,7 @@
                 });
                 
                 if (response.ok) {
-                    console.log("Визит успешно отправлен на API.");
+                    console.log("Визит успешно обработан API.");
                 } else {
                     console.error("Сервер API вернул ошибку при фиксации визита.");
                 }
@@ -762,10 +762,11 @@
                 
                 const data = await response.json();
                 
-                if (data && data.unique_visitors !== undefined) {
+                // Перенастроено под считывание вашей реальной колонки 'views' из Supabase View
+                if (data && data.views !== undefined) {
                     const counterEl = document.getElementById('visitCountNum');
                     if (counterEl) {
-                        counterEl.innerText = data.unique_visitors;
+                        counterEl.innerText = data.views;
                     }
                 }
             } catch (err) {

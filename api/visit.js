@@ -1,6 +1,6 @@
 import { createClient } from '@supabase/supabase-js';
 
-// Инициализация Supabase через переменные окружения Vercel
+// Инициализация Supabase
 const supabaseUrl = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL;
 const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_KEY;
 const supabase = createClient(supabaseUrl, supabaseKey);
@@ -17,87 +17,84 @@ export default async function handler(req, res) {
     return;
   }
 
-  // Получаем текущую дату в формате YYYY-MM-DD для часового пояса МСК (UTC+3)
+  // Получаем текущую дату в формате YYYY-MM-DD для МСК (UTC+3)
   const now = new Date();
   const userTime = new Date(now.getTime() + (3 * 60 * 60 * 1000)); 
   const today = userTime.toISOString().split('T')[0];
   const timestamp = userTime.toISOString();
 
   try {
-    // 1. ЛОГИКА GET: Отдаем фронтенду текущее число уникальных визитов за сегодня
+    // 1. ЛОГИКА GET: Отдаем фронтенду число визитов из колонки 'views'
     if (req.method === 'GET') {
       const { data, error } = await supabase
         .from('unique_daily_visits')
         .select('*')
-        .eq('visit_date', today)
+        .eq('created_at', today)
         .maybeSingle();
 
       if (error) throw error;
 
-      return res.status(200).json(data || { visit_date: today, unique_visitors: 0 });
+      return res.status(200).json(data || { created_at: today, views: 0 });
     }
 
-    // 2. ЛОГИКА POST: Фиксируем новый визит (с защитой от накрутки)
+    // 2. ЛОГИКА POST: Фиксируем визит с защитой от накрутки
     if (req.method === 'POST') {
-      // Получаем реальный IP-адрес пользователя, зашедшего на сайт
       const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress || 'unknown';
 
-      // Проверяем, логировался ли этот IP уже сегодня в таблице site_visits
+      // Проверяем по колонке 'create_at', заходил ли этот IP сегодня
       const { data: ipCheck, error: ipCheckError } = await supabase
         .from('site_visits')
         .select('id')
         .eq('ip', ip)
-        .gte('visited_at', today + 'T00:00:00.000Z')
-        .lte('visited_at', today + 'T23:59:59.999Z')
+        .gte('create_at', today + 'T00:00:00.000Z')
+        .lte('create_at', today + 'T23:59:59.999Z')
         .limit(1);
 
       if (ipCheckError) throw ipCheckError;
 
-      // ЗАЩИТА: Если этот IP уже заходил сегодня, просто возвращаем текущую статистику (не увеличивая счетчик)
+      // ЗАЩИТА: Если IP уже был сегодня, не увеличиваем счетчик, просто отдаем текущую инфу
       if (ipCheck && ipCheck.length > 0) {
         const { data: currentRecord } = await supabase
           .from('unique_daily_visits')
           .select('*')
-          .eq('visit_date', today)
+          .eq('created_at', today)
           .maybeSingle();
 
-        return res.status(200).json(currentRecord || { visit_date: today, unique_visitors: 1 });
+        return res.status(200).json(currentRecord || { created_at: today, views: 1 });
       }
 
-      // Если IP новый, записываем его в таблицу site_visits
+      // Если IP новый — записываем его в site_visits (в колонку 'create_at')
       const { error: insertVisitError } = await supabase
         .from('site_visits')
-        .insert([{ visited_at: timestamp, ip: ip }]);
+        .insert([{ create_at: timestamp, ip: ip }]);
 
-      if (insertVisitError) {
-        console.error('Ошибка записи в таблицу site_visits:', insertVisitError.message);
-      }
+      if (insertVisitError) throw insertVisitError;
 
-      // Проверяем, создана ли уже строка агрегатора для сегодняшнего дня
+      // Проверяем, есть ли уже строка для сегодняшнего дня в unique_daily_visits
       const { data: existingRecord, error: fetchError } = await supabase
         .from('unique_daily_visits')
         .select('*')
-        .eq('visit_date', today)
+        .eq('created_at', today)
         .maybeSingle();
 
       if (fetchError) throw fetchError;
 
       if (existingRecord) {
-        // Запись на сегодня есть — инкрементируем уникального посетителя (+1)
+        // Строка есть — увеличиваем значение в колонке 'views' на 1
         const { data: updateData, error: updateError } = await supabase
           .from('unique_daily_visits')
-          .update({ unique_visitors: existingRecord.unique_visitors + 1 })
-          .eq('visit_date', today)
+          .update({ views: existingRecord.views + 1 })
+          .eq('created_at', today)
           .select()
           .single();
 
         if (updateError) throw updateError;
         return res.status(200).json(updateData);
       } else {
-        // Записи на сегодня еще нет — создаем её со значением 1
+        // Строки нет — создаем новую со значением views = 1
         const { data: insertData, error: insertError } = await supabase
           .from('unique_daily_visits')
-          .insert([{ visit_date: today, unique_visitors: 1 }])
+          .insert([{ created_at: today, views: 1 }])
           .select()
           .single();
 
@@ -108,7 +105,7 @@ export default async function handler(req, res) {
 
     return res.status(405).json({ error: 'Метод не поддерживается' });
   } catch (err) {
-    console.error('Ошибка в обработчике API визитов:', err.message);
+    console.error('Ошибка в обработчике API:', err.message);
     return res.status(500).json({ error: err.message });
   }
 }
