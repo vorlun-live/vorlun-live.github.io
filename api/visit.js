@@ -2,13 +2,7 @@ import { createClient } from '@supabase/supabase-js';
 
 const supabaseUrl = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL;
 const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_KEY;
-
-// Защита от пустых переменных окружения
-if (!supabaseUrl || !supabaseKey || supabaseUrl.includes('placeholder')) {
-  console.error('КРИТИЧЕСКАЯ ОШИБКА: Переменные SUPABASE_URL или SUPABASE_SERVICE_ROLE_KEY не заданы в настройках Vercel!');
-}
-
-const supabase = (supabaseUrl && supabaseKey) ? createClient(supabaseUrl, supabaseKey) : null;
+const supabase = createClient(supabaseUrl, supabaseKey);
 
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Credentials', 'true');
@@ -21,19 +15,13 @@ export default async function handler(req, res) {
     return;
   }
 
-  if (!supabase) {
-    return res.status(500).json({ 
-      error: 'Конфигурация базы данных отсутствует. Проверьте Environment Variables в панели Vercel.' 
-    });
-  }
-
   const now = new Date();
   const userTime = new Date(now.getTime() + (3 * 60 * 60 * 1000)); 
   const today = userTime.toISOString().split('T')[0];
   const timestamp = userTime.toISOString();
 
   try {
-    // 1. ЛОГИКА GET: Считаем уникальные визиты прямо по таблице site_visits
+    // 1. ЛОГИКА GET: Считаем уникальные IP за сегодня прямо из таблицы site_visits
     if (req.method === 'GET') {
       const { data, error } = await supabase
         .from('site_visits')
@@ -47,7 +35,7 @@ export default async function handler(req, res) {
       return res.status(200).json({ views: uniqueIPs.size });
     }
 
-    // 2. ЛОГИКА POST: Запись нового визита
+    // 2. ЛОГИКА POST: Запись визита с проверкой дублей
     if (req.method === 'POST') {
       const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress || 'unknown';
 
