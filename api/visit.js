@@ -24,7 +24,7 @@ export default async function handler(req, res) {
   const timestamp = userTime.toISOString();
 
   try {
-    // 1. ЛОГИКА GET: Читаем готовые данные из вашего View (по колонкам created_at и views)
+    // 1. ЛОГИКА GET: Читаем данные из View (unique_daily_visits)
     if (req.method === 'GET') {
       const { data, error } = await supabase
         .from('unique_daily_visits')
@@ -41,22 +41,22 @@ export default async function handler(req, res) {
     if (req.method === 'POST') {
       const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress || 'unknown';
 
-      // Проверяем по колонкам 'create_at' и 'visitor_ip', заходил ли этот IP сегодня
+      // Проверка по точным колонкам 'visited_at' и 'visitor_ip'
       const { data: ipCheck, error: ipCheckError } = await supabase
         .from('site_visits')
         .select('id')
         .eq('visitor_ip', ip)
-        .gte('create_at', today + 'T00:00:00.000Z')
-        .lte('create_at', today + 'T23:59:59.999Z')
+        .gte('visited_at', today + 'T00:00:00.000Z')
+        .lte('visited_at', today + 'T23:59:59.999Z')
         .limit(1);
 
       if (ipCheckError) throw ipCheckError;
 
-      // Если IP новый за сегодня — делаем вставку в таблицу site_visits (колонки create_at и visitor_ip)
+      // Если IP сегодня еще не было — делаем вставку в правильные колонки visited_at и visitor_ip
       if (!ipCheck || ipCheck.length === 0) {
         const { error: insertVisitError } = await supabase
           .from('site_visits')
-          .insert([{ create_at: timestamp, visitor_ip: ip }]);
+          .insert([{ visited_at: timestamp, visitor_ip: ip }]);
 
         if (insertVisitError) throw insertVisitError;
       }
