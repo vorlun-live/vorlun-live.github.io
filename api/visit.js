@@ -3,10 +3,45 @@ import { createClient } from '@supabase/supabase-js';
 // Серверный клиент Supabase с SERVICE_ROLE_KEY (обходит RLS).
 // Переменные окружения задаются ТОЛЬКО в Vercel Project Settings → Environment Variables,
 // в коде их быть не должно — иначе ключ утечёт в git-историю.
-const supabaseUrl = process.env.SUPABASE_URL;
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+//
+// ВАЖНО: после добавления/изменения переменных окружения в Vercel нужен новый деплой —
+// уже запущенные функции их не подхватывают "на лету".
 
-const supabase = createClient(supabaseUrl, supabaseServiceKey);
+/**
+ * Убирает случайно попавшие при копировании кавычки, пробелы и переносы строк
+ * вокруг значения переменной окружения — частая причина ошибки
+ * "Invalid path specified in request URL" при создании клиента Supabase.
+ */
+function normalizeEnvValue(rawValue) {
+  if (!rawValue) return '';
+  return rawValue.trim().replace(/^['"]|['"]$/g, '');
+}
+
+const supabaseUrl = normalizeEnvValue(process.env.SUPABASE_URL);
+const supabaseServiceKey = normalizeEnvValue(process.env.SUPABASE_SERVICE_ROLE_KEY);
+
+// Простая проверка, что URL похож на корректный абсолютный адрес Supabase.
+const isValidSupabaseUrl = /^https:\/\/[a-z0-9-]+\.supabase\.co\/?$/i.test(supabaseUrl);
+
+let supabase = null;
+let configError = null;
+
+if (!supabaseUrl || !supabaseServiceKey) {
+  configError = 'Не заданы SUPABASE_URL / SUPABASE_SERVICE_ROLE_KEY в переменных окружения Vercel';
+} else if (!isValidSupabaseUrl) {
+  configError = 'SUPABASE_URL имеет некорректный формат (ожидается https://<project>.supabase.co)';
+} else {
+  supabase = createClient(supabaseUrl, supabaseServiceKey);
+}
+
+// Диагностика в Vercel Runtime Logs без утечки самого секрета
+if (configError) {
+  console.error(
+    `[visit.js] Ошибка конфигурации: ${configError}. ` +
+    `SUPABASE_URL задан: ${Boolean(supabaseUrl)}, длина=${supabaseUrl.length}. ` +
+    `SUPABASE_SERVICE_ROLE_KEY задан: ${Boolean(supabaseServiceKey)}, длина=${supabaseServiceKey.length}.`
+  );
+}
 
 // Грубая валидация формата IPv4/IPv6 — чтобы не писать в базу произвольный мусор,
 // если заголовок будет подделан или придёт в неожиданном виде.
@@ -46,9 +81,8 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: 'Метод не поддерживается' });
   }
 
-  if (!supabaseUrl || !supabaseServiceKey) {
-    console.error('Не заданы SUPABASE_URL / SUPABASE_SERVICE_ROLE_KEY в переменных окружения Vercel');
-    return res.status(500).json({ error: 'Сервер не настроен' });
+  if (configError) {
+    return res.status(500).json({ error: 'Сервер не настроен', details: configError });
   }
 
   try {
