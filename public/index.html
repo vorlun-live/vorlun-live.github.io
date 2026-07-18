@@ -274,6 +274,24 @@
         .btn-tiktok { background-color: var(--tiktok-color); color: #ffffff; border: 1px solid rgba(255, 255, 255, 0.1); }
         .btn-tiktok:hover { border-color: var(--tiktok-border); transform: translateY(-2px); }
 
+        .catalog-search-input {
+            width: 100%;
+            box-sizing: border-box;
+            padding: 12px 16px;
+            margin-bottom: 16px;
+            background-color: var(--card-bg);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 8px;
+            color: var(--text-main);
+            font-size: 0.95rem;
+            outline: none;
+            transition: border-color 0.2s ease;
+        }
+
+        .catalog-search-input:focus {
+            border-color: var(--primary);
+        }
+
         .catalog-tags {
             display: flex;
             gap: 8px;
@@ -353,6 +371,130 @@
             margin: 20px 0;
             color: var(--text-main);
             font-size: 1rem;
+        }
+
+        /* Лайки под статьёй */
+        .article-likes-block {
+            margin-top: 35px;
+            padding-top: 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.06);
+        }
+
+        .like-button {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background-color: var(--card-bg);
+            border: 1px solid rgba(44, 182, 125, 0.25);
+            color: var(--text-main);
+            padding: 10px 20px;
+            border-radius: 24px;
+            cursor: pointer;
+            font-size: 0.95rem;
+            font-weight: 600;
+            transition: all 0.2s ease;
+        }
+
+        .like-button:hover:not(:disabled) {
+            border-color: var(--secondary);
+            transform: translateY(-1px);
+        }
+
+        .like-button:disabled {
+            cursor: default;
+            color: var(--secondary);
+            border-color: var(--secondary);
+            opacity: 0.9;
+        }
+
+        /* Похожие статьи под статьёй */
+        .related-articles-block {
+            margin-top: 35px;
+            padding-top: 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.06);
+        }
+
+        .related-articles-block h4 {
+            color: var(--text-main);
+            margin-bottom: 14px;
+            font-size: 1.1rem;
+        }
+
+        .related-articles-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 12px;
+        }
+
+        .related-card {
+            background-color: var(--card-bg);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            padding: 14px 16px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 0.9rem;
+        }
+
+        .related-card:hover {
+            border-color: var(--primary);
+            transform: translateY(-2px);
+        }
+
+        .related-card span.tag {
+            color: var(--secondary);
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .related-card p {
+            margin: 6px 0 0 0;
+            color: var(--text-main);
+            line-height: 1.4;
+        }
+
+        /* Топ дней в сайдбаре */
+        .top-days-list {
+            list-style: none;
+            padding: 0;
+            margin: 10px 0 0 0;
+            font-size: 0.85rem;
+        }
+
+        .top-days-list li {
+            display: flex;
+            justify-content: space-between;
+            padding: 6px 0;
+            color: var(--text-muted);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+        }
+
+        .top-days-list li span:last-child {
+            color: var(--secondary);
+            font-weight: 600;
+        }
+
+        .chart-range-toggle {
+            display: flex;
+            gap: 6px;
+            margin-bottom: 8px;
+        }
+
+        .chart-range-toggle button {
+            flex: 1;
+            background-color: var(--card-bg);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            color: var(--text-muted);
+            padding: 5px 8px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.75rem;
+        }
+
+        .chart-range-toggle button.active-tag {
+            background-color: var(--primary);
+            color: white;
+            border-color: var(--primary);
         }
 
         .visitor-counter-box {
@@ -486,9 +628,17 @@
         <aside class="sidebar">
             <div class="sidebar-panel">
                 <h4><span class="live-indicator"></span> Посещаемость сайта</h4>
+
+                <div class="chart-range-toggle">
+                    <button id="chart-range-days" class="active-tag" onclick="setChartRange('days')">7 дней</button>
+                    <button id="chart-range-weeks" onclick="setChartRange('weeks')">8 недель</button>
+                </div>
+
                 <div style="width: 100%; height: 130px;">
                     <canvas id="trafficChart"></canvas>
                 </div>
+
+                <ul class="top-days-list" id="topDaysList"></ul>
             </div>
 
             <div class="visitor-counter-box">
@@ -596,8 +746,17 @@
             <div id="page-catalog" class="page">
                 <div class="section">
                     <h2>📚 Все публикации</h2>
-                    <p style="color: var(--text-muted); font-size: 0.95rem; margin-bottom: 25px;">Выбирай категорию, чтобы отфильтровать гайды:</p>
-                    
+                    <p style="color: var(--text-muted); font-size: 0.95rem; margin-bottom: 15px;">Ищи по названию или выбирай категорию, чтобы отфильтровать гайды:</p>
+
+                    <input
+                        type="text"
+                        id="catalog-search"
+                        class="catalog-search-input"
+                        placeholder="🔍 Поиск по гайдам..."
+                        oninput="filterCatalog(null, null)"
+                        autocomplete="off"
+                    >
+
                     <div class="catalog-tags">
                         <button class="tag-filter active-tag" onclick="filterCatalog('all', this)">Все темы</button>
                         <button class="tag-filter" onclick="filterCatalog('obs', this)">Настройка OBS</button>
@@ -606,7 +765,11 @@
                         <button class="tag-filter" onclick="filterCatalog('tiktok', this)">Продвижение TikTok</button>
                         <button class="tag-filter" onclick="filterCatalog('camera', this)">Камера и Свет</button>
                         <button class="tag-filter" onclick="filterCatalog('twitch', this)">Фишки Твича</button>
+                        <button class="tag-filter" onclick="filterCatalog('gear', this)">Оборудование</button>
+                        <button class="tag-filter" onclick="filterCatalog('community', this)">Продвижение и комьюнити</button>
                     </div>
+
+                    <p id="catalog-empty-msg" style="display: none; color: var(--text-muted); margin-top: 20px;">Ничего не нашлось. Попробуй другой запрос или сбрось фильтр.</p>
 
                     <div id="catalog-list" class="catalog-grid">
                         
@@ -660,6 +823,42 @@
                                 <div class="article-meta"><span>#Твич</span></div>
                                 <h3>Оформление канала Twitch: панели, чат и виджеты</h3>
                                 <p>Создаем приятный визуал для зрителя. Как настроить интерактивные панели под стримом и блоки чата.</p>
+                            </div>
+                            <span class="post-link">Читать гайд →</span>
+                        </div>
+
+                        <div class="post-card mix-art gear" onclick="openArticle('streamdeck-guide')">
+                            <div>
+                                <div class="article-meta"><span>#Оборудование</span></div>
+                                <h3>Настройка Stream Deck и горячих клавиш для быстрого переключения сцен</h3>
+                                <p>Как собрать раскладку кнопок, которая реально ускоряет стрим, и обойтись без Stream Deck на одних горячих клавишах.</p>
+                            </div>
+                            <span class="post-link">Читать гайд →</span>
+                        </div>
+
+                        <div class="post-card mix-art obs" onclick="openArticle('obs-vs-streamlabs-guide')">
+                            <div>
+                                <div class="article-meta"><span>#OBS</span></div>
+                                <h3>OBS vs Streamlabs: что выбрать новичку</h3>
+                                <p>Сравниваем два самых популярных инструмента для стрима — по нагрузке на ПК, гибкости настроек и встроенным фичам.</p>
+                            </div>
+                            <span class="post-link">Читать гайд →</span>
+                        </div>
+
+                        <div class="post-card mix-art community" onclick="openArticle('discord-guide')">
+                            <div>
+                                <div class="article-meta"><span>#Продвижение</span></div>
+                                <h3>Как раскрутить Discord-сервер вокруг канала</h3>
+                                <p>Структура каналов, роли за донаты и активность, которая удерживает комьюнити между стримами.</p>
+                            </div>
+                            <span class="post-link">Читать гайд →</span>
+                        </div>
+
+                        <div class="post-card mix-art community" onclick="openArticle('collab-guide')">
+                            <div>
+                                <div class="article-meta"><span>#Продвижение</span></div>
+                                <h3>Коллаборации с другими стримерами: как договориться и организовать рейд</h3>
+                                <p>Где искать партнёров своего уровня, как предлагать коллаб и что такое рейд-цепочки в конце стрима.</p>
                             </div>
                             <span class="post-link">Читать гайд →</span>
                         </div>
@@ -909,8 +1108,164 @@
                 </div>
             </div>
 
+            <div id="page-streamdeck-guide" class="page">
+                <button class="back-btn" onclick="showPage('catalog')">← Назад в каталог</button>
+                <div class="section">
+                    <h1 style="font-size: 2rem; margin-top: 0; color: var(--text-main);">Настройка Stream Deck и горячих клавиш для быстрого переключения сцен</h1>
+                    <div class="article-content">
+                        <p>Пока вы вручную ищете мышкой нужную сцену в OBS, стрим уже завис на 3 секунды тишины. Быстрое переключение — это не про дорогое железо, это про правильно настроенные горячие клавиши (а Stream Deck — просто удобная физическая кнопка для того же самого).</p>
+                        <hr>
+
+                        <h3>1. Горячие клавиши в OBS — бесплатная база</h3>
+                        <p>Настройки → Горячие клавиши. Назначьте отдельную комбинацию на каждую сцену («Начало стрима», «Игра», «Перерыв») — используйте цифровой блок клавиатуры (Num1, Num2, Num3), он не конфликтует с горячими клавишами игр.</p>
+                        <ul>
+                            <li><strong>Переключить на сцену:</strong> самая важная категория — назначьте по одной клавише на каждую сцену.</li>
+                            <li><strong>Отключить звук микрофона:</strong> отдельная клавиша (например, Num0) — пригодится, если нужно срочно откашляться или ответить в дверь.</li>
+                            <li><strong>Начать/остановить запись:</strong> если пишете стрим локально отдельно от трансляции.</li>
+                        </ul>
+
+                        <div class="tip-box">
+                            <strong>Совет:</strong> назначайте комбинации, а не одиночные клавиши (например, Ctrl+Num1) — одиночные цифры и буквы слишком легко случайно задеть во время игры.
+                        </div>
+
+                        <h3>2. Когда действительно нужен физический Stream Deck</h3>
+                        <p>Клавиатурных горячих клавиш достаточно для 90% стримеров. Физический Stream Deck (или его бюджетные аналоги вроде приложения-эмулятора на старом телефоне через Deckboard/Touch Portal) имеет смысл, если:</p>
+                        <ul>
+                            <li>У вас больше 6-8 сцен и их сложно запомнить по клавишам.</li>
+                            <li>Вы часто запускаете BrowserSource-виджеты (звуки, мемы) прямо во время игры одной кнопкой.</li>
+                            <li>Играете в игры, где активно используется весь диапазон клавиатуры, и лишних свободных клавиш физически не осталось.</li>
+                        </ul>
+
+                        <h3>3. Бесплатная альтернатива: Touch Portal</h3>
+                        <p>Установите приложение <strong>Touch Portal</strong> на старый смартфон или планшет — оно превращает экран в сетку программируемых кнопок и работает по Wi-Fi с плагином для OBS. По сути это тот же Stream Deck, но без покупки железа.</p>
+
+                        <h3>4. Организация сцен под горячие клавиши</h3>
+                        <p>Называйте сцены короткими понятными именами (не «Сцена 3», а «Игра», «Афк», «Чат») — это снижает шанс переключиться не туда даже без взгляда на экран, на автомате.</p>
+
+                        <div class="tip-box">
+                            <strong>Важно:</strong> протестируйте все горячие клавиши в реальной игре перед стримом — часто выясняется, что игра «съедает» ту же комбинацию для своих внутриигровых действий.
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="page-obs-vs-streamlabs-guide" class="page">
+                <button class="back-btn" onclick="showPage('catalog')">← Назад в каталог</button>
+                <div class="section">
+                    <h1 style="font-size: 2rem; margin-top: 0; color: var(--text-main);">OBS vs Streamlabs: что выбрать новичку</h1>
+                    <div class="article-content">
+                        <p>Оба инструмента бесплатны и оба умеют стримить на Twitch. Разница — в философии: OBS Studio — это чистый конструктор, Streamlabs Desktop — тот же OBS «под капотом», но с готовыми виджетами и магазином тем поверх.</p>
+                        <hr>
+
+                        <h3>1. Нагрузка на ПК</h3>
+                        <p>Streamlabs Desktop исторически потребляет больше ресурсов — встроенный чат, алерты и магазин тем работают фоном постоянно, даже когда вы ими не пользуетесь. На слабом ПК (4 ядра CPU, GPU уровня GTX 1650 и ниже) это может стоить 5-10 FPS в игре.</p>
+                        <div class="tip-box">
+                            <strong>Правило:</strong> если ваш ПК — единственный источник и для игры, и для стрима (не двухпк-сетап), при слабом железе выбирайте чистый OBS Studio.
+                        </div>
+
+                        <h3>2. Скорость настройки</h3>
+                        <ul>
+                            <li><strong>Streamlabs:</strong> готовые темы оформления, встроенный виджет алертов без внешних сервисов, мастер настройки на русском.</li>
+                            <li><strong>OBS:</strong> собираете сцены с нуля, зато полный контроль над каждым источником и фильтром без лишнего "мусора" в интерфейсе.</li>
+                        </ul>
+
+                        <h3>3. Гибкость и плагины</h3>
+                        <p>У OBS Studio — огромное коммьюнити плагинов (StreamFX, Move Transition, Advanced Scene Switcher) и открытый исходный код. У Streamlabs гибкости меньше, часть продвинутых функций (например, некоторые эффекты) доступна только в платной подписке Streamlabs Prime.</p>
+
+                        <h3>4. Итоговая рекомендация</h3>
+                        <ul>
+                            <li><strong>Streamlabs</strong> — если вы совсем новичок, хотите готовый визуал за 10 минут и не боитесь чуть большей нагрузки на ПК.</li>
+                            <li><strong>OBS Studio</strong> — если у вас средний/слабый ПК, вы играете в требовательные игры и не против один раз потратить час на настройку виджетов вручную (см. другие наши гайды по OBS).</li>
+                        </ul>
+
+                        <div class="tip-box">
+                            <strong>Важно:</strong> все гайды по OBS на этом сайте (про звук, свет, кодировщик) применимы и к Streamlabs Desktop — под капотом это тот же движок OBS, настройки называются так же.
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="page-discord-guide" class="page">
+                <button class="back-btn" onclick="showPage('catalog')">← Назад в каталог</button>
+                <div class="section">
+                    <h1 style="font-size: 2rem; margin-top: 0; color: var(--text-main);">Как раскрутить Discord-сервер вокруг канала</h1>
+                    <div class="article-content">
+                        <p>Twitch-чат живёт только во время стрима и исчезает, как только вы выключаете трансляцию. Discord — это место, где комьюнити продолжает жить между стримами, а вы получаете постоянный канал связи со зрителями.</p>
+                        <hr>
+
+                        <h3>1. Минимальная структура каналов</h3>
+                        <p>Не плодите 40 каналов в первый же день — новый сервер с гигантским списком каналов пугает и выглядит пустым. Начните с малого:</p>
+                        <ul>
+                            <li><strong>#правила</strong> и <strong>#объявления</strong> — только для чтения, ваши анонсы.</li>
+                            <li><strong>#общий-чат</strong> — основное место общения.</li>
+                            <li><strong>#когда-стрим</strong> — с интеграцией бота-уведомлений (см. ниже).</li>
+                            <li><strong>Голосовой канал</strong> — «Тусовка» для созвонов вне стрима.</li>
+                        </ul>
+
+                        <h3>2. Автоматизация ботами</h3>
+                        <ul>
+                            <li><strong>StreamElements/Streamcord бот:</strong> автоматически постит уведомление в Discord, когда вы запускаете стрим на Twitch — не нужно объявлять руками.</li>
+                            <li><strong>MEE6 или Carl-bot:</strong> автовыдача ролей за активность в чате, приветствие новых участников.</li>
+                        </ul>
+
+                        <h3>3. Роли как мотивация</h3>
+                        <p>Настройте роли за донат-тир или за подписку на Twitch (через интеграцию Twitch ↔ Discord в настройках сервера — «Discord Server Integrations» на самом Twitch). Уникальный цвет ника и доступ в приватный голосовой канал — простая, но рабочая мотивация задонатить или подписаться.</p>
+
+                        <div class="tip-box">
+                            <strong>Совет:</strong> подключите Twitch-интеграцию Discord (Server Settings → Integrations → Twitch) — она сама выдаёт роль подписчикам без ручной модерации.
+                        </div>
+
+                        <h3>4. Что удерживает активность между стримами</h3>
+                        <ul>
+                            <li>Еженедельный опрос «во что играем на следующем стриме» — вовлекает и одновременно подсказывает контент-план.</li>
+                            <li>Канал для мемов/клипов — зрители сами приносят вам материал для нарезок в TikTok.</li>
+                            <li>Личное присутствие — заходите в голосовой хотя бы иногда вне стрима, это чувствуется и ценится.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div id="page-collab-guide" class="page">
+                <button class="back-btn" onclick="showPage('catalog')">← Назад в каталог</button>
+                <div class="section">
+                    <h1 style="font-size: 2rem; margin-top: 0; color: var(--text-main);">Коллаборации с другими стримерами: как договориться и организовать рейд</h1>
+                    <div class="article-content">
+                        <p>Один из самых быстрых способов найти новых зрителей — это не реклама, а коллаборация с другим стримером похожего размера аудитории. Его зрители узнают о вас в естественном контексте, а не через баннер.</p>
+                        <hr>
+
+                        <h3>1. Как искать партнёров своего уровня</h3>
+                        <p>Коллаб со стримером в 10 раз крупнее вас обычно не работает — вы ему не интересны как партнёр, а не как разовый гость. Ищите тех, кто в похожем диапазоне зрителей (±50%) и играет в те же игры (GTA5 RP, Dota 2, CS) — так аудитория пересекается по интересам.</p>
+                        <ul>
+                            <li>Смотрите категорию своей игры на Twitch — сортировка по зрителям покажет каналы похожего размера.</li>
+                            <li>Ищите активных в тех же Discord-сообществах и на форумах RP-серверов (для Majestic RP, например).</li>
+                        </ul>
+
+                        <h3>2. Как правильно предложить коллаб</h3>
+                        <div class="tip-box">
+                            <strong>Не пишите:</strong> «Привет, го коллаб?» — без контекста это выглядит как спам и обычно игнорируется.
+                        </div>
+                        <p>Работает конкретное предложение: укажите формат (совместная игра, интервью, дуэльный стрим), примерную дату и почему это будет интересно именно его аудитории. Ссылку на свой канал прикладывайте — стример должен понимать, с кем имеет дело.</p>
+
+                        <h3>3. Форматы коллабов</h3>
+                        <ul>
+                            <li><strong>Совместная игра</strong> — самый простой формат: играете в одну игру одновременно (GTA5 RP отлично для этого подходит — общий сервер, разные персонажи).</li>
+                            <li><strong>Дуэльный/командный формат</strong> — CS, Dota 2 — соревновательный момент сам создаёт контент.</li>
+                            <li><strong>Взаимный гостевой визит</strong> — заходите в чат друг к другу с камерой на 15-20 минут в разгар стрима.</li>
+                        </ul>
+
+                        <h3>4. Рейд-цепочки в конце стрима</h3>
+                        <p>Функция Twitch «Raid» перенаправляет ваших зрителей на канал другого стримера сразу после того, как вы закончили. Договоритесь заранее с 2-3 стримерами о взаимных рейдах в конце стрима в удобное время — это создаёт цепочку, где зрители переходят от канала к каналу, и все в цепочке получают приток новых людей.</p>
+
+                        <div class="tip-box">
+                            <strong>Совет:</strong> перед рейдом скажите зрителям пару тёплых слов о том, к кому вы их отправляете — это ощутимо повышает шанс, что они останутся смотреть, а не сразу закроют вкладку.
+                        </div>
+                    </div>
+                </div>
+            </div>
+
         </div>
     </div>
+
 
     <script>
         // Инициализация Supabase
@@ -978,16 +1333,181 @@
             }
         }
 
+        // Создаёт (один раз) и обновляет блок лайков в конце статьи.
+        // "Уже оценено" хранится в localStorage — это мягкая защита от накрутки одним и тем же
+        // браузером, без необходимости заводить полноценную систему аккаунтов.
+        async function initLikesWidget(articleId) {
+            const page = document.getElementById('page-' + articleId);
+            if (!page) return;
+            const section = page.querySelector('.section');
+            if (!section) return;
+
+            let block = section.querySelector('.article-likes-block');
+            if (!block) {
+                block = document.createElement('div');
+                block.className = 'article-likes-block';
+                block.innerHTML = `<button class="like-button" id="like-btn-${articleId}">👍 Полезно (…)</button>`;
+                section.appendChild(block);
+            }
+
+            const button = document.getElementById(`like-btn-${articleId}`);
+            if (!button) return;
+
+            const alreadyLiked = localStorage.getItem(`liked_${articleId}`) === '1';
+
+            let currentCount = 0;
+            try {
+                const { data, error } = await supabaseClient
+                    .from('article_likes')
+                    .select('likes')
+                    .eq('article_id', articleId)
+                    .maybeSingle();
+
+                if (error) throw error;
+                currentCount = data ? data.likes : 0;
+            } catch (err) {
+                console.error('Не удалось получить количество лайков:', err.message);
+            }
+
+            renderLikeButton(button, articleId, currentCount, alreadyLiked);
+        }
+
+        function renderLikeButton(button, articleId, count, liked) {
+            button.textContent = liked ? `✓ Оценено (${count})` : `👍 Полезно (${count})`;
+            button.disabled = liked;
+            button.onclick = liked ? null : () => handleLikeClick(button, articleId, count);
+        }
+
+        async function handleLikeClick(button, articleId, currentCount) {
+            button.disabled = true;
+            try {
+                const response = await fetch('/api/article-like', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ articleId })
+                });
+
+                if (!response.ok) {
+                    const errorBody = await response.json().catch(() => ({}));
+                    throw new Error(errorBody.error || `Сервер вернул статус ${response.status}`);
+                }
+
+                const result = await response.json();
+                localStorage.setItem(`liked_${articleId}`, '1');
+                renderLikeButton(button, articleId, result.likes, true);
+            } catch (err) {
+                console.error('Не удалось поставить лайк:', err.message);
+                button.disabled = false;
+            }
+        }
+
         // Инициализация Chart.js
         let myChart;
+        let allVisitsData = []; // Полный набор данных из unique_daily_visits, чтобы не делать лишних запросов при переключении вида
+        let currentChartRange = 'days';
+
+        // Строит подписи и значения для вида "последние 7 дней" (по UTC-дням, как и раньше)
+        function buildDaysView(data) {
+            const expectedDates = [];
+            for (let i = 6; i >= 0; i--) {
+                const d = new Date();
+                d.setUTCDate(d.getUTCDate() - i);
+                d.setUTCHours(0, 0, 0, 0);
+                expectedDates.push(d);
+            }
+
+            const finalData = expectedDates.map(expectedDate => {
+                const dateStr = expectedDate.toISOString().split('T')[0];
+                const found = data.find(item => item.visit_date && item.visit_date.split('T')[0] === dateStr);
+                return { date: expectedDate, visits: found ? found.unique_visitors : 0 };
+            });
+
+            return {
+                labels: finalData.map(item => `${String(item.date.getUTCDate()).padStart(2, '0')}.${String(item.date.getUTCMonth() + 1).padStart(2, '0')}`),
+                values: finalData.map(item => item.visits),
+                label: 'Уникальные визиты',
+                todayValue: finalData[finalData.length - 1].visits
+            };
+        }
+
+        // Строит подписи и значения для вида "последние 8 недель".
+        // Важно: это СУММА дневных уникальных визитов внутри недели, а не дедуплицированные
+        // уникальные визиты за всю неделю (один и тот же посетитель, зашедший в разные дни
+        // недели, будет учтён в сумме несколько раз) — подписываем честно, чтобы не вводить в заблуждение.
+        function buildWeeksView(data) {
+            const buckets = [];
+            for (let w = 7; w >= 0; w--) {
+                const end = new Date();
+                end.setUTCHours(0, 0, 0, 0);
+                end.setUTCDate(end.getUTCDate() - (w * 7));
+                const start = new Date(end);
+                start.setUTCDate(start.getUTCDate() - 6);
+                buckets.push({ start, end, total: 0 });
+            }
+
+            data.forEach(item => {
+                if (!item.visit_date) return;
+                const itemDate = new Date(item.visit_date);
+                const bucket = buckets.find(b => itemDate >= b.start && itemDate <= b.end);
+                if (bucket) bucket.total += item.unique_visitors || 0;
+            });
+
+            const fmt = (d) => `${String(d.getUTCDate()).padStart(2, '0')}.${String(d.getUTCMonth() + 1).padStart(2, '0')}`;
+
+            return {
+                labels: buckets.map(b => `${fmt(b.start)}–${fmt(b.end)}`),
+                values: buckets.map(b => b.total),
+                label: 'Визиты за неделю (сумма)'
+            };
+        }
+
+        // Топ-3 дня за всё время по данным из unique_daily_visits
+        function renderTopDays(data) {
+            const list = document.getElementById('topDaysList');
+            if (!list) return;
+
+            const top = [...data]
+                .filter(item => item.visit_date && item.unique_visitors > 0)
+                .sort((a, b) => b.unique_visitors - a.unique_visitors)
+                .slice(0, 3);
+
+            if (top.length === 0) {
+                list.innerHTML = '';
+                return;
+            }
+
+            list.innerHTML = '<li style="border:none; color: var(--text-main); font-weight:600; padding-top:12px;">🏆 Топ дней</li>' +
+                top.map(item => {
+                    const d = new Date(item.visit_date);
+                    const label = `${String(d.getUTCDate()).padStart(2, '0')}.${String(d.getUTCMonth() + 1).padStart(2, '0')}.${d.getUTCFullYear()}`;
+                    return `<li><span>${label}</span><span>${item.unique_visitors}</span></li>`;
+                }).join('');
+        }
+
+        // Переключение между видом "7 дней" и "8 недель" без повторного запроса к базе
+        function setChartRange(range) {
+            currentChartRange = range;
+            document.getElementById('chart-range-days').classList.toggle('active-tag', range === 'days');
+            document.getElementById('chart-range-weeks').classList.toggle('active-tag', range === 'weeks');
+
+            const view = range === 'days' ? buildDaysView(allVisitsData) : buildWeeksView(allVisitsData);
+            if (myChart) {
+                myChart.data.labels = view.labels;
+                myChart.data.datasets[0].data = view.values;
+                myChart.data.datasets[0].label = view.label;
+                myChart.update();
+            }
+        }
+
         document.addEventListener("DOMContentLoaded", async function() {
             const ctx = document.getElementById('trafficChart').getContext('2d');
 
-            let dates = [];
-            let visits = [];
-            
+            let initialView = { labels: [], values: [], label: 'Уникальные визиты', todayValue: null };
+
             try {
-                // Забираем данные из представления unique_daily_visits
+                // Забираем весь исторический набор данных из представления unique_daily_visits —
+                // он же используется и для графика "7 дней", и для "8 недель", и для топ-дней,
+                // чтобы не делать три отдельных запроса к базе.
                 const { data, error } = await supabaseClient
                     .from('unique_daily_visits')
                     .select('visit_date, unique_visitors')
@@ -995,40 +1515,10 @@
 
                 if (error) throw error;
 
-                // Строим последние 7 дней в UTC — именно так `date_trunc('day', visited_at)`
-                // группирует визиты в view `unique_daily_visits`. Если считать в локальной
-                // полуночи и потом конвертировать в UTC-строку, дату может сдвинуть
-                // на соседний день из-за часового пояса браузера.
-                const expectedDates = [];
-                for (let i = 6; i >= 0; i--) {
-                    const d = new Date();
-                    d.setUTCDate(d.getUTCDate() - i);
-                    d.setUTCHours(0, 0, 0, 0);
-                    expectedDates.push(d);
-                }
-
-                const finalData = expectedDates.map(expectedDate => {
-                    const dateStr = expectedDate.toISOString().split('T')[0];
-                    
-                    const found = data ? data.find(item => {
-                        if (!item.visit_date) return false;
-                        return item.visit_date.split('T')[0] === dateStr;
-                    }) : null;
-
-                    return {
-                        date: expectedDate,
-                        visits: found ? found.unique_visitors : 0
-                    };
-                });
-
-                dates = finalData.map(item => {
-                    const d = item.date;
-                    return `${String(d.getUTCDate()).padStart(2, '0')}.${String(d.getUTCMonth() + 1).padStart(2, '0')}`;
-                });
-                visits = finalData.map(item => item.visits);
-
-                // Последний элемент finalData всегда соответствует сегодняшнему дню (i = 0 в цикле выше)
-                renderUniqueVisitsToday(finalData[finalData.length - 1].visits);
+                allVisitsData = data || [];
+                initialView = buildDaysView(allVisitsData);
+                renderUniqueVisitsToday(initialView.todayValue);
+                renderTopDays(allVisitsData);
 
             } catch (err) {
                 console.error("Сбор данных графика:", err.message);
@@ -1036,18 +1526,18 @@
                 for (let i = 6; i >= 0; i--) {
                     const d = new Date();
                     d.setUTCDate(d.getUTCDate() - i);
-                    dates.push(`${String(d.getUTCDate()).padStart(2, '0')}.${String(d.getUTCMonth() + 1).padStart(2, '0')}`);
-                    visits.push(0);
+                    initialView.labels.push(`${String(d.getUTCDate()).padStart(2, '0')}.${String(d.getUTCMonth() + 1).padStart(2, '0')}`);
+                    initialView.values.push(0);
                 }
             }
-            
+
             myChart = new Chart(ctx, {
                 type: 'line',
                 data: {
-                    labels: dates, 
+                    labels: initialView.labels,
                     datasets: [{
-                        label: 'Уникальные визиты',
-                        data: visits, 
+                        label: initialView.label,
+                        data: initialView.values,
                         borderColor: '#2cb67d',
                         backgroundColor: 'rgba(44, 182, 125, 0.1)',
                         borderWidth: 2,
@@ -1096,23 +1586,100 @@
             window.scrollTo({top: 0, behavior: 'smooth'});
         }
 
-        function openArticle(articleId) {
-            showPage(articleId);
+        // Метаданные всех статей — единый источник правды для "Похожих статей",
+        // поиска и лайков. При добавлении новой статьи достаточно дописать сюда один объект.
+        const ARTICLES = [
+            { id: 'obs-guide', title: 'Как настроить OBS для стрима без лагов в 2026 году', tag: '#OBS', category: 'obs' },
+            { id: 'audio-guide', title: 'Настройка микрофона в OBS: как убрать шумы, клики и гул', tag: '#Звук', category: 'audio' },
+            { id: 'donates-guide', title: 'Как подключить донаты на Twitch и настроить оповещения', tag: '#Донаты', category: 'donates' },
+            { id: 'tiktok-guide', title: 'Продвижение стримов через TikTok: алгоритмы 2026 года', tag: '#Тренды / TikTok', category: 'tiktok' },
+            { id: 'camera-guide', title: 'Как настроить освещение и камеру для стрима', tag: '#Камера', category: 'camera' },
+            { id: 'twitch-panel-guide', title: 'Оформление канала Twitch: панели, чат и виджеты', tag: '#Твич', category: 'twitch' },
+            { id: 'streamdeck-guide', title: 'Настройка Stream Deck и горячих клавиш для быстрого переключения сцен', tag: '#Оборудование', category: 'gear' },
+            { id: 'obs-vs-streamlabs-guide', title: 'OBS vs Streamlabs: что выбрать новичку', tag: '#OBS', category: 'obs' },
+            { id: 'discord-guide', title: 'Как раскрутить Discord-сервер вокруг канала', tag: '#Продвижение', category: 'community' },
+            { id: 'collab-guide', title: 'Коллаборации с другими стримерами: как договориться и организовать рейд', tag: '#Продвижение', category: 'community' }
+        ];
+
+        // Подбирает до 3 похожих статей: сперва из той же категории, затем добирает остальными
+        function getRelatedArticles(currentId, count = 3) {
+            const current = ARTICLES.find(a => a.id === currentId);
+            const others = ARTICLES.filter(a => a.id !== currentId);
+            if (!current) return others.slice(0, count);
+
+            const sameCategory = others.filter(a => a.category === current.category);
+            const rest = others.filter(a => a.category !== current.category);
+            return [...sameCategory, ...rest].slice(0, count);
         }
 
+        // Создаёт (один раз) и наполняет блок "Похожие статьи" в конце страницы статьи
+        function renderRelatedArticles(articleId) {
+            const page = document.getElementById('page-' + articleId);
+            if (!page) return;
+            const section = page.querySelector('.section');
+            if (!section) return;
+
+            let block = section.querySelector('.related-articles-block');
+            if (!block) {
+                block = document.createElement('div');
+                block.className = 'related-articles-block';
+                section.appendChild(block);
+            }
+
+            const related = getRelatedArticles(articleId);
+            if (related.length === 0) {
+                block.innerHTML = '';
+                return;
+            }
+
+            block.innerHTML = '<h4>Похожие статьи</h4><div class="related-articles-grid"></div>';
+            const grid = block.querySelector('.related-articles-grid');
+            related.forEach(article => {
+                const card = document.createElement('div');
+                card.className = 'related-card';
+                card.onclick = () => openArticle(article.id);
+                card.innerHTML = `<span class="tag">${article.tag}</span><p>${article.title}</p>`;
+                grid.appendChild(card);
+            });
+        }
+
+        function openArticle(articleId) {
+            showPage(articleId);
+            initLikesWidget(articleId);
+            renderRelatedArticles(articleId);
+        }
+
+        // Текущая выбранная категория хранится отдельно, чтобы поиск и теги
+        // работали вместе, а не сбрасывали друг друга при переключении.
+        let currentCatalogCategory = 'all';
+
         function filterCatalog(category, btn) {
-            const buttons = document.querySelectorAll('.tag-filter');
-            buttons.forEach(b => b.classList.remove('active-tag'));
-            btn.classList.add('active-tag');
+            if (category !== null) {
+                currentCatalogCategory = category;
+                document.querySelectorAll('.tag-filter').forEach(b => b.classList.remove('active-tag'));
+                if (btn) btn.classList.add('active-tag');
+            }
+
+            const searchInput = document.getElementById('catalog-search');
+            const query = searchInput ? searchInput.value.trim().toLowerCase() : '';
 
             const cards = document.querySelectorAll('.post-card.mix-art');
+            let visibleCount = 0;
+
             cards.forEach(card => {
-                if (category === 'all' || card.classList.contains(category)) {
-                    card.style.display = 'flex';
-                } else {
-                    card.style.display = 'none';
-                }
+                const matchesCategory = currentCatalogCategory === 'all' || card.classList.contains(currentCatalogCategory);
+
+                const title = card.querySelector('h3')?.textContent.toLowerCase() || '';
+                const description = card.querySelector('p')?.textContent.toLowerCase() || '';
+                const matchesQuery = !query || title.includes(query) || description.includes(query);
+
+                const isVisible = matchesCategory && matchesQuery;
+                card.style.display = isVisible ? 'flex' : 'none';
+                if (isVisible) visibleCount++;
             });
+
+            const emptyMsg = document.getElementById('catalog-empty-msg');
+            if (emptyMsg) emptyMsg.style.display = visibleCount === 0 ? 'block' : 'none';
         }
     </script>
 </body>
