@@ -1,7 +1,10 @@
 {
   "name": "visit-counter",
   "version": "1.0.0",
+  "description": "API и фронтенд для подсчета визитов",
+  "main": "visit.js",
   "dependencies": {
-    "@supabase/supabase-js": "^2.39.0"
+    "@supabase/supabase-js": "^2.39.8",
+    "dotenv": "^16.4.5"
   }
 }

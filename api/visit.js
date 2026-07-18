@@ -1,11 +1,12 @@
 import { createClient } from '@supabase/supabase-js';
 
+// Инициализация клиента Supabase с использованием переменных окружения Vercel
 const supabaseUrl = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL;
 const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_KEY;
 const supabase = createClient(supabaseUrl, supabaseKey);
 
 export default async function handler(req, res) {
-  // Настройка CORS
+  // Разрешаем CORS для любых доменов (чтобы не было проблем с fetch с GitHub Pages / Vercel)
   res.setHeader('Access-Control-Allow-Credentials', 'true');
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,POST');
@@ -16,60 +17,60 @@ export default async function handler(req, res) {
     return;
   }
 
-  // Используем чистую текущую дату сервера для фильтрации (без ручных сдвигов)
-  const todayStr = new Date().toISOString().split('T')[0];
+  // Получаем сегодняшнюю дату в формате YYYY-MM-DD (только дату, без времени)
+  const today = new Date().toISOString().split('T')[0];
 
   try {
-    // 1. ЛОГИКА GET: Считаем уникальные IP за текущие сутки
     if (req.method === 'GET') {
+      // Логика получения данных: суммируем уникальных посетителей или отдаем записи
       const { data, error } = await supabase
-        .from('site_visits')
-        .select('visitor_ip')
-        .gte('visited_at', todayStr); // База сама поймет всё, что позже начала сегодняшнего дня
+        .from('unique_daily_visits')
+        .select('*')
+        .eq('visit_date', today)
+        .maybeSingle();
 
       if (error) throw error;
 
-      const uniqueIPs = new Set(data?.map(item => item.visitor_ip) || []);
-      return res.status(200).json({ views: uniqueIPs.size });
+      return res.status(200).json(data || { visit_date: today, unique_visitors: 0 });
     }
 
-    // 2. ЛОГИКА POST: Запись визита
     if (req.method === 'POST') {
-      const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress || 'unknown';
+      // Сначала проверяем, есть ли запись за сегодня
+      const { data: existingRecord, error: fetchError } = await supabase
+        .from('unique_daily_visits')
+        .select('*')
+        .eq('visit_date', today)
+        .maybeSingle();
 
-      // Проверяем, был ли этот IP сегодня
-      const { data: ipCheck, error: ipCheckError } = await supabase
-        .from('site_visits')
-        .select('id')
-        .eq('visitor_ip', ip)
-        .gte('visited_at', todayStr)
-        .limit(1);
+      if (fetchError) throw fetchError;
 
-      if (ipCheckError) throw ipCheckError;
+      if (existingRecord) {
+        // Если запись есть — обновляем (инкрементируем счетчик на 1)
+        const { data: updateData, error: updateError } = await supabase
+          .from('unique_daily_visits')
+          .update({ unique_visitors: existingRecord.unique_visitors + 1 })
+          .eq('visit_date', today)
+          .select()
+          .single();
 
-      // Если IP новый за сегодня — просто делаем вставку. 
-      // Мы НЕ передаем visited_at, чтобы Supabase использовал свое стандартное значение (NOW() / CURRENT_TIMESTAMP)
-      if (!ipCheck || ipCheck.length === 0) {
-        const { error: insertVisitError } = await supabase
-          .from('site_visits')
-          .insert([{ visitor_ip: ip }]);
+        if (updateError) throw updateError;
+        return res.status(200).json(updateData);
+      } else {
+        // Если записи нет — создаем новую со значением 1
+        const { data: insertData, error: insertError } = await supabase
+          .from('unique_daily_visits')
+          .insert([{ visit_date: today, unique_visitors: 1 }])
+          .select()
+          .single();
 
-        if (insertVisitError) throw insertVisitError;
+        if (insertError) throw insertError;
+        return res.status(200).json(insertData);
       }
-
-      // Считаем итоговое количество для мгновенного ответа
-      const { data: allVisitsToday } = await supabase
-        .from('site_visits')
-        .select('visitor_ip')
-        .gte('visited_at', todayStr);
-
-      const uniqueIPs = new Set(allVisitsToday?.map(item => item.visitor_ip) || []);
-      return res.status(200).json({ views: uniqueIPs.size });
     }
 
     return res.status(405).json({ error: 'Метод не поддерживается' });
   } catch (err) {
-    console.error('Критический сбой API визитов:', err.message);
-    return res.status(500).json({ error: err.message });
+    console.error('Ошибка в API функции:', err.message);
+    return res.status(500).json({ error: 'Внутренняя ошибка сервера', details: err.message });
   }
 }
