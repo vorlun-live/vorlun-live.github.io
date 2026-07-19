@@ -393,6 +393,20 @@
             font-size: 0.95rem;
             font-weight: 600;
             transition: all 0.2s ease;
+            margin-right: 10px;
+        }
+
+        .dislike-button {
+            border-color: rgba(255, 99, 99, 0.25);
+        }
+
+        .dislike-button:hover:not(:disabled) {
+            border-color: #ff6363;
+        }
+
+        .dislike-button:disabled {
+            color: #ff8787;
+            border-color: #ff8787;
         }
 
         .like-button:hover:not(:disabled) {
@@ -405,6 +419,195 @@
             color: var(--secondary);
             border-color: var(--secondary);
             opacity: 0.9;
+        }
+
+        /* Оглавление статьи */
+        .toc-block {
+            background-color: var(--card-bg);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 10px;
+            padding: 16px 20px;
+            margin: 20px 0 30px 0;
+        }
+
+        .toc-block h4 {
+            margin: 0 0 10px 0;
+            color: var(--text-main);
+            font-size: 0.95rem;
+        }
+
+        .toc-block ol {
+            margin: 0;
+            padding-left: 20px;
+        }
+
+        .toc-block li {
+            margin-bottom: 6px;
+        }
+
+        .toc-block a {
+            color: var(--secondary);
+            text-decoration: none;
+            font-size: 0.9rem;
+            cursor: pointer;
+        }
+
+        .toc-block a:hover {
+            text-decoration: underline;
+        }
+
+        /* Кнопки "Поделиться" */
+        .share-buttons {
+            display: flex;
+            gap: 8px;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+
+        .share-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background-color: var(--card-bg);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            color: var(--text-main);
+            padding: 8px 14px;
+            border-radius: 18px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            transition: all 0.2s ease;
+        }
+
+        .share-btn:hover {
+            border-color: var(--primary);
+            transform: translateY(-1px);
+        }
+
+        /* Кнопка "Наверх" */
+        .back-to-top-btn {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            width: 46px;
+            height: 46px;
+            border-radius: 50%;
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            font-size: 1.2rem;
+            cursor: pointer;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 14px rgba(0,0,0,0.35);
+            z-index: 1000;
+            transition: opacity 0.2s ease;
+        }
+
+        .back-to-top-btn.visible {
+            display: flex;
+        }
+
+        /* Комментарии */
+        .comments-block {
+            margin-top: 35px;
+            padding-top: 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.06);
+        }
+
+        .comments-block h4 {
+            color: var(--text-main);
+            margin-bottom: 14px;
+            font-size: 1.1rem;
+        }
+
+        .comment-form {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-bottom: 24px;
+        }
+
+        .comment-form input,
+        .comment-form textarea {
+            background-color: var(--card-bg);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 8px;
+            padding: 10px 14px;
+            color: var(--text-main);
+            font-size: 0.9rem;
+            font-family: inherit;
+            outline: none;
+            box-sizing: border-box;
+        }
+
+        .comment-form input:focus,
+        .comment-form textarea:focus {
+            border-color: var(--primary);
+        }
+
+        .comment-form textarea {
+            resize: vertical;
+            min-height: 70px;
+        }
+
+        .comment-form button {
+            align-self: flex-start;
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 10px 22px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .comment-form button:disabled {
+            opacity: 0.6;
+            cursor: default;
+        }
+
+        /* Honeypot-поле — невидимо для людей, но боты часто заполняют все поля формы подряд */
+        .comment-form .hp-field {
+            position: absolute;
+            left: -9999px;
+            width: 1px;
+            height: 1px;
+            overflow: hidden;
+        }
+
+        .comment-item {
+            background-color: var(--card-bg);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            padding: 12px 16px;
+            margin-bottom: 10px;
+        }
+
+        .comment-item .comment-meta {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-bottom: 6px;
+        }
+
+        .comment-item .comment-author {
+            color: var(--secondary);
+            font-weight: 600;
+        }
+
+        .comment-item .comment-text {
+            color: var(--text-main);
+            font-size: 0.92rem;
+            line-height: 1.5;
+            white-space: pre-wrap;
+        }
+
+        .comments-empty-msg {
+            color: var(--text-muted);
+            font-size: 0.9rem;
         }
 
         /* Похожие статьи под статьёй */
@@ -612,6 +815,7 @@
     </style>
 </head>
 <body>
+    <button class="back-to-top-btn" id="backToTopBtn" onclick="window.scrollTo({top: 0, behavior: 'smooth'})" aria-label="Наверх">↑</button>
 
     <header>
         <div class="header-container">
@@ -1346,45 +1550,68 @@
             if (!block) {
                 block = document.createElement('div');
                 block.className = 'article-likes-block';
-                block.innerHTML = `<button class="like-button" id="like-btn-${articleId}">👍 Полезно (…)</button>`;
+                block.innerHTML = `
+                    <button class="like-button" id="like-btn-${articleId}">👍 Полезно (…)</button>
+                    <button class="like-button dislike-button" id="dislike-btn-${articleId}">👎 Не то (…)</button>
+                `;
                 section.appendChild(block);
             }
 
-            const button = document.getElementById(`like-btn-${articleId}`);
-            if (!button) return;
+            const likeButton = document.getElementById(`like-btn-${articleId}`);
+            const dislikeButton = document.getElementById(`dislike-btn-${articleId}`);
+            if (!likeButton || !dislikeButton) return;
 
-            const alreadyLiked = localStorage.getItem(`liked_${articleId}`) === '1';
+            // Голос — либо лайк, либо дизлайк, не оба сразу. Хранится в localStorage
+            // (мягкая защита от повторного клика тем же браузером, не от накрутки вообще).
+            const existingVote = localStorage.getItem(`voted_${articleId}`); // 'like' | 'dislike' | null
 
-            let currentCount = 0;
+            let likesCount = 0;
+            let dislikesCount = 0;
             try {
                 const { data, error } = await supabaseClient
                     .from('article_likes')
-                    .select('likes')
+                    .select('likes, dislikes')
                     .eq('article_id', articleId)
                     .maybeSingle();
 
                 if (error) throw error;
-                currentCount = data ? data.likes : 0;
+                likesCount = data?.likes || 0;
+                dislikesCount = data?.dislikes || 0;
             } catch (err) {
-                console.error('Не удалось получить количество лайков:', err.message);
+                console.error('Не удалось получить количество лайков/дизлайков:', err.message);
             }
 
-            renderLikeButton(button, articleId, currentCount, alreadyLiked);
+            renderVoteButtons(articleId, likesCount, dislikesCount, existingVote);
         }
 
-        function renderLikeButton(button, articleId, count, liked) {
-            button.textContent = liked ? `✓ Оценено (${count})` : `👍 Полезно (${count})`;
-            button.disabled = liked;
-            button.onclick = liked ? null : () => handleLikeClick(button, articleId, count);
+        function renderVoteButtons(articleId, likesCount, dislikesCount, votedType) {
+            const likeButton = document.getElementById(`like-btn-${articleId}`);
+            const dislikeButton = document.getElementById(`dislike-btn-${articleId}`);
+            if (!likeButton || !dislikeButton) return;
+
+            const voted = Boolean(votedType);
+
+            likeButton.textContent = votedType === 'like' ? `✓ Полезно (${likesCount})` : `👍 Полезно (${likesCount})`;
+            dislikeButton.textContent = votedType === 'dislike' ? `✓ Не то (${dislikesCount})` : `👎 Не то (${dislikesCount})`;
+
+            likeButton.disabled = voted;
+            dislikeButton.disabled = voted;
+
+            likeButton.onclick = voted ? null : () => handleVoteClick(articleId, 'like', likesCount, dislikesCount);
+            dislikeButton.onclick = voted ? null : () => handleVoteClick(articleId, 'dislike', likesCount, dislikesCount);
         }
 
-        async function handleLikeClick(button, articleId, currentCount) {
-            button.disabled = true;
+        async function handleVoteClick(articleId, voteType, likesCount, dislikesCount) {
+            const likeButton = document.getElementById(`like-btn-${articleId}`);
+            const dislikeButton = document.getElementById(`dislike-btn-${articleId}`);
+            if (likeButton) likeButton.disabled = true;
+            if (dislikeButton) dislikeButton.disabled = true;
+
             try {
                 const response = await fetch('/api/article-like', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ articleId })
+                    body: JSON.stringify({ articleId, voteType })
                 });
 
                 if (!response.ok) {
@@ -1393,11 +1620,128 @@
                 }
 
                 const result = await response.json();
-                localStorage.setItem(`liked_${articleId}`, '1');
-                renderLikeButton(button, articleId, result.likes, true);
+                localStorage.setItem(`voted_${articleId}`, voteType);
+                renderVoteButtons(articleId, result.likes, result.dislikes, voteType);
             } catch (err) {
-                console.error('Не удалось поставить лайк:', err.message);
-                button.disabled = false;
+                console.error('Не удалось проголосовать:', err.message);
+                if (likeButton) likeButton.disabled = false;
+                if (dislikeButton) dislikeButton.disabled = false;
+            }
+        }
+
+        // Экранирование HTML перед вставкой пользовательского текста в DOM —
+        // обязательно для имени и текста комментария, иначе это открытая XSS-дыра
+        // (комментарий вида "<img src=x onerror=...>" выполнился бы у всех читателей).
+        function escapeHtml(str) {
+            const div = document.createElement('div');
+            div.textContent = str;
+            return div.innerHTML;
+        }
+
+        // Создаёт (один раз) форму и список комментариев, затем подгружает существующие
+        async function initCommentsWidget(articleId) {
+            const page = document.getElementById('page-' + articleId);
+            if (!page) return;
+            const section = page.querySelector('.section');
+            if (!section) return;
+
+            let block = section.querySelector('.comments-block');
+            if (!block) {
+                block = document.createElement('div');
+                block.className = 'comments-block';
+                block.innerHTML = `
+                    <h4>💬 Комментарии</h4>
+                    <form class="comment-form" id="comment-form-${articleId}">
+                        <input type="text" class="hp-field" name="website" tabindex="-1" autocomplete="off">
+                        <input type="text" id="comment-name-${articleId}" placeholder="Ваше имя" maxlength="50" required>
+                        <textarea id="comment-text-${articleId}" placeholder="Ваш комментарий..." maxlength="1000" required></textarea>
+                        <button type="submit">Отправить</button>
+                    </form>
+                    <div id="comments-list-${articleId}"></div>
+                `;
+                section.appendChild(block);
+
+                document.getElementById(`comment-form-${articleId}`).addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    submitComment(articleId);
+                });
+            }
+
+            await loadComments(articleId);
+        }
+
+        async function loadComments(articleId) {
+            const list = document.getElementById(`comments-list-${articleId}`);
+            if (!list) return;
+            list.innerHTML = '<p class="comments-empty-msg">Загрузка...</p>';
+
+            try {
+                const response = await fetch(`/api/article-comment?articleId=${encodeURIComponent(articleId)}`);
+                if (!response.ok) throw new Error(`Сервер вернул статус ${response.status}`);
+                const { comments } = await response.json();
+                renderComments(articleId, comments || []);
+            } catch (err) {
+                console.error('Не удалось загрузить комментарии:', err.message);
+                list.innerHTML = '<p class="comments-empty-msg">Не удалось загрузить комментарии.</p>';
+            }
+        }
+
+        function renderComments(articleId, comments) {
+            const list = document.getElementById(`comments-list-${articleId}`);
+            if (!list) return;
+
+            if (comments.length === 0) {
+                list.innerHTML = '<p class="comments-empty-msg">Пока никто не оставил комментарий — будьте первым!</p>';
+                return;
+            }
+
+            list.innerHTML = comments.map(c => {
+                const date = new Date(c.created_at);
+                const dateLabel = `${String(date.getUTCDate()).padStart(2, '0')}.${String(date.getUTCMonth() + 1).padStart(2, '0')}.${date.getUTCFullYear()}`;
+                return `
+                    <div class="comment-item">
+                        <div class="comment-meta">
+                            <span class="comment-author">${escapeHtml(c.name)}</span>
+                            <span>${dateLabel}</span>
+                        </div>
+                        <div class="comment-text">${escapeHtml(c.comment)}</div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        async function submitComment(articleId) {
+            const form = document.getElementById(`comment-form-${articleId}`);
+            const nameInput = document.getElementById(`comment-name-${articleId}`);
+            const textInput = document.getElementById(`comment-text-${articleId}`);
+            const honeypot = form.querySelector('.hp-field');
+            const submitBtn = form.querySelector('button[type="submit"]');
+
+            const name = nameInput.value.trim();
+            const comment = textInput.value.trim();
+            if (!name || !comment) return;
+
+            submitBtn.disabled = true;
+            try {
+                const response = await fetch('/api/article-comment', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ articleId, name, comment, website: honeypot.value })
+                });
+
+                if (!response.ok) {
+                    const errorBody = await response.json().catch(() => ({}));
+                    throw new Error(errorBody.error || `Сервер вернул статус ${response.status}`);
+                }
+
+                nameInput.value = '';
+                textInput.value = '';
+                await loadComments(articleId);
+            } catch (err) {
+                console.error('Не удалось отправить комментарий:', err.message);
+                alert('Не получилось отправить комментарий. Попробуйте ещё раз.');
+            } finally {
+                submitBtn.disabled = false;
             }
         }
 
@@ -1560,6 +1904,16 @@
             // (сам визит мог добавить новый уникальный IP, значение могло увеличиться)
             await registerVisit();
             await refreshUniqueVisitsToday();
+
+            // Если страница открыта по прямой ссылке на статью (#obs-guide и т.п.) — открываем её сразу
+            handleDeepLink();
+        });
+
+        // Кнопка "Наверх" появляется после прокрутки на 400px вниз
+        window.addEventListener('scroll', () => {
+            const btn = document.getElementById('backToTopBtn');
+            if (!btn) return;
+            btn.classList.toggle('visible', window.scrollY > 400);
         });
 
         function showPage(pageId) {
@@ -1578,9 +1932,11 @@
                 if (pageId === 'main') {
                     navMain.classList.add('active');
                     navCatalog.classList.remove('active');
+                    history.replaceState(null, '', location.pathname);
                 } else if (pageId === 'catalog') {
                     navCatalog.classList.add('active');
                     navMain.classList.remove('active');
+                    history.replaceState(null, '', location.pathname);
                 }
             }
             window.scrollTo({top: 0, behavior: 'smooth'});
@@ -1643,10 +1999,98 @@
             });
         }
 
+        // Создаёт (один раз) оглавление статьи из всех <h3> внутри .article-content.
+        // Если у заголовка ещё нет id — генерирует его из текста (транслитерация не нужна,
+        // кириллица в id браузерами поддерживается нормально).
+        function buildTableOfContents(articleId) {
+            const page = document.getElementById('page-' + articleId);
+            if (!page) return;
+            const content = page.querySelector('.article-content');
+            const section = page.querySelector('.section');
+            if (!content || !section) return;
+
+            const headings = content.querySelectorAll('h3');
+            let toc = section.querySelector('.toc-block');
+
+            if (headings.length < 2) {
+                // Оглавление из одного пункта бесполезно — не показываем блок вообще
+                if (toc) toc.remove();
+                return;
+            }
+
+            if (!toc) {
+                toc = document.createElement('div');
+                toc.className = 'toc-block';
+                content.parentNode.insertBefore(toc, content);
+            }
+
+            const items = Array.from(headings).map((h, index) => {
+                if (!h.id) h.id = `${articleId}-heading-${index}`;
+                return `<li><a onclick="document.getElementById('${h.id}').scrollIntoView({behavior:'smooth', block:'start'})">${h.textContent}</a></li>`;
+            }).join('');
+
+            toc.innerHTML = `<h4>📑 В этой статье</h4><ol>${items}</ol>`;
+        }
+
+        // Кнопки "Поделиться" — используют реальную ссылку с хэшем на конкретную статью
+        // (см. openArticle: при открытии статьи хэш в адресной строке обновляется),
+        // поэтому скопированная или отправленная ссылка откроет именно эту статью.
+        function injectShareButtons(articleId, title) {
+            const page = document.getElementById('page-' + articleId);
+            if (!page) return;
+            const section = page.querySelector('.section');
+            if (!section) return;
+
+            let block = section.querySelector('.share-buttons');
+            if (block) return; // кнопки не меняются между открытиями одной и той же статьи
+
+            const articleUrl = `${location.origin}${location.pathname}#${articleId}`;
+
+            block = document.createElement('div');
+            block.className = 'share-buttons';
+            block.innerHTML = `
+                <button class="share-btn" onclick="window.open('https://vk.com/share.php?url=${encodeURIComponent(articleUrl)}&title=${encodeURIComponent(title)}', '_blank')">📌 VK</button>
+                <button class="share-btn" onclick="window.open('https://t.me/share/url?url=${encodeURIComponent(articleUrl)}&text=${encodeURIComponent(title)}', '_blank')">✈️ Telegram</button>
+                <button class="share-btn" id="copy-link-${articleId}" onclick="copyArticleLink('${articleId}')">🔗 Скопировать ссылку</button>
+            `;
+
+            const content = section.querySelector('.article-content');
+            content.parentNode.insertBefore(block, content.nextSibling);
+        }
+
+        async function copyArticleLink(articleId) {
+            const articleUrl = `${location.origin}${location.pathname}#${articleId}`;
+            const btn = document.getElementById(`copy-link-${articleId}`);
+            try {
+                await navigator.clipboard.writeText(articleUrl);
+                if (btn) {
+                    const original = btn.textContent;
+                    btn.textContent = '✅ Скопировано';
+                    setTimeout(() => { btn.textContent = original; }, 2000);
+                }
+            } catch (err) {
+                console.error('Не удалось скопировать ссылку:', err.message);
+            }
+        }
+
         function openArticle(articleId) {
             showPage(articleId);
+            history.replaceState(null, '', '#' + articleId);
+
+            const meta = ARTICLES.find(a => a.id === articleId);
+            buildTableOfContents(articleId);
+            injectShareButtons(articleId, meta ? meta.title : 'Гайд VORLUN');
             initLikesWidget(articleId);
+            initCommentsWidget(articleId);
             renderRelatedArticles(articleId);
+        }
+
+        // Глубокие ссылки: если страница открыта с хэшем вида #obs-guide — сразу открываем эту статью
+        function handleDeepLink() {
+            const hash = location.hash.replace('#', '');
+            if (hash && ARTICLES.some(a => a.id === hash)) {
+                openArticle(hash);
+            }
         }
 
         // Текущая выбранная категория хранится отдельно, чтобы поиск и теги
