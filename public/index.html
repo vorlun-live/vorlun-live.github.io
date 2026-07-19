@@ -1,6 +1,14 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
+    <script>
+        // Ставим тему СИНХРОННО, до отрисовки CSS — иначе при светлой теме будет
+        // на долю секунды видно тёмную вспышку при каждой загрузке страницы.
+        (function() {
+            var saved = localStorage.getItem('vorlun-theme');
+            if (saved === 'light') document.documentElement.setAttribute('data-theme', 'light');
+        })();
+    </script>
     <!-- Yandex.Metrika counter -->
     <script type="text/javascript">
         (function(m,e,t,r,i,k,a){
@@ -17,11 +25,44 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>VORLUN | Гайды по стримингу, настройке ОБС и продвижению</title>
     <meta name="description" content="Полезные SEO-гайды для начинающих контент-мейкеров. Как настроить OBS без лагов, убрать шумы микрофона и продвигать Twitch через TikTok.">
-    
+    <meta name="keywords" content="стриминг, twitch, obs studio, настройка стрима, донаты стример, продвижение twitch, tiktok для стримера, gta5 rp, majestic rp, dota 2, cs, stream deck">
+    <meta name="author" content="VORLUN">
+    <link rel="canonical" href="https://vorlun-live-github-io.vercel.app/">
+
     <meta name="yandex-verification" content="ddcfc6be5a50b1df" />
     <meta name="google-site-verification" content="em-FzPvx-EDfwSKd8oKJtHq9x_0OzSksyTe-Tg9n3fs" />
 
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎮</text></svg>">
+    <!-- Open Graph — превью при шаринге в VK, Telegram, Discord -->
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="VORLUN">
+    <meta property="og:title" content="VORLUN | Гайды по стримингу, настройке OBS и продвижению">
+    <meta property="og:description" content="База знаний для стримеров: настройка OBS без лагов, звук, свет, донаты, продвижение через TikTok и Discord.">
+    <meta property="og:url" content="https://vorlun-live-github-io.vercel.app/">
+    <meta property="og:image" content="https://vorlun-live-github-io.vercel.app/favicon-512.png">
+    <meta property="og:locale" content="ru_RU">
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:title" content="VORLUN | Гайды по стримингу, настройке OBS и продвижению">
+    <meta name="twitter:description" content="База знаний для стримеров: настройка OBS без лагов, звук, свет, донаты, продвижение через TikTok и Discord.">
+    <meta name="twitter:image" content="https://vorlun-live-github-io.vercel.app/favicon-512.png">
+
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+    <link rel="manifest" href="/site.webmanifest">
+
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "WebSite",
+        "name": "VORLUN",
+        "url": "https://vorlun-live-github-io.vercel.app/",
+        "description": "База знаний для стримеров: гайды по настройке OBS, звука, света, донатов и продвижению через TikTok и Discord.",
+        "inLanguage": "ru"
+    }
+    </script>
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -65,6 +106,44 @@
             --twitch-hover: #7d5bbe;
             --tiktok-color: #121212;
             --tiktok-border: #25f4ee;
+        }
+
+        /* Светлая тема — переключается через data-theme на <html>, сохраняется в localStorage */
+        html[data-theme="light"] {
+            --bg-color: #f4f4f7;
+            --panel-bg: #ffffff;
+            --card-bg: #f0eff5;
+            --primary: #6d3fd6;
+            --primary-glow: rgba(109, 63, 214, 0.12);
+            --secondary: #1f9d63;
+            --secondary-glow: rgba(31, 157, 99, 0.12);
+            --text-main: #1a1523;
+            --text-muted: #5c6370;
+            --alert-color: #e63946;
+
+            --twitch-color: #6441a5;
+            --twitch-hover: #7d5bbe;
+            --tiktok-color: #121212;
+            --tiktok-border: #0f8a85;
+        }
+
+        .theme-toggle-btn {
+            background: none;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: var(--text-main);
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 1rem;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            margin-left: 8px;
+        }
+
+        .theme-toggle-btn:hover {
+            border-color: var(--primary);
         }
 
         body {
@@ -677,6 +756,78 @@
             font-weight: 600;
         }
 
+        /* Значки за активность */
+        .badges-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(50px, 1fr));
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .badge-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            font-size: 1.4rem;
+            opacity: 0.25;
+            filter: grayscale(1);
+            transition: all 0.2s ease;
+            cursor: default;
+        }
+
+        .badge-item.unlocked {
+            opacity: 1;
+            filter: none;
+        }
+
+        .badge-item span.badge-label {
+            font-size: 0.6rem;
+            color: var(--text-muted);
+            text-align: center;
+            line-height: 1.1;
+        }
+
+        .achievement-toast {
+            position: fixed;
+            bottom: 24px;
+            left: 24px;
+            background-color: var(--card-bg);
+            border: 1px solid var(--secondary);
+            border-radius: 12px;
+            padding: 14px 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            box-shadow: 0 6px 20px rgba(0,0,0,0.4);
+            z-index: 1000;
+            transform: translateY(20px);
+            opacity: 0;
+            transition: all 0.3s ease;
+            pointer-events: none;
+            max-width: 300px;
+        }
+
+        .achievement-toast.visible {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        .achievement-toast .toast-icon {
+            font-size: 1.8rem;
+        }
+
+        .achievement-toast .toast-title {
+            color: var(--secondary);
+            font-weight: 700;
+            font-size: 0.85rem;
+        }
+
+        .achievement-toast .toast-desc {
+            color: var(--text-muted);
+            font-size: 0.78rem;
+        }
+
         .chart-range-toggle {
             display: flex;
             gap: 6px;
@@ -816,6 +967,13 @@
 </head>
 <body>
     <button class="back-to-top-btn" id="backToTopBtn" onclick="window.scrollTo({top: 0, behavior: 'smooth'})" aria-label="Наверх">↑</button>
+    <div class="achievement-toast" id="achievementToast">
+        <span class="toast-icon" id="toastIcon"></span>
+        <div>
+            <div class="toast-title" id="toastTitle"></div>
+            <div class="toast-desc" id="toastDesc"></div>
+        </div>
+    </div>
 
     <header>
         <div class="header-container">
@@ -823,6 +981,7 @@
             <nav>
                 <button id="nav-main" class="active" onclick="showPage('main')">Главная</button>
                 <button id="nav-catalog" onclick="showPage('catalog')">Каталог гайдов</button>
+                <button id="theme-toggle-btn" class="theme-toggle-btn" onclick="toggleTheme()" aria-label="Переключить тему" title="Светлая/тёмная тема">🌙</button>
             </nav>
         </div>
     </header>
@@ -850,6 +1009,11 @@
                 <div>Уникальные визиты за сегодня</div>
             </div>
 
+            <div class="sidebar-panel">
+                <h4>🏅 Мои значки</h4>
+                <div class="badges-grid" id="badgesGrid"></div>
+            </div>
+
             <div class="sidebar-panel" style="font-size: 0.95rem; line-height: 1.6;">
                 <h4 style="color: var(--primary);">🎮 О чем мои стримы</h4>
                 <p style="margin: 0 0 12px 0; color: #e1e6eb;">Привет! Я создаю контент, делюсь фишками по оптимизации стримов, а также веду трансляции.</p>
@@ -873,6 +1037,15 @@
         <div class="container">
             
             <div id="page-main" class="page active-page">
+                <div class="section">
+                    <h1 style="font-size: 1.4rem; margin: 0 0 8px 0; color: var(--text-main);">VORLUN — база знаний для стримеров</h1>
+                    <p style="color: var(--text-muted); font-size: 0.95rem; line-height: 1.6; margin: 0;">
+                        Здесь собраны практические гайды по настройке стрима: как выставить OBS без лагов, убрать шум с микрофона,
+                        подключить донаты и оформить канал на Twitch. Плюс материалы по продвижению через TikTok и Discord —
+                        полезно и новичкам, и тем, кто уже стримит GTA5 RP, Dota 2, CS или Majestic RP.
+                    </p>
+                </div>
+
                 <div class="section">
                     <h2>👾 Статус Стрима (Live)</h2>
                     <p style="color: var(--text-muted); font-size: 0.95rem; margin-top: 5px;">Проверка идет ли трансляция на Twitch в реальном времени.</p>
@@ -945,6 +1118,18 @@
                     <p>Добро пожаловать в базу знаний для начинающих и опытных контент-мейкеров. Если вы хотите начать вести трансляции на Twitch, записывать ролики для YouTube или развивать свой TikTok-канал, здесь собраны актуальные материалы и пошаговые руководства. Мы разбираем ключевые технические аспекты: как настроить OBS Studio до идеального состояния без потери кадров, какие фильтры использовать для получения студийного звука с бюджетного микрофона, а также как правильно выставить свет и экспозицию веб-камеры.</p>
                     <p>Оптимизация оборудования и программного обеспечения — залог качественного и стабильного эфира, который удерживает зрителя. Изучайте наши подробные статьи, внедряйте проверенные настройки кодировщиков, избегайте частых ошибок новинков и привлекайте новую аудиторию с помощью органического трафика из социальных сетей!</p>
                 </section>
+            </div>
+
+            <div id="page-404" class="page">
+                <div class="section" style="text-align: center; padding: 60px 20px;">
+                    <div style="font-size: 3.5rem; margin-bottom: 10px;">🔍💨</div>
+                    <h2 style="margin-bottom: 10px;">Страница потерялась в стриме</h2>
+                    <p style="color: var(--text-muted); margin-bottom: 30px;">Такой статьи не существует — возможно, ссылка устарела или была введена с опечаткой.</p>
+                    <div class="links-grid" style="max-width: 400px; margin: 0 auto;">
+                        <button onclick="showPage('main')" class="btn btn-twitch" style="border:none; cursor:pointer;">🏠 На главную</button>
+                        <button onclick="showPage('catalog')" class="btn btn-tiktok" style="border:none; cursor:pointer;">📚 В каталог гайдов</button>
+                    </div>
+                </div>
             </div>
 
             <div id="page-catalog" class="page">
@@ -1068,7 +1253,19 @@
                         </div>
                         
                     </div>
+
+                    <div class="comments-block" style="margin-top: 45px;">
+                        <h4>✉️ Не нашли нужную тему?</h4>
+                        <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 16px;">Предложите тему для нового гайда или напишите, что не так — письмо откроется в вашей почте и уйдёт напрямую автору.</p>
+                        <form class="comment-form" id="feedback-form" style="max-width: 480px;">
+                            <input type="text" id="feedback-name" placeholder="Ваше имя (необязательно)" maxlength="50">
+                            <input type="email" id="feedback-email" placeholder="Ваш email для ответа (необязательно)" maxlength="100">
+                            <textarea id="feedback-message" placeholder="Тема гайда или сообщение..." maxlength="1500" required></textarea>
+                            <button type="submit">Отправить на почту</button>
+                        </form>
+                    </div>
                 </div>
+
             </div>
 
             <div id="page-obs-guide" class="page">
@@ -1622,6 +1819,7 @@
                 const result = await response.json();
                 localStorage.setItem(`voted_${articleId}`, voteType);
                 renderVoteButtons(articleId, result.likes, result.dislikes, voteType);
+                bumpActivityStat('votes');
             } catch (err) {
                 console.error('Не удалось проголосовать:', err.message);
                 if (likeButton) likeButton.disabled = false;
@@ -1737,9 +1935,10 @@
                 nameInput.value = '';
                 textInput.value = '';
                 await loadComments(articleId);
+                bumpActivityStat('comments');
             } catch (err) {
                 console.error('Не удалось отправить комментарий:', err.message);
-                alert('Не получилось отправить комментарий. Попробуйте ещё раз.');
+                alert(err.message || 'Не получилось отправить комментарий. Попробуйте ещё раз.');
             } finally {
                 submitBtn.disabled = false;
             }
@@ -1907,6 +2106,9 @@
 
             // Если страница открыта по прямой ссылке на статью (#obs-guide и т.п.) — открываем её сразу
             handleDeepLink();
+            syncThemeToggleIcon();
+            renderBadges();
+            initFeedbackForm();
         });
 
         // Кнопка "Наверх" появляется после прокрутки на 400px вниз
@@ -2085,12 +2287,138 @@
             renderRelatedArticles(articleId);
         }
 
-        // Глубокие ссылки: если страница открыта с хэшем вида #obs-guide — сразу открываем эту статью
+        // Глубокие ссылки: если страница открыта с хэшем вида #obs-guide — сразу открываем эту статью.
+        // Если хэш есть, но такой статьи не существует — показываем 404, а не молча остаёмся на главной.
         function handleDeepLink() {
             const hash = location.hash.replace('#', '');
-            if (hash && ARTICLES.some(a => a.id === hash)) {
+            if (!hash) return;
+
+            if (ARTICLES.some(a => a.id === hash)) {
                 openArticle(hash);
+            } else if (hash !== 'catalog' && hash !== 'main') {
+                showPage('404');
             }
+        }
+
+        // Значки за активность. Считаются по localStorage ЭТОГО браузера (не по аккаунту —
+        // на сайте нет системы логина), поэтому это скорее геймификация для настроения,
+        // чем строгая проверяемая статистика.
+        const ACHIEVEMENTS = [
+            { id: 'first_vote', icon: '👍', label: 'Первый голос', desc: 'Поставили первую оценку статье', check: s => s.votes >= 1 },
+            { id: 'first_comment', icon: '💬', label: 'Собеседник', desc: 'Оставили первый комментарий', check: s => s.comments >= 1 },
+            { id: 'active_voter', icon: '🔥', label: 'Активный читатель', desc: 'Оценили 5 статей', check: s => s.votes >= 5 },
+            { id: 'regular_author', icon: '📝', label: 'Постоянный автор', desc: 'Оставили 3 комментария', check: s => s.comments >= 3 },
+            { id: 'legend', icon: '🏆', label: 'Легенда чата', desc: '10 оценок и 5 комментариев', check: s => s.votes >= 10 && s.comments >= 5 },
+        ];
+
+        function getActivityStats() {
+            return {
+                votes: parseInt(localStorage.getItem('vorlun-stat-votes') || '0', 10),
+                comments: parseInt(localStorage.getItem('vorlun-stat-comments') || '0', 10),
+            };
+        }
+
+        function getUnlockedAchievements() {
+            try {
+                return JSON.parse(localStorage.getItem('vorlun-achievements') || '[]');
+            } catch {
+                return [];
+            }
+        }
+
+        // Увеличивает счётчик активности на 1 ('votes' | 'comments') и проверяет,
+        // не разблокировался ли новый значок — если да, показывает тост.
+        function bumpActivityStat(statName) {
+            const key = `vorlun-stat-${statName}`;
+            const next = parseInt(localStorage.getItem(key) || '0', 10) + 1;
+            localStorage.setItem(key, String(next));
+
+            const stats = getActivityStats();
+            const unlocked = getUnlockedAchievements();
+
+            ACHIEVEMENTS.forEach(a => {
+                if (!unlocked.includes(a.id) && a.check(stats)) {
+                    unlocked.push(a.id);
+                    showAchievementToast(a);
+                }
+            });
+
+            localStorage.setItem('vorlun-achievements', JSON.stringify(unlocked));
+            renderBadges();
+        }
+
+        function showAchievementToast(achievement) {
+            const toast = document.getElementById('achievementToast');
+            if (!toast) return;
+
+            document.getElementById('toastIcon').textContent = achievement.icon;
+            document.getElementById('toastTitle').textContent = `Новый значок: ${achievement.label}`;
+            document.getElementById('toastDesc').textContent = achievement.desc;
+
+            toast.classList.add('visible');
+            clearTimeout(toast._hideTimeout);
+            toast._hideTimeout = setTimeout(() => toast.classList.remove('visible'), 4000);
+        }
+
+        function renderBadges() {
+            const grid = document.getElementById('badgesGrid');
+            if (!grid) return;
+
+            const unlocked = getUnlockedAchievements();
+            grid.innerHTML = ACHIEVEMENTS.map(a => `
+                <div class="badge-item ${unlocked.includes(a.id) ? 'unlocked' : ''}" title="${a.desc}">
+                    <div>${a.icon}</div>
+                    <span class="badge-label">${a.label}</span>
+                </div>
+            `).join('');
+        }
+
+        // Форма обратной связи собирает письмо и открывает его в почтовом клиенте пользователя —
+        // без бэкенда и сторонних email-сервисов. Инициализируется один раз при первой загрузке страницы.
+        function initFeedbackForm() {
+            const form = document.getElementById('feedback-form');
+            if (!form || form.dataset.initialized) return;
+            form.dataset.initialized = 'true';
+
+            form.addEventListener('submit', (e) => {
+                e.preventDefault();
+
+                const name = document.getElementById('feedback-name').value.trim();
+                const email = document.getElementById('feedback-email').value.trim();
+                const message = document.getElementById('feedback-message').value.trim();
+                if (!message) return;
+
+                const subject = `VORLUN — предложение по сайту от ${name || 'посетителя'}`;
+                const bodyLines = [
+                    message,
+                    '',
+                    '---',
+                    name ? `Имя: ${name}` : null,
+                    email ? `Email для ответа: ${email}` : null,
+                ].filter(Boolean);
+
+                const mailtoUrl = `mailto:dmitriy.1986.mos@gmail.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(bodyLines.join('\n'))}`;
+                window.location.href = mailtoUrl;
+            });
+        }
+
+        function toggleTheme() {
+            const isLight = document.documentElement.getAttribute('data-theme') === 'light';
+            if (isLight) {
+                document.documentElement.removeAttribute('data-theme');
+                localStorage.setItem('vorlun-theme', 'dark');
+            } else {
+                document.documentElement.setAttribute('data-theme', 'light');
+                localStorage.setItem('vorlun-theme', 'light');
+            }
+            syncThemeToggleIcon();
+        }
+
+        function syncThemeToggleIcon() {
+            const btn = document.getElementById('theme-toggle-btn');
+            if (!btn) return;
+            const isLight = document.documentElement.getAttribute('data-theme') === 'light';
+            btn.textContent = isLight ? '☀️' : '🌙';
         }
 
         // Текущая выбранная категория хранится отдельно, чтобы поиск и теги
