@@ -1164,6 +1164,8 @@
             .header-container { flex-direction: column; gap: 10px; }
             nav { width: 100%; justify-content: center; overflow-x: auto; padding-bottom: 5px; }
             .main-wrapper { grid-template-columns: 1fr; width: 95%; margin: 20px auto; gap: 20px; }
+            .container { order: 1; }
+            .sidebar { order: 2; }
             .stats-grid { grid-template-columns: 1fr; }
             .links-grid { grid-template-columns: 1fr; }
             .catalog-grid { grid-template-columns: 1fr; }
@@ -2891,17 +2893,21 @@
                 status.style.color = 'var(--text-muted)';
                 status.textContent = 'Сохраняем...';
 
-                const { error } = await supabaseClient.from('profiles').update({ display_name: newName }).eq('id', currentUser.id);
-                if (error) {
-                    status.style.color = 'var(--alert-color)';
-                    status.textContent = 'Не удалось сохранить: ' + error.message;
-                    return;
-                }
+                try {
+                    const response = await authedFetch('/api/update-profile', { displayName: newName });
+                    if (!response.ok) {
+                        const errorBody = await response.json().catch(() => ({}));
+                        throw new Error(errorBody.error || `Сервер вернул статус ${response.status}`);
+                    }
 
-                currentDisplayName = newName;
-                status.style.color = 'var(--secondary)';
-                status.textContent = '✅ Сохранено';
-                updateAuthUI();
+                    currentDisplayName = newName;
+                    status.style.color = 'var(--secondary)';
+                    status.textContent = '✅ Сохранено';
+                    updateAuthUI();
+                } catch (err) {
+                    status.style.color = 'var(--alert-color)';
+                    status.textContent = err.message || 'Не удалось сохранить имя.';
+                }
             });
 
             renderBadgesInto('profileBadgesGrid');
