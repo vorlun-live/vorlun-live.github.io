@@ -951,28 +951,42 @@
 
         .badge-tooltip {
             position: absolute;
-            bottom: calc(100% + 8px);
+            bottom: calc(100% + 12px);
             left: 50%;
             transform: translateX(-50%) translateY(4px);
-            background-color: var(--panel-bg);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            background-color: var(--card-bg);
+            border: 2px solid var(--primary);
             color: var(--text-main);
-            padding: 8px 12px;
-            border-radius: 8px;
-            font-size: 0.75rem;
-            font-weight: 500;
-            white-space: nowrap;
+            padding: 12px 16px;
+            border-radius: 10px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            line-height: 1.4;
+            white-space: normal;
+            width: 160px;
+            text-align: center;
             opacity: 0;
             pointer-events: none;
             transition: all 0.15s ease;
-            box-shadow: 0 4px 14px rgba(0,0,0,0.3);
-            z-index: 10;
+            box-shadow: 0 6px 20px rgba(0,0,0,0.5);
+            z-index: 50;
+        }
+
+        .badge-tooltip::after {
+            content: '';
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            border: 7px solid transparent;
+            border-top-color: var(--primary);
         }
 
         .badge-tooltip .tooltip-status {
             display: block;
-            font-size: 0.68rem;
-            margin-top: 2px;
+            font-size: 0.78rem;
+            font-weight: 700;
+            margin-top: 6px;
         }
 
         .badge-item:hover .badge-tooltip {
@@ -1182,6 +1196,7 @@
             </form>
 
             <form id="auth-form-signup" style="display: none;">
+                <input type="text" id="signup-name" placeholder="Ваше имя" required maxlength="50" autocomplete="name">
                 <input type="email" id="signup-email" placeholder="Email" required autocomplete="email">
                 <input type="password" id="signup-password" placeholder="Пароль (минимум 6 символов)" required minlength="6" autocomplete="new-password">
                 <input type="password" id="signup-password-confirm" placeholder="Повторите пароль" required minlength="6" autocomplete="new-password">
@@ -1338,6 +1353,13 @@
                     <p>Добро пожаловать в базу знаний для начинающих и опытных контент-мейкеров. Если вы хотите начать вести трансляции на Twitch, записывать ролики для YouTube или развивать свой TikTok-канал, здесь собраны актуальные материалы и пошаговые руководства. Мы разбираем ключевые технические аспекты: как настроить OBS Studio до идеального состояния без потери кадров, какие фильтры использовать для получения студийного звука с бюджетного микрофона, а также как правильно выставить свет и экспозицию веб-камеры.</p>
                     <p>Оптимизация оборудования и программного обеспечения — залог качественного и стабильного эфира, который удерживает зрителя. Изучайте наши подробные статьи, внедряйте проверенные настройки кодировщиков, избегайте частых ошибок новинков и привлекайте новую аудиторию с помощью органического трафика из социальных сетей!</p>
                 </section>
+            </div>
+
+            <div id="page-profile" class="page">
+                <div class="section">
+                    <h2>👤 Мой профиль</h2>
+                    <div id="profile-content">Загрузка...</div>
+                </div>
             </div>
 
             <div id="page-404" class="page">
@@ -2125,16 +2147,36 @@
             list.innerHTML = comments.map(c => {
                 const date = new Date(c.created_at);
                 const dateLabel = `${String(date.getUTCDate()).padStart(2, '0')}.${String(date.getUTCMonth() + 1).padStart(2, '0')}.${date.getUTCFullYear()}`;
+                const canDelete = currentUser && (c.user_id === currentUser.id || currentIsAdmin);
+                const deleteBtn = canDelete
+                    ? `<span class="logout-link" style="cursor:pointer;" onclick="handleDeleteComment('${articleId}', ${c.id})">${currentIsAdmin && c.user_id !== currentUser.id ? '🛡 Удалить (админ)' : 'Удалить'}</span>`
+                    : '';
                 return `
                     <div class="comment-item">
                         <div class="comment-meta">
                             <span class="comment-author">${escapeHtml(c.name)}</span>
-                            <span>${dateLabel}</span>
+                            <span>${dateLabel} ${deleteBtn}</span>
                         </div>
                         <div class="comment-text">${escapeHtml(c.comment)}</div>
                     </div>
                 `;
             }).join('');
+        }
+
+        async function handleDeleteComment(articleId, commentId) {
+            if (!confirm('Удалить этот комментарий?')) return;
+
+            try {
+                const response = await authedFetch('/api/article-comment', { commentId }, 'DELETE');
+                if (!response.ok) {
+                    const errorBody = await response.json().catch(() => ({}));
+                    throw new Error(errorBody.error || `Сервер вернул статус ${response.status}`);
+                }
+                await loadComments(articleId);
+            } catch (err) {
+                console.error('Не удалось удалить комментарий:', err.message);
+                alert(err.message || 'Не получилось удалить комментарий.');
+            }
         }
 
         async function submitComment(articleId) {
@@ -2352,6 +2394,10 @@
                 targetPage.classList.add('active-page');
             }
 
+            if (!ARTICLES.some(a => a.id === pageId)) {
+                currentOpenArticleId = null;
+            }
+
             const navMain = document.getElementById('nav-main');
             const navCatalog = document.getElementById('nav-catalog');
 
@@ -2360,15 +2406,19 @@
                     navMain.classList.add('active');
                     navCatalog.classList.remove('active');
                     history.replaceState(null, '', location.pathname);
-                    currentOpenArticleId = null;
                 } else if (pageId === 'catalog') {
                     navCatalog.classList.add('active');
                     navMain.classList.remove('active');
                     history.replaceState(null, '', location.pathname);
-                    currentOpenArticleId = null;
+                } else {
+                    navMain.classList.remove('active');
+                    navCatalog.classList.remove('active');
                 }
             }
-            window.scrollTo({top: 0, behavior: 'smooth'});
+            // Мгновенный скролл, а не smooth — при переключении между страницами разной высоты
+            // (длинный каталог -> короткая статья) анимация плавного скролла конфликтовала
+            // с одномоментным изменением высоты контента, и viewport "улетал" не в ту точку.
+            window.scrollTo(0, 0);
         }
 
         // Метаданные всех статей — единый источник правды для "Похожих статей",
@@ -2593,8 +2643,8 @@
             toast._hideTimeout = setTimeout(() => toast.classList.remove('visible'), 4000);
         }
 
-        function renderBadges() {
-            const grid = document.getElementById('badgesGrid');
+        function renderBadges(targetId = 'badgesGrid') {
+            const grid = document.getElementById(targetId);
             if (!grid) return;
 
             if (!isAuthedAndConfirmed()) {
@@ -2619,11 +2669,18 @@
             }).join('');
         }
 
+        // Просто явный алиас для читаемости в местах, где рисуем значки не в сайдбар,
+        // а в конкретный контейнер (например, на странице профиля).
+        function renderBadgesInto(targetId) {
+            renderBadges(targetId);
+        }
+
         // ==================== АВТОРИЗАЦИЯ ====================
 
         let currentSession = null;
         let currentUser = null;
         let currentDisplayName = null;
+        let currentIsAdmin = false;
         let currentOpenArticleId = null; // если открыта статья — переинициализируем её виджеты при смене входа
 
         function isAuthedAndConfirmed() {
@@ -2631,13 +2688,13 @@
         }
 
         // Достаёт свежий access_token и добавляет его в заголовок — используется
-        // всеми запросами на запись (голос, комментарий), которые требуют авторизации.
-        async function authedFetch(url, body) {
+        // всеми запросами на запись (голос, комментарий, удаление), которые требуют авторизации.
+        async function authedFetch(url, body, method = 'POST') {
             const { data: { session } } = await supabaseClient.auth.getSession();
             const token = session?.access_token;
 
             return fetch(url, {
-                method: 'POST',
+                method,
                 headers: {
                     'Content-Type': 'application/json',
                     ...(token ? { Authorization: `Bearer ${token}` } : {}),
@@ -2670,6 +2727,7 @@
             if (!currentUser) {
                 widget.innerHTML = `<button class="auth-btn" onclick="openAuthModal()">Войти</button>`;
                 currentDisplayName = null;
+                currentIsAdmin = false;
                 return;
             }
 
@@ -2679,13 +2737,16 @@
             }
 
             try {
-                const { data } = await supabaseClient.from('profiles').select('display_name').eq('id', currentUser.id).maybeSingle();
+                const { data } = await supabaseClient.from('profiles').select('display_name, is_admin').eq('id', currentUser.id).maybeSingle();
                 currentDisplayName = data?.display_name || currentUser.email.split('@')[0];
+                currentIsAdmin = Boolean(data?.is_admin);
             } catch {
                 currentDisplayName = currentUser.email.split('@')[0];
+                currentIsAdmin = false;
             }
 
-            widget.innerHTML = `<span class="auth-user-chip">👤 ${escapeHtml(currentDisplayName)} <span class="logout-link" onclick="handleSignOut()">Выйти</span></span>`;
+            const adminBadge = currentIsAdmin ? ' <span style="color: var(--secondary);">⚙️ Админ</span>' : '';
+            widget.innerHTML = `<span class="auth-user-chip">👤 <span style="cursor:pointer; text-decoration: underline dotted;" onclick="openProfilePage()">${escapeHtml(currentDisplayName)}</span>${adminBadge} <span class="logout-link" onclick="handleSignOut()">Выйти</span></span>`;
         }
 
         async function handleSignOut() {
@@ -2716,9 +2777,16 @@
             document.getElementById('auth-form-signup').addEventListener('submit', async (e) => {
                 e.preventDefault();
                 const status = document.getElementById('authModalStatus');
+                const name = document.getElementById('signup-name').value.trim();
                 const email = document.getElementById('signup-email').value.trim();
                 const password = document.getElementById('signup-password').value;
                 const passwordConfirm = document.getElementById('signup-password-confirm').value;
+
+                if (!name) {
+                    status.style.color = 'var(--alert-color)';
+                    status.textContent = 'Введите имя.';
+                    return;
+                }
 
                 if (password !== passwordConfirm) {
                     status.style.color = 'var(--alert-color)';
@@ -2729,7 +2797,12 @@
                 status.style.color = 'var(--text-muted)';
                 status.textContent = 'Регистрируем...';
 
-                const { error } = await supabaseClient.auth.signUp({ email, password });
+                // Имя передаём через options.data — оно попадает в raw_user_meta_data,
+                // а серверный триггер handle_new_user() при создании профиля берёт имя оттуда.
+                const { error } = await supabaseClient.auth.signUp({
+                    email, password,
+                    options: { data: { display_name: name } }
+                });
                 if (error) {
                     status.style.color = 'var(--alert-color)';
                     status.textContent = error.message;
@@ -2739,6 +2812,99 @@
                 status.style.color = 'var(--secondary)';
                 status.textContent = '✅ Проверьте почту и перейдите по ссылке подтверждения — после этого сможете комментировать и оценивать статьи.';
             });
+        }
+
+        // Страница профиля: имя (с возможностью изменить), email, значки, свои комментарии
+        async function openProfilePage() {
+            if (!isAuthedAndConfirmed()) {
+                openAuthModal();
+                return;
+            }
+
+            showPage('profile');
+            const container = document.getElementById('profile-content');
+            container.innerHTML = 'Загрузка...';
+
+            let myComments = [];
+            let myVotesCount = 0;
+            try {
+                const [commentsResult, votesResult] = await Promise.all([
+                    supabaseClient.from('article_comments').select('id, article_id, comment, created_at').eq('user_id', currentUser.id).order('created_at', { ascending: false }),
+                    supabaseClient.from('article_votes').select('article_id', { count: 'exact', head: true }).eq('user_id', currentUser.id),
+                ]);
+                myComments = commentsResult.data || [];
+                myVotesCount = votesResult.count || 0;
+            } catch (err) {
+                console.error('Не удалось загрузить данные профиля:', err.message);
+            }
+
+            const adminLine = currentIsAdmin ? `<p style="color: var(--secondary); font-weight: 600;">⚙️ У вас права администратора — можно удалять любые комментарии.</p>` : '';
+
+            const commentsHtml = myComments.length === 0
+                ? '<p class="comments-empty-msg">Вы ещё не оставляли комментариев.</p>'
+                : myComments.map(c => {
+                    const meta = ARTICLES.find(a => a.id === c.article_id);
+                    const date = new Date(c.created_at);
+                    const dateLabel = `${String(date.getUTCDate()).padStart(2, '0')}.${String(date.getUTCMonth() + 1).padStart(2, '0')}.${date.getUTCFullYear()}`;
+                    return `
+                        <div class="comment-item">
+                            <div class="comment-meta">
+                                <span class="comment-author" style="cursor:pointer;" onclick="openArticle('${c.article_id}')">${escapeHtml(meta ? meta.title : c.article_id)}</span>
+                                <span>${dateLabel} <span class="logout-link" style="cursor:pointer;" onclick="handleDeleteComment('${c.article_id}', ${c.id}).then(() => openProfilePage())">Удалить</span></span>
+                            </div>
+                            <div class="comment-text">${escapeHtml(c.comment)}</div>
+                        </div>
+                    `;
+                }).join('');
+
+            container.innerHTML = `
+                <div class="sidebar-panel" style="margin-bottom: 20px;">
+                    <p style="margin: 0 0 4px 0; color: var(--text-muted); font-size: 0.85rem;">Email</p>
+                    <p style="margin: 0 0 16px 0;">${escapeHtml(currentUser.email)}</p>
+
+                    <p style="margin: 0 0 4px 0; color: var(--text-muted); font-size: 0.85rem;">Отображаемое имя</p>
+                    <form id="profile-name-form" style="display: flex; gap: 8px; max-width: 320px;">
+                        <input type="text" id="profile-name-input" value="${escapeHtml(currentDisplayName)}" maxlength="50" required style="flex:1; background-color: var(--card-bg); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 8px 12px; color: var(--text-main);">
+                        <button type="submit" style="background: var(--primary); color:white; border:none; border-radius:8px; padding: 0 16px; cursor:pointer;">Сохранить</button>
+                    </form>
+                    <p id="profile-name-status" style="font-size: 0.8rem; margin-top: 6px;"></p>
+                    ${adminLine}
+                </div>
+
+                <div class="sidebar-panel" style="margin-bottom: 20px;">
+                    <h4>🏅 Мои значки</h4>
+                    <div class="badges-grid" id="profileBadgesGrid"></div>
+                </div>
+
+                <div class="sidebar-panel">
+                    <h4>💬 Мои комментарии (${myComments.length}) · 👍 Оценок поставлено: ${myVotesCount}</h4>
+                    ${commentsHtml}
+                </div>
+            `;
+
+            document.getElementById('profile-name-form').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const status = document.getElementById('profile-name-status');
+                const newName = document.getElementById('profile-name-input').value.trim();
+                if (!newName) return;
+
+                status.style.color = 'var(--text-muted)';
+                status.textContent = 'Сохраняем...';
+
+                const { error } = await supabaseClient.from('profiles').update({ display_name: newName }).eq('id', currentUser.id);
+                if (error) {
+                    status.style.color = 'var(--alert-color)';
+                    status.textContent = 'Не удалось сохранить: ' + error.message;
+                    return;
+                }
+
+                currentDisplayName = newName;
+                status.style.color = 'var(--secondary)';
+                status.textContent = '✅ Сохранено';
+                updateAuthUI();
+            });
+
+            renderBadgesInto('profileBadgesGrid');
         }
 
         function initAuthListener() {

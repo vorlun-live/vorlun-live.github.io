@@ -30,6 +30,10 @@ export default async function handler(req, res) {
     return handlePost(req, res);
   }
 
+  if (req.method === 'DELETE') {
+    return handleDelete(req, res);
+  }
+
   return res.status(405).json({ error: 'Метод не поддерживается' });
 }
 
@@ -45,7 +49,7 @@ async function handleGet(req, res) {
   try {
     const { data, error } = await supabase
       .from('article_comments')
-      .select('id, name, comment, created_at')
+      .select('id, user_id, name, comment, created_at')
       .eq('article_id', articleId)
       .order('created_at', { ascending: false })
       .limit(COMMENTS_PER_PAGE);
@@ -113,6 +117,55 @@ async function handlePost(req, res) {
     return res.status(201).json({ success: true, comment: data, newlyUnlocked });
   } catch (err) {
     console.error('Ошибка при записи комментария:', err.message);
+    return res.status(500).json({ error: 'Внутренняя ошибка сервера', details: err.message });
+  }
+}
+
+// Удалить комментарий может либо его автор, либо администратор (profiles.is_admin) — любой.
+async function handleDelete(req, res) {
+  const user = await getAuthenticatedUser(req);
+  if (!user) {
+    return res.status(401).json({ error: 'Нужно войти в аккаунт' });
+  }
+
+  const { commentId } = req.body || {};
+  if (!commentId) {
+    return res.status(400).json({ error: 'Не указан commentId' });
+  }
+
+  try {
+    const { data: comment, error: fetchError } = await supabase
+      .from('article_comments')
+      .select('id, user_id')
+      .eq('id', commentId)
+      .maybeSingle();
+
+    if (fetchError) throw fetchError;
+    if (!comment) {
+      return res.status(404).json({ error: 'Комментарий не найден' });
+    }
+
+    const { data: profile, error: profileError } = await supabase
+      .from('profiles')
+      .select('is_admin')
+      .eq('id', user.id)
+      .maybeSingle();
+
+    if (profileError) throw profileError;
+
+    const isOwner = comment.user_id === user.id;
+    const isAdmin = Boolean(profile?.is_admin);
+
+    if (!isOwner && !isAdmin) {
+      return res.status(403).json({ error: 'Можно удалять только свои комментарии' });
+    }
+
+    const { error: deleteError } = await supabase.from('article_comments').delete().eq('id', commentId);
+    if (deleteError) throw deleteError;
+
+    return res.status(200).json({ success: true });
+  } catch (err) {
+    console.error('Ошибка при удалении комментария:', err.message);
     return res.status(500).json({ error: 'Внутренняя ошибка сервера', details: err.message });
   }
 }
