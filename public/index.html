@@ -1915,6 +1915,23 @@
 
 
     <script>
+        // Метаданные всех статей — объявлено первым делом, до всего остального.
+        // showPage()/openArticle() читают этот массив, а он должен быть гарантированно
+        // доступен даже если что-то ниже (например, инициализация Supabase) упадёт с ошибкой —
+        // иначе весь остальной инлайн-скрипт обрывается на середине, и переключение страниц ломается.
+        const ARTICLES = [
+            { id: 'obs-guide', title: 'Как настроить OBS для стрима без лагов в 2026 году', tag: '#OBS', category: 'obs' },
+            { id: 'audio-guide', title: 'Настройка микрофона в OBS: как убрать шумы, клики и гул', tag: '#Звук', category: 'audio' },
+            { id: 'donates-guide', title: 'Как подключить донаты на Twitch и настроить оповещения', tag: '#Донаты', category: 'donates' },
+            { id: 'tiktok-guide', title: 'Продвижение стримов через TikTok: алгоритмы 2026 года', tag: '#Тренды / TikTok', category: 'tiktok' },
+            { id: 'camera-guide', title: 'Как настроить освещение и камеру для стрима', tag: '#Камера', category: 'camera' },
+            { id: 'twitch-panel-guide', title: 'Оформление канала Twitch: панели, чат и виджеты', tag: '#Твич', category: 'twitch' },
+            { id: 'streamdeck-guide', title: 'Настройка Stream Deck и горячих клавиш для быстрого переключения сцен', tag: '#Оборудование', category: 'gear' },
+            { id: 'obs-vs-streamlabs-guide', title: 'OBS vs Streamlabs: что выбрать новичку', tag: '#OBS', category: 'obs' },
+            { id: 'discord-guide', title: 'Как раскрутить Discord-сервер вокруг канала', tag: '#Продвижение', category: 'community' },
+            { id: 'collab-guide', title: 'Коллаборации с другими стримерами: как договориться и организовать рейд', tag: '#Продвижение', category: 'community' }
+        ];
+
         // Инициализация Supabase
         let SUPABASE_URL = "%SUPABASE_URL%";
         let SUPABASE_KEY = "%SUPABASE_KEY%";
@@ -1924,7 +1941,15 @@
             SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN5b3FjYWZ3cGZsZnhzY25wdWZrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE5ODE3MDUsImV4cCI6MjA5NzU1NzcwNX0.nofBw5Q7iJ5nIPbqKQ5ABlmIw3_I3Pi6i-5f7UxWLiI";
         }
 
-        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        // Если CDN со скриптом Supabase не загрузился (сбой сети, блокировщик рекламы и т.п.),
+        // это больше не должно ронять остальной код на странице — просто отключаем
+        // всё, что зависит от Supabase, вместо падения всего скрипта целиком.
+        let supabaseClient = null;
+        try {
+            supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        } catch (err) {
+            console.error('Не удалось инициализировать Supabase-клиент:', err.message);
+        }
 
         // Фиксация визита через серверный API (/api/visit).
         // Каждый заход, включая повторные, записывается отдельной строкой в site_visits —
@@ -2422,21 +2447,6 @@
             // с одномоментным изменением высоты контента, и viewport "улетал" не в ту точку.
             window.scrollTo(0, 0);
         }
-
-        // Метаданные всех статей — единый источник правды для "Похожих статей",
-        // поиска и лайков. При добавлении новой статьи достаточно дописать сюда один объект.
-        const ARTICLES = [
-            { id: 'obs-guide', title: 'Как настроить OBS для стрима без лагов в 2026 году', tag: '#OBS', category: 'obs' },
-            { id: 'audio-guide', title: 'Настройка микрофона в OBS: как убрать шумы, клики и гул', tag: '#Звук', category: 'audio' },
-            { id: 'donates-guide', title: 'Как подключить донаты на Twitch и настроить оповещения', tag: '#Донаты', category: 'donates' },
-            { id: 'tiktok-guide', title: 'Продвижение стримов через TikTok: алгоритмы 2026 года', tag: '#Тренды / TikTok', category: 'tiktok' },
-            { id: 'camera-guide', title: 'Как настроить освещение и камеру для стрима', tag: '#Камера', category: 'camera' },
-            { id: 'twitch-panel-guide', title: 'Оформление канала Twitch: панели, чат и виджеты', tag: '#Твич', category: 'twitch' },
-            { id: 'streamdeck-guide', title: 'Настройка Stream Deck и горячих клавиш для быстрого переключения сцен', tag: '#Оборудование', category: 'gear' },
-            { id: 'obs-vs-streamlabs-guide', title: 'OBS vs Streamlabs: что выбрать новичку', tag: '#OBS', category: 'obs' },
-            { id: 'discord-guide', title: 'Как раскрутить Discord-сервер вокруг канала', tag: '#Продвижение', category: 'community' },
-            { id: 'collab-guide', title: 'Коллаборации с другими стримерами: как договориться и организовать рейд', tag: '#Продвижение', category: 'community' }
-        ];
 
         // Подбирает до 3 похожих статей: сперва из той же категории, затем добирает остальными
         function getRelatedArticles(currentId, count = 3) {
